@@ -1,5 +1,6 @@
-namespace Conqueror.Net.FileBrowserUi.Icons;
+using Avalonia.Platform;
 
+namespace Conqueror.Net.FileBrowserUi.Icons;
 /// <summary>
 /// Maps a file, folder or volume onto a key in the SVG icon theme.
 /// </summary>
@@ -81,6 +82,139 @@ public static class FileIconResolver
     public static string ForFile(FileBrowserUi.Models.FileSystemEntry entry) =>
         ForExtension(entry.Extension);
 
+    /// <summary>
+    /// Icon key chosen from a MIME type rather than a file extension.
+    /// </summary>
+    /// <remarks>
+    /// The upstream pack is a freedesktop.org icon theme, so its mimetype artwork is already
+    /// named after MIME types - <c>application/pdf</c> is <c>application-pdf.svg</c>. That
+    /// makes most lookups a direct transform, and the generic per-top-level-type icons act as
+    /// the fallback, which is what the theme's own viewers do.
+    /// </remarks>
+    public static string ForMimeType(string mimeType)
+    {
+        if (string.IsNullOrWhiteSpace(mimeType))
+        {
+            return Text;
+        }
+
+        var slash = mimeType.IndexOf('/');
+
+        if (slash <= 0)
+        {
+            return Text;
+        }
+
+        var top = mimeType[..slash];
+        var subtype = mimeType[(slash + 1)..].TrimEnd(';', ' ');
+
+        // The theme spells generic members as "image-x-generic" and "text-x-generic", so a
+        // literal substitution would miss them.
+        var generic = top switch
+        {
+            "image" => Image,
+            "audio" => Audio,
+            "video" => Video,
+            "text" => Text,
+            _ => Text,
+        };
+
+        // Exact match first: only the curated assets actually exist on disk, so a candidate
+        // has to be checked rather than assumed.
+        foreach (var candidate in Candidates(subtype, generic))
+        {
+            if (IsBundledIcon(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return generic;
+    }
+
+    /// <summary>
+    /// Names to try for a MIME subtype, most specific first.
+    /// </summary>
+    /// <remarks>
+    /// The final entry is always <paramref name="generic"/>, so this never returns empty and
+    /// the caller cannot fall off the end.
+    /// </remarks>
+    private static IEnumerable<string> Candidates(string subtype, string generic)
+    {
+        if (subtype.Length > 0)
+        {
+            // "vnd.openxmlformats-officedocument.wordprocessingml.document" -> as-is, then
+            // progressively truncated at '.' and '-' boundaries, which is how the theme names
+            // its more specific siblings (e.g. "application-vnd.ms-excel").
+            var trimmed = subtype;
+
+            yield return "application-" + trimmed;
+
+            while (true)
+            {
+                var cut = trimmed.LastIndexOfAny(['.', '-']);
+
+                if (cut <= 0)
+                {
+                    break;
+                }
+
+                trimmed = trimmed[..cut];
+
+                yield return "application-" + trimmed;
+            }
+
+            // Non-application types keep their own top-level name.
+            yield return subtype;
+        }
+
+        yield return generic;
+    }
+
+    /// <summary>
+    /// Whether an icon key is one of the curated assets.
+    /// </summary>
+    /// <remarks>
+    /// Probed through <see cref="AssetLoader"/> rather than against a hand-kept list, which
+    /// could drift from what <c>tools/import-icon-theme.ps1</c> actually copied. Avalonia packs
+    /// every <c>AvaloniaResource</c> into a single embedded blob rather than into individually
+    /// named manifest resources, so assembly inspection would not see them at all.
+    /// </remarks>
+    private static bool IsBundledIcon(string key)
+    {
+        lock (_probeLock)
+        {
+            if (_bundled.Contains(key))
+            {
+                return true;
+            }
+        }
+
+        if (!AssetLoader.Exists(new Uri(FileIconResolver.UriFor(key), UriKind.Absolute)))
+        {
+            return false;
+        }
+
+        lock (_probeLock)
+        {
+            _bundled.Add(key);
+        }
+
+        return true;
+    }
+
+    private static readonly HashSet<string> _bundled = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Guards <see cref="_bundled"/>. <see cref="FileIconResolver"/> is called from the UI
+    /// thread while folders load, and list enumeration can run concurrently.
+    /// </summary>
+    /// <remarks>
+    /// <c>System.Threading.Lock</c> would read better but is .NET 9+; this targets net8.0.
+    /// The critical sections here are a hash-set probe, so contention is irrelevant.
+    /// </remarks>
+    private static readonly object _probeLock = new();
+
     /// <summary>Icon key for a folder, distinguishing the well-known shell locations.</summary>
     public static string ForFolder(string fullPath)
     {
@@ -108,6 +242,11 @@ public static class FileIconResolver
     }
 
     /// <summary>Icon key for a drive or network location.</summary>
+    /// <remarks>
+    /// Network artwork in this pack embeds a base64 PNG, so
+    /// <c>tools/import-icon-theme.ps1</c> deliberately refuses it; <see cref="Network"/> is then
+    /// absent and callers must fall back to <see cref="Folder"/>.
+    /// </remarks>
     public static string ForShellFolder(FileBrowserUi.Models.ShellFolder folder) =>
         folder.Kind switch
         {
@@ -115,6 +254,9 @@ public static class FileIconResolver
             FileBrowserUi.Models.ShellFolderKind.Network => Network,
             _ => ForFolder(folder.Path),
         };
+
+    /// <summary>Whether an icon key was actually imported as an asset.</summary>
+    public static bool IsBundled(string key) => IsBundledIcon(key);
 
     /// <summary>Turns an icon key into the avares URI the SVG control loads.</summary>
     public static string UriFor(string key) => AssetPrefix + key + ".svg";

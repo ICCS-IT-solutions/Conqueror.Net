@@ -30,5 +30,9 @@
     <PackageReference Include="WebViewControl-Avalonia" Version="3.120.13" />
     <!-- Renders the SVG icon theme. MIT; targets net8.0 / Avalonia 11.3. -->
     <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
+    <!-- Content-based MIME detection, used to pick icons. The Condensed definition set is
+         ~1 MB instead of the ~9 MB exhaustive one; both are enough to identify real files. -->
+    <PackageReference Include="Mime-Detective" Version="25.8.1" />
+    <PackageReference Include="Mime-Detective.Definitions.Condensed" Version="25.8.1" />
   </ItemGroup>
 </Project>

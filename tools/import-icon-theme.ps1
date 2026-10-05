@@ -61,6 +61,52 @@ $manifest = [ordered]@{
     'document'      = 'mimetypes/application-postscript.svg'
 }
 
+# freedesktop-named icons, so FileIconResolver.ForMimeType can hit them by direct transform
+# (application/pdf -> application-pdf.svg) instead of always collapsing to a generic icon.
+# Size-gated individually: image/png alone is 2.1 MB of paths.
+$manifest += [ordered]@{
+    'application-zip'               = 'mimetypes/application-zip.svg'
+    'application-gzip'              = 'mimetypes/application-gzip.svg'
+    'application-x-tar'             = 'mimetypes/application-x-tar.svg'
+    'application-x-7z-compressed'   = 'mimetypes/application-x-7z-compressed.svg'
+    'application-vnd.rar'           = 'mimetypes/application-vnd.rar.svg'
+    'application-x-bzip'            = 'mimetypes/application-x-bzip.svg'
+    'application-x-xz'              = 'mimetypes/application-x-xz.svg'
+    'application-vnd.ms-excel'      = 'mimetypes/application-vnd.ms-excel.svg'
+    'application-vnd.ms-powerpoint' = 'mimetypes/application-vnd.ms-powerpoint.svg'
+    'application-x-shellscript'     = 'mimetypes/application-x-shellscript.svg'
+    'application-json'              = 'mimetypes/application-json.svg'
+    'application-xml'               = 'mimetypes/application-xml.svg'
+    'image-jpeg'                    = 'mimetypes/image-jpeg.svg'
+    'image-gif'                     = 'mimetypes/image-gif.svg'
+    'image-svg+xml'                 = 'mimetypes/image-svg+xml.svg'
+    'image-bmp'                     = 'mimetypes/image-bmp.svg'
+    'image-tiff'                    = 'mimetypes/image-tiff.svg'
+    'image-webp'                    = 'mimetypes/image-webp.svg'
+    'text-x-python'                 = 'mimetypes/text-x-python.svg'
+    'audio-mpeg'                    = 'mimetypes/audio-mpeg.svg'
+    'audio-x-wav'                   = 'mimetypes/audio-x-wav.svg'
+    'audio-ogg'                     = 'mimetypes/audio-ogg.svg'
+    'audio-x-flac'                  = 'mimetypes/audio-x-flac.svg'
+    'video-mp4'                     = 'mimetypes/video-mp4.svg'
+    'video-x-matroska'              = 'mimetypes/video-x-matroska.svg'
+    'video-x-msvideo'               = 'mimetypes/video-x-msvideo.svg'
+    'video-x-ms-wmv'                = 'mimetypes/video-x-ms-wmv.svg'
+}
+
+# Anything above this is reported as OVERSIZE and skipped rather than embedded. The gates that
+# matter in this pack, all measured:
+#   image-x-icon.svg        759 KB  63 paths, for a .ico list icon
+#   image/png.svg          2144 KB  pure vector but absurd at 18 px
+#   application-msword.svg  345 KB  embeds base64 raster, so not actually scalable
+#   application-html.svg    111 KB  embeds base64 raster
+# Per-key override of the size gate. folder-remote is 141 KB of pure vector, which the pack
+# charges for a detailed network folder; it is core navigation chrome, so it is worth keeping
+# even though a filetype icon of that size would not be. No raster is allowed through here.
+$SizeOverrides = @{ 'folder-remote' = 150KB }
+
+$MaxBytes = 100KB
+
 $dest = Join-Path (Get-Location) $Destination
 New-Item -ItemType Directory -Path $dest -Force | Out-Null
 
@@ -75,10 +121,32 @@ $rows = foreach ($key in $manifest.Keys) {
 
     # ReadAllBytes dereferences symlinks; Copy-Item does not reliably do so.
     $bytes = [System.IO.File]::ReadAllBytes($src)
+
+    $limit = if ($SizeOverrides.ContainsKey($key)) { $SizeOverrides[$key] } else { $MaxBytes }
+
+    if ($bytes.Length -gt $limit)
+    {
+        [pscustomobject]@{
+            Key = $key; Status = 'OVERSIZE'
+            KB = [math]::Round($bytes.Length / 1KB, 1); Paths = 0
+        }
+        continue
+    }
+
+    $text = [System.Text.Encoding]::UTF8.GetString($bytes)
+
+    if ($text -match 'base64')
+    {
+        [pscustomobject]@{
+            Key = $key; Status = 'RASTER'
+            KB = [math]::Round($bytes.Length / 1KB, 1); Paths = 0
+        }
+        continue
+    }
+
     [System.IO.File]::WriteAllBytes((Join-Path $dest "$key.svg"), $bytes)
     $total += $bytes.Length
 
-    $text = [System.Text.Encoding]::UTF8.GetString($bytes)
     [pscustomobject]@{
         Key    = $key
         Status = 'ok'
@@ -88,9 +156,16 @@ $rows = foreach ($key in $manifest.Keys) {
 }
 
 $rows | Format-Table -AutoSize
-"`n{0} icons, {1:N0} KB total -> {2}" -f $rows.Count, ($total / 1KB), $dest
+"`n{0} icons embedded, {1:N0} KB total -> {2}" -f ($rows | Where-Object Status -eq 'ok').Count, ($total / 1KB), $dest
 
 $missing = $rows | Where-Object Status -eq 'MISSING'
+$skipped = $rows | Where-Object Status -in 'OVERSIZE', 'RASTER'
+
+if ($skipped) {
+    "`nskipped:"
+    $skipped | ForEach-Object { "  {0,-12} {1,7} KB  {2}" -f $_.Key, $_.KB, $_.Status }
+}
+
 if ($missing) {
     Write-Warning "Missing: $($missing.Key -join ', ')"
 }

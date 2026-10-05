@@ -15,7 +15,68 @@ position — **read the licensing section before shipping this in anything comme
 
 `Icons_source/` is **gitignored**. It is not redistributed with this repository.
 
-## Curating
+## MIME-based icon selection
+
+Icons are chosen from **detected MIME type**, not just the file extension.
+
+The upstream pack is a freedesktop.org icon theme, so its mimetype artwork is already named
+after MIME types — `application/pdf` is `application-pdf.svg`. That makes the mapping mostly
+mechanical, and `FileIconResolver.ForMimeType` tries the exact name, then progressively
+truncated variants, then a generic per-top-level-type fallback.
+
+### Detection strategy
+
+`FileBrowserUi/Services/MimeTypeResolver.cs` resolves in this order:
+
+1. **Extension short-circuit** for text-ish types (`.md`, `.txt`, `.html`, `.cs`, `.json`, …).
+2. **Magic-number sniffing** via [Mime-Detective](https://github.com/pronet8/Mime-Detective),
+   reading only the first 512 bytes.
+
+Sniffing is lazy and cached per path. Measured cost is **0.09–0.6 ms per file**, so a folder of
+several hundred entries resolves in well under a tenth of a second, and revisiting a folder
+costs nothing.
+
+Folders are never sniffed — a directory's leading bytes are meaningless, and opening one per row
+during enumeration would be a serious cost.
+
+### Two behaviours that needed fixing
+
+Both were found by `tools/test-mime-detection.ps1`, not by inspection:
+
+- A Markdown file was reported as **`message/rfc822`**. Its readable ASCII header collides with
+  several text-based magic numbers. Extensions like `.md` and `.txt` now bypass sniffing.
+- A plain extensionless file was reported as **`application/octet-stream`**. When no magic
+  number matches, the header is now tested for control bytes and reported as `text/plain` if it
+  decodes as text.
+
+Verified behaviour:
+
+| Input | Detected | Icon |
+| --- | --- | --- |
+| `real.png` | `image/png` | image |
+| `fake-image.png` (really a PDF) | `application/pdf` | **PDF** — content beats extension |
+| `notes.md`, `README.md` | `text/plain` | text |
+| `README` (no extension) | `text/plain` | text |
+| `blob.dat` (binary) | `application/octet-stream` | extension fallback |
+| missing file | `application/octet-stream` | extension fallback, no exception |
+
+Run the check with:
+
+```powershell
+pwsh -File tools/test-mime-detection.ps1
+```
+
+### Windows registry MIME types were rejected
+
+`HKCR\.ext\Content Type` was the obvious route and it was measured and dropped:
+
+- **Slow**: ~31 ms per lookup (3139 ms for 100 reads). Per-file, that is seconds of UI stall.
+- **Incomplete**: `.docx` has no `Content Type` value at all — only `PerceivedType` and a ProgID
+  pointing at `OpenOffice.Docx`. Plenty of modern Office files are absent.
+
+Content sniffing is both faster and more accurate than the registry here.
+
+## Asset curation
 
 Only a small subset is copied into `Assets/Icons/`, flattened to stable semantic keys:
 

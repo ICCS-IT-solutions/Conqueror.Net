@@ -47,11 +47,37 @@ public sealed class FileSystemEntry
     /// <summary>Human readable kind shown in the "Type" column, e.g. "Text Document".</summary>
     public string TypeDescription => _typeDescription ??= ResolveTypeDescription();
 
-    /// <summary>Key into the SVG icon theme; see <see cref="FileIconResolver"/>.</summary>
-    public string IconKey =>
-        _iconKey ??= IsDirectory
-            ? Icons.FileIconResolver.ForFolder(FullPath)
-            : Icons.FileIconResolver.ForFile(this);
+    /// <summary>Key into the SVG icon theme; see <see cref="Icons.FileIconResolver"/>.</summary>
+    /// <remarks>
+    /// Content wins where it can be trusted: a <c>.png</c> that is really a PDF gets the PDF
+    /// icon. Folders never sniff - a directory's leading bytes are meaningless, and opening one
+    /// per row during enumeration would be a serious cost in a folder of several thousand.
+    /// </remarks>
+    public string IconKey
+    {
+        get
+        {
+            if (_iconKey is not null)
+            {
+                return _iconKey;
+            }
+
+            if (IsDirectory)
+            {
+                return _iconKey = Icons.FileIconResolver.ForFolder(FullPath);
+            }
+
+            var mime = Services.MimeTypeResolver.Shared.Resolve(FullPath);
+
+            _iconKey = mime switch
+            {
+                Services.MimeTypeResolver.FallbackMimeType => Icons.FileIconResolver.ForExtension(Extension),
+                _ => Icons.FileIconResolver.ForMimeType(mime),
+            };
+
+            return _iconKey;
+        }
+    }
 
     public string SizeDisplay => IsDirectory ? string.Empty : ByteSizeFormatter.Format(Length);
 
