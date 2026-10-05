@@ -1,0 +1,194 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Conqueror.Net.WindowRoot.ViewModels"
+        xmlns:tabs="clr-namespace:Conqueror.Net.Core.Tabs"
+        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
+        x:Class="Conqueror.Net.WindowRoot.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding WindowTitle}"
+        Width="1024" Height="640"
+        MinWidth="640" MinHeight="420"
+        WindowStartupLocation="CenterScreen">
+
+    <DockPanel LastChildFill="True">
+
+        <!-- ================= Menu bar: File / Edit / View / Favorites / Help ===== -->
+        <Menu DockPanel.Dock="Top" Classes="xpMenuBar">
+            <MenuItem Header="_File" Classes="xpMenuItem">
+                <MenuItem Header="_New Web Tab" Click="OnNewWebTabClick" InputGesture="Ctrl+T" />
+                <MenuItem Header="New _Folder" Click="OnNewFolderClick" />
+                <Separator />
+                <MenuItem Header="_Open..." Click="OnOpenLocationClick" InputGesture="Ctrl+O" />
+                <MenuItem Header="Close _Tab" Command="{Binding CloseTabCommand}" InputGesture="Ctrl+W" />
+                <Separator />
+                <MenuItem Header="E_xit" Click="OnExitClick" />
+            </MenuItem>
+            <MenuItem Header="_Edit" Classes="xpMenuItem">
+                <MenuItem Header="Select _All" Click="OnSelectAllClick" InputGesture="Ctrl+A" />
+            </MenuItem>
+            <MenuItem Header="_View" Classes="xpMenuItem">
+                <MenuItem Header="_Folder Pane" Name="FolderPaneMenuItem"
+                          ToggleType="CheckBox" IsChecked="True"
+                          IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                          Click="OnToggleFolderPaneClick" />
+                <MenuItem Header="_Show Hidden Files" Name="HiddenFilesMenuItem"
+                          ToggleType="CheckBox" IsChecked="False"
+                          IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                          Click="OnToggleHiddenClick" />
+                <Separator />
+                <MenuItem Header="T_humbnails" Click="OnViewModeClick" Tag="Tiles" />
+                <MenuItem Header="_Tiles" Click="OnViewModeClick" Tag="Tiles" />
+                <MenuItem Header="_Icons" Click="OnViewModeClick" Tag="Icons" />
+                <MenuItem Header="_List" Click="OnViewModeClick" Tag="List" />
+                <MenuItem Header="_Details" Click="OnViewModeClick" Tag="Details" />
+                <Separator />
+                <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}" InputGesture="F5" />
+            </MenuItem>
+            <MenuItem Header="Fa_vorites" Classes="xpMenuItem">
+                <MenuItem Header="Open _Location..." Click="OnOpenLocationClick" />
+            </MenuItem>
+            <MenuItem Header="_Help" Classes="xpMenuItem">
+                <MenuItem Header="_About Conqueror.Net" Click="OnAboutClick" />
+            </MenuItem>
+        </Menu>
+
+        <!-- ============================ Toolbar ================================= -->
+        <Border DockPanel.Dock="Top" Classes="xpToolbarSurface">
+            <DockPanel Margin="2,3" LastChildFill="True">
+
+                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
+                        Command="{Binding AddWebTabCommand}"
+                        ToolTip.Tip="New web tab (Ctrl+T)">
+                    <Path Data="{StaticResource Icon.Globe}" Fill="#2A5DB0" />
+                </Button>
+                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
+                        Command="{Binding AddFileTabCommand}"
+                        ToolTip.Tip="New file tab">
+                    <Path Data="{StaticResource Icon.Folder}" Fill="#E8B84A" Stroke="#9C7B22" StrokeThickness="0.7" />
+                </Button>
+                <Rectangle DockPanel.Dock="Right" Width="1" Margin="4,2,8,2"
+                           Fill="{StaticResource BrushShadow}" />
+                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
+                        Command="{Binding RefreshCommand}"
+                        ToolTip.Tip="Refresh (F5)">
+                    <Path Data="{StaticResource Icon.Refresh}" Fill="#3A7A2E" />
+                </Button>
+
+                <!-- Search box lives on the toolbar, exactly as in XP Explorer. -->
+                <TextBox DockPanel.Dock="Right" Classes="xpField"
+                         Width="150" Margin="4,0,6,0"
+                         VerticalContentAlignment="Center"
+                         Text="{Binding SelectedTab.SearchText, Mode=TwoWay}"
+                         Watermark="Search" />
+
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButton"
+                        Command="{Binding GoBackCommand}"
+                        IsEnabled="{Binding CanGoBack}"
+                        ToolTip.Tip="Back (Alt+Left)">
+                    <Path Data="{StaticResource Icon.Back}" Fill="#1E6B3A" />
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButton"
+                        Command="{Binding GoForwardCommand}"
+                        IsEnabled="{Binding CanGoForward}"
+                        ToolTip.Tip="Forward (Alt+Right)">
+                    <Path Data="{StaticResource Icon.Forward}" Fill="#1E6B3A" />
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButton"
+                        Command="{Binding GoUpCommand}"
+                        IsEnabled="{Binding CanGoUp}"
+                        ToolTip.Tip="Up one level (Alt+Up)">
+                    <Path Data="{StaticResource Icon.Up}" Fill="#B8860B" />
+                </Button>
+
+                <Rectangle DockPanel.Dock="Left" Width="1" Margin="2,2"
+                           Fill="{StaticResource BrushShadow}" />
+            </DockPanel>
+        </Border>
+
+        <!-- ====================== Tab strip and address bar ==================== -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource BrushFace}">
+            <DockPanel LastChildFill="True">
+
+                <ItemsControl DockPanel.Dock="Top"
+                              ItemsSource="{Binding Tabs}"
+                              Margin="2,4,2,0"
+                              Height="23">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="tabs:ITabViewModel">
+                            <Border x:Name="TabRoot"
+                                    Margin="0,0,2,0"
+                                    CornerRadius="3,3,0,0"
+                                    BorderThickness="1"
+                                    BorderBrush="{StaticResource BrushDarkShadow}"
+                                    Background="#FFFFFF">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Path Grid.Column="0" Width="13" Height="13"
+                                          Margin="4,0,3,0"
+                                          VerticalAlignment="Center"
+                                          Data="{Binding IconKey, Converter={x:Static vm:IconKeyToGeometryConverter.Instance}}"
+                                          Fill="#2A5DB0" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Title}"
+                                               VerticalAlignment="Center"
+                                               MaxWidth="140"
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,4" />
+                                    <Button Grid.Column="2" Classes="xpToolbarButton"
+                                            Width="16" Height="16" Padding="0"
+                                            Margin="0,0,1,0"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Close this tab">
+                                        <Path Data="M4,4 L9,9 M9,4 L4,9"
+                                              Stroke="#5A5A5A" StrokeThickness="1.3" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Grid DockPanel.Dock="Top" Margin="3,5,3,3" ColumnDefinitions="*,Auto" Height="24">
+                    <TextBox Grid.Column="0" Name="AddressBox" Classes="xpField"
+                             Text="{Binding AddressText, Mode=TwoWay}"
+                             VerticalContentAlignment="Center">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Enter" Command="{Binding NavigateCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                    <Button Grid.Column="1" Classes="xpButton" Margin="4,0,0,0"
+                            Content="Go" Command="{Binding NavigateCommand}" />
+                </Grid>
+            </DockPanel>
+        </Border>
+
+        <!-- ============================ Status bar ============================= -->
+        <!-- Docked before the content control on purpose: with LastChildFill=True the
+             final child is the one that fills, so the status bar must come first. -->
+        <Border DockPanel.Dock="Bottom" Classes="xpStatusSurface">
+            <Grid ColumnDefinitions="*,Auto" Margin="4,3">
+                <TextBlock Grid.Column="0"
+                           Text="{Binding ActiveStatusText}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1"
+                           Text="My Computer"
+                           VerticalAlignment="Center"
+                           Margin="8,0,0,0"
+                           Foreground="#3A3A3A" />
+            </Grid>
+        </Border>
+
+        <!-- ========================= Tab content area ========================== -->
+        <ContentControl Content="{Binding SelectedTab}" />
+    </DockPanel>
+</Window>
+

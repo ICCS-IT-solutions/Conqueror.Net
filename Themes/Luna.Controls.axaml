@@ -1,0 +1,205 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ====================================================================
+         XP "raised" button, used by the menu bar and the tab strip.
+         ==================================================================== -->
+
+    <Style Selector="Window">
+        <Setter Property="FontFamily" Value="{StaticResource XpFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource XpFontSize}" />
+        <Setter Property="Background" Value="{StaticResource BrushFace}" />
+    </Style>
+
+    <Style Selector="ToolTip">
+        <Setter Property="Background" Value="{StaticResource LunaInfo}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4,2" />
+    </Style>
+
+    <Style Selector="Button.xpButton">
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushDarkShadow}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="6,3" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3">
+                    <Border x:Name="PART_Inner"
+                            Margin="1"
+                            BorderBrush="{StaticResource LunaLight}"
+                            BorderThickness="1"
+                            CornerRadius="2">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.xpButton:pointerover /template/ Border#PART_Root">
+        <Setter Property="BorderBrush" Value="{StaticResource LunaHighlight}" />
+    </Style>
+    <Style Selector="Button.xpButton:pointerover /template/ Border#PART_Inner">
+        <Setter Property="BorderBrush" Value="#DCE6F5" />
+    </Style>
+    <Style Selector="Button.xpButton:pressed /template/ Border#PART_Inner">
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+    </Style>
+    <Style Selector="Button.xpButton:disabled">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
+    <!-- Icon-only toolbar button. Hovering shows XP's amber glow. -->
+    <Style Selector="Button.xpToolbarButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="3" />
+        <Setter Property="Width" Value="23" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3">
+                    <Border x:Name="PART_Inner"
+                            Margin="1"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="2">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.xpToolbarButton:pointerover">
+        <Setter Property="Background" Value="#FDE79B" />
+        <Setter Property="BorderBrush" Value="#F5A300" />
+    </Style>
+    <Style Selector="Button.xpToolbarButton:pointerover /template/ Border#PART_Inner">
+        <Setter Property="BorderBrush" Value="{StaticResource LunaLight}" />
+    </Style>
+    <Style Selector="Button.xpToolbarButton:pressed">
+        <Setter Property="Background" Value="#F5A300" />
+    </Style>
+    <Style Selector="Button.xpToolbarButton:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+    <!-- ====================================================================
+         Sunken text fields: the address bar and the search box.
+         ==================================================================== -->
+
+    <Style Selector="TextBox.xpField">
+        <Setter Property="Background" Value="{StaticResource BrushWindow}" />
+        <Setter Property="Foreground" Value="#000000" />
+        <Setter Property="BorderBrush" Value="#7F9DB9" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="3,2" />
+        <Setter Property="MinHeight" Value="21" />
+    </Style>
+    <Style Selector="TextBox.xpField:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource LunaHighlight}" />
+    </Style>
+
+    <!-- ====================================================================
+         Menu bar: File / Edit / View / Favorites / Help.
+         ==================================================================== -->
+
+    <Style Selector="Menu.xpMenuBar">
+        <Setter Property="Background" Value="{StaticResource BrushFace}" />
+        <Setter Property="Padding" Value="0,1" />
+    </Style>
+    <Style Selector="MenuItem.xpMenuItem">
+        <Setter Property="Padding" Value="8,3" />
+    </Style>
+
+    <!-- ====================================================================
+         Flat white surfaces and XP blue selection for item lists.
+         ==================================================================== -->
+
+    <Style Selector="ListBox.xpList">
+        <Setter Property="Background" Value="{StaticResource BrushWindow}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="ListBoxItem">
+        <Setter Property="Padding" Value="2,1" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+        <Setter Property="Background" Value="{StaticResource BrushHighlight}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+        <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushHighlightText}" />
+    </Style>
+
+    <!-- ====================================================================
+         Surfaces: toolbar, status bar and the task pane.
+         ==================================================================== -->
+
+    <Style Selector="Border.xpToolbarSurface">
+        <Setter Property="Background" Value="{StaticResource BrushToolbarGradient}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style Selector="Border.xpStatusSurface">
+        <Setter Property="Background" Value="{StaticResource BrushStatusGradient}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+    <Style Selector="Border.xpTaskPaneSurface">
+        <Setter Property="Background" Value="{StaticResource BrushWindow}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+    </Style>
+
+    <!-- XP's 3D groove separator. -->
+    <Style Selector="Border.xpGroove">
+        <Setter Property="Height" Value="2" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="0,1,0,1" />
+    </Style>
+
+    <!-- Flat, bordered column captions for the details view. -->
+    <Style Selector="Button.xpColumnHeader">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+        <Setter Property="Padding" Value="4,3" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.xpColumnHeader:pointerover">
+        <Setter Property="Background" Value="#EFF5FC" />
+    </Style>
+
+</Styles>

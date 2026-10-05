@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ====================================================================
+         Icon geometries drawn as vector paths so they scale cleanly and need
+         no binary assets. Each is a 16x16 grid, matching Explorer's icon size.
+         ==================================================================== -->
+
+    <!-- Navigation arrows -->
+    <Geometry x:Key="Icon.Back">M10.5,2 L4,8 L10.5,14 L10.5,10.2 L15,10.2 L15,5.8 L10.5,5.8 Z</Geometry>
+    <Geometry x:Key="Icon.Forward">M5.5,2 L12,8 L5.5,14 L5.5,10.2 L1,10.2 L1,5.8 L5.5,5.8 Z</Geometry>
+    <Geometry x:Key="Icon.Up">M8,1.5 L14,7.5 L11.2,7.5 L11.2,14 L4.8,14 L4.8,7.5 L2,7.5 Z</Geometry>
+
+    <!-- Folder: a manila tab plus body, the way Explorer's folder icon reads. -->
+    <Geometry x:Key="Icon.Folder">M1,3.5 L6,3.5 L7.6,5.2 L15,5.2 L15,13.5 L1,13.5 Z</Geometry>
+    <Geometry x:Key="Icon.FolderOpen">M1,3.5 L6,3.5 L7.6,5.2 L15,5.2 L15,7.5 L1,7.5 Z M2.2,9.4 L15,9.4 L12.4,14 L0.6,14 Z</Geometry>
+    <Geometry x:Key="Icon.File">M3,1.5 L9.5,1.5 L13,5 L13,14.5 L3,14.5 Z</Geometry>
+
+    <!-- Web / browser -->
+    <Geometry x:Key="Icon.Globe">M8,1 A7,7 0 1,1 7.99,1 Z</Geometry>
+
+    <!-- Refresh / stop / search / plus -->
+    <Geometry x:Key="Icon.Refresh">M8,2.5 A5.5,5.5 0 1,0 13.5,8 L11.5,8 A3.5,3.5 0 1,1 8,4.5 L10.2,4.5 L7.4,1.7 L4.6,4.5 L6.8,4.5 A5.5,5.5 0 0,0 8,2.5 Z</Geometry>
+    <Geometry x:Key="Icon.Stop">M4,4 L12,4 L12,12 L4,12 Z</Geometry>
+    <Geometry x:Key="Icon.Search">M6.6,1.6 A4.4,4.4 0 1,1 6.59,1.6 Z M6.6,3 A3,3 0 1,0 6.61,3 Z M10,9.2 L14.4,13.6 L13,15 L8.6,10.6 Z</Geometry>
+    <Geometry x:Key="Icon.Plus">M7,2 L9,2 L9,7 L14,7 L14,9 L9,9 L9,14 L7,14 L7,9 L2,9 L2,7 L7,7 Z</Geometry>
+
+    <!-- Tab strip -->
+    <Geometry x:Key="Icon.Tab">M1.5,4 L14.5,4 L14.5,13 L1.5,13 Z</Geometry>
+
+    <!-- Menu bar -->
+    <Geometry x:Key="Icon.Chevron">M4,6 L12,6 L8,10.5 Z</Geometry>
+
+</ResourceDictionary>

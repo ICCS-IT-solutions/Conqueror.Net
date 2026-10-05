@@ -1,0 +1,36 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:fileVm="clr-namespace:Conqueror.Net.FileBrowserUi.ViewModels"
+             xmlns:fileViews="clr-namespace:Conqueror.Net.FileBrowserUi.Views"
+             xmlns:webVm="clr-namespace:Conqueror.Net.WebBrowserUi.ViewModels"
+             xmlns:webViews="clr-namespace:Conqueror.Net.WebBrowserUi.Views"
+             x:Class="Conqueror.Net.App"
+             RequestedThemeVariant="Light">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Conqueror.Net/Themes/Palette.axaml" />
+                <ResourceInclude Source="avares://Conqueror.Net/Themes/Icons.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <!-- Fluent supplies the un-themed control internals (scrollbars, menus, popups);
+             the Luna stylesheet then repaints them in XP colours. -->
+        <FluentTheme />
+        <StyleInclude Source="avares://Conqueror.Net/Themes/Luna.Controls.axaml" />
+    </Application.Styles>
+
+    <!-- Tab content is resolved from its view-model type, which is what lets the shell
+         swap file tabs and Chromium tabs through one ContentControl. -->
+    <Application.DataTemplates>
+        <DataTemplate DataType="fileVm:FileBrowserViewModel">
+            <fileViews:FileBrowserView />
+        </DataTemplate>
+        <DataTemplate DataType="webVm:BrowserTabViewModel">
+            <webViews:BrowserView />
+        </DataTemplate>
+    </Application.DataTemplates>
+</Application>

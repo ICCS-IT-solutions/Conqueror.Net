@@ -1,0 +1,158 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Conqueror.Net.FileBrowserUi.ViewModels"
+             xmlns:models="clr-namespace:Conqueror.Net.FileBrowserUi.Models"
+             xmlns:conv="clr-namespace:Conqueror.Net.WindowRoot.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="520"
+             x:Class="Conqueror.Net.FileBrowserUi.Views.FileBrowserView"
+             x:DataType="vm:FileBrowserViewModel">
+
+    <!-- The four Explorer folder-pane layouts. The view swaps these at runtime.
+         They live in Resources (key-addressable) rather than DataTemplates, which is a
+         plain collection and cannot be looked up by name from code. -->
+    <UserControl.Resources>
+        <ResourceDictionary>
+        <DataTemplate x:Key="EntryIconsTemplate" DataType="models:FileSystemEntry">
+            <StackPanel Spacing="3" HorizontalAlignment="Center" Width="96">
+                <Path Width="32" Height="32"
+                      Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
+                      Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                <TextBlock Text="{Binding Name}"
+                           FontSize="11"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxHeight="40"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EntryListTemplate" DataType="models:FileSystemEntry">
+            <StackPanel Orientation="Horizontal" Spacing="4" Width="200">
+                <Path Width="16" Height="16"
+                      Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
+                      Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                <TextBlock Text="{Binding Name}"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EntryDetailsTemplate" DataType="models:FileSystemEntry">
+            <Grid ColumnDefinitions="*,110,150,140" Width="700">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
+                    <Path Width="16" Height="16"
+                          Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
+                          Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding SizeDisplay}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="{Binding TypeDescription}" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="3" Text="{Binding ModifiedDisplay}" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="EntryTilesTemplate" DataType="models:FileSystemEntry">
+            <Grid ColumnDefinitions="Auto,*" Margin="2" Width="460">
+                <Path Grid.Column="0" Width="32" Height="32"
+                      Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
+                      Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding TypeDescription}" FontSize="10" Foreground="#555" />
+                    <TextBlock Text="{Binding SizeDisplay}" FontSize="10" Foreground="#555" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border Background="{StaticResource BrushFace}">
+        <DockPanel LastChildFill="True">
+
+            <!-- ============ Task pane: folders and drives (XP's left sidebar) ==== -->
+            <Border DockPanel.Dock="Left"
+                    Width="190"
+                    Classes="xpTaskPaneSurface"
+                    IsVisible="{Binding ShowFolderPane}">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Folders"
+                               Margin="8,7,6,5"
+                               FontWeight="Bold"
+                               Foreground="#0A246A" />
+                    <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="6,0" />
+
+                    <ListBox Name="ShellFolderList"
+                             Classes="xpList"
+                             BorderThickness="0"
+                             Background="Transparent"
+                             ItemsSource="{Binding ShellFolders}"
+                             SelectedItem="{Binding SelectedShellFolder, Mode=TwoWay}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="models:ShellFolder">
+                                <Grid ColumnDefinitions="Auto,*" Margin="0,1">
+                                    <Path Grid.Column="0"
+                                          Width="14" Height="14"
+                                          VerticalAlignment="Center"
+                                          Data="{StaticResource Icon.Folder}"
+                                          Fill="#E8B84A"
+                                          Stroke="#9C7B22"
+                                          StrokeThickness="0.8" />
+                                    <TextBlock Grid.Column="1"
+                                               Margin="5,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding Name}"
+                                               TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding Path}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- ================================ Content =========================== -->
+            <DockPanel>
+
+                <!-- Sortable column headers, shown only in Details view. -->
+                <Border Name="DetailsHeader" DockPanel.Dock="Top" IsVisible="False"
+                        Background="#FFFFFF"
+                        BorderBrush="{StaticResource BrushShadow}"
+                        BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="*,110,150,140" Width="700">
+                        <Button Grid.Column="0" Classes="xpColumnHeader" Command="{Binding SortByCommand}"
+                                CommandParameter="Name" Content="Name" HorizontalAlignment="Stretch" />
+                        <Button Grid.Column="1" Classes="xpColumnHeader" Command="{Binding SortByCommand}"
+                                CommandParameter="Size" Content="Size" HorizontalAlignment="Stretch" />
+                        <Button Grid.Column="2" Classes="xpColumnHeader" Command="{Binding SortByCommand}"
+                                CommandParameter="Type" Content="Type" HorizontalAlignment="Stretch" />
+                        <Button Grid.Column="3" Classes="xpColumnHeader" Command="{Binding SortByCommand}"
+                                CommandParameter="DateModified" Content="Date Modified" HorizontalAlignment="Stretch" />
+                    </Grid>
+                </Border>
+
+                <ListBox Name="EntryList"
+                         Classes="xpList"
+                         BorderThickness="0"
+                         ItemsSource="{Binding Items}"
+                         ItemTemplate="{StaticResource EntryIconsTemplate}"
+                         SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                         SelectionMode="Multiple"
+                         DoubleTapped="OnEntryDoubleTapped"
+                         KeyDown="OnEntryKeyDown"
+                         Background="{StaticResource BrushWindow}">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+            </DockPanel>
+        </DockPanel>
+    </Border>
+</UserControl>
