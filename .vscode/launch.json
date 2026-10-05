@@ -1,0 +1,74 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //
+    // This is a WinExe (GUI) app that embeds Chromium via CEF, so there is no console
+    // to show; the "external terminal" entry below is only there for watching stdout.
+    "version": "0.2.0",
+    "configurations": [
+        // Default: opens on a folder tab, exactly as running the exe does.
+        {
+            "name": "Launch",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/Conqueror.Net.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false
+        },
+        // Starts straight into a browser tab. The app treats a URL argument as a web tab
+        // and anything else as a folder path; swap the URL for whatever you are testing.
+        {
+            "name": "Launch (web tab)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/Conqueror.Net.dll",
+            "args": ["https://example.com"],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false
+        },
+        // Starts on a folder tab at a chosen path.
+        {
+            "name": "Launch (folder path)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/Conqueror.Net.dll",
+            "args": ["C:\\Users\\Iain\\Documents"],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false
+        },
+        // Visible console, useful for CEF's stdout/Trace output.
+        {
+            "name": "Launch (external terminal)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net8.0/Conqueror.Net.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "console": "externalTerminal",
+            "stopAtEntry": false
+        },
+        // Hot reload. Caveat: Chromium cannot be initialised twice in a process, so a
+        // reload while a browser tab is open is liable to take CEF down. Prefer this for
+        // XAML/view work and use "Launch" whenever a browser tab is involved.
+        {
+            "name": "Watch and Run",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "dotnet",
+            "args": ["watch", "run", "--project", "${workspaceFolder}/Conqueror.Net.csproj"],
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

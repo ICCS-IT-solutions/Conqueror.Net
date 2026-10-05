@@ -7,9 +7,14 @@ artifacts/
 
 ## IDEs
 .vs/
-.vscode/*
-!.vscode/extensions.json
 .idea/
+
+# .vscode is mostly per-machine, but launch.json and tasks.json are shared project
+# build configuration and are tracked (same convention as VirtualCPUemulator).
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
 
 ## CEF / Chromium runtime artifacts
 *.log
