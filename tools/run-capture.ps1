@@ -3,7 +3,8 @@ param(
     [string]$Out = "$env:TEMP\shot.png",
     [int]$WarmupSec = 15,
     [string]$ProcessName = '',
-    [string]$AppArgs = ''
+    [string]$AppArgs = '',
+    [int]$SettleSec = 6
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,7 +37,7 @@ if ($hwnd -eq [IntPtr]::Zero) {
     exit 1
 }
 
-Start-Sleep -Seconds 6
+Start-Sleep -Seconds $SettleSec
 & (Join-Path $PSScriptRoot 'screenshot.ps1') -TitleLike $TitleLike -Out $Out -ProcessName $ProcessName
 
 if (-not $p.HasExited) { $p.Refresh(); Write-Output "still alive: responding=$($p.Responding)" }
