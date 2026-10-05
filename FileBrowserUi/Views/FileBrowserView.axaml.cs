@@ -138,7 +138,9 @@ public partial class FileBrowserView : UserControl
             ? Avalonia.Layout.Orientation.Vertical
             : Avalonia.Layout.Orientation.Horizontal;
 
-        list.ItemsPanel = new FuncTemplate<Panel?>(() => new WrapPanel { Orientation = orientation });
+        list.ItemsPanel = new FuncTemplate<Panel?>(
+            () => new WrapPanel { Orientation = orientation }
+        );
 
         if (header is not null)
         {
