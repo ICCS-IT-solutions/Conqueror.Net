@@ -29,6 +29,35 @@ public class ShellApp : Application
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
+    /// <summary>
+    /// Reads <c>--edge &lt;bottom|top|left|right|windows&gt;</c> from the command line.
+    /// </summary>
+    /// <remarks>
+    /// An override for one run, not saved: the persisted setting wins on the next launch. This
+    /// exists so each position can be launched and screenshotted on demand, which is how the
+    /// vertical layouts are verified without a GUI to click through.
+    /// </remarks>
+    private static Models.TaskbarEdge? GetEdgeOverride(string[] args)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] is "--edge" or "/edge")
+            {
+                return args[i + 1].ToLowerInvariant() switch
+                {
+                    "bottom" => Models.TaskbarEdge.Bottom,
+                    "top" => Models.TaskbarEdge.Top,
+                    "left" => Models.TaskbarEdge.Left,
+                    "right" => Models.TaskbarEdge.Right,
+                    "windows" or "match" => Models.TaskbarEdge.MatchWindows,
+                    _ => null,
+                };
+            }
+        }
+
+        return null;
+    }
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -37,16 +66,30 @@ public class ShellApp : Application
             // the lifetime is driven explicitly and the taskbar is the thing that stays up.
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-            var windowManager = new ShellWindowManager();
+            var settings = Services.ShellSettings.Load();
 
-            var taskbar = new TaskbarWindow { DataContext = new TaskbarViewModel(windowManager) };
+            // A --edge switch makes each position testable without a context menu, which also
+            // gives the smoke tests something deterministic to assert on.
+            var requested = GetEdgeOverride(desktop.Args ?? []);
+
+            if (requested is not null)
+            {
+                settings.Edge = requested.Value;
+            }
+
+            var windowManager = new Services.ShellWindowManager(settings);
+
+            var taskbar = new TaskbarWindow
+            {
+                DataContext = new TaskbarViewModel(windowManager, settings),
+            };
 
             windowManager.Attach(taskbar);
 
             desktop.MainWindow = taskbar;
             taskbar.Show();
 
-            desktop.Startup += (_, _) => Log?.Invoke("shell started");
+            Log?.Invoke($"started on {settings.Edge} edge");
         }
 
         base.OnFrameworkInitializationCompleted();

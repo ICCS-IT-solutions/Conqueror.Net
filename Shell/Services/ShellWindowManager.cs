@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Conqueror.Net.Shell.Models;
 using Conqueror.Net.Shell.ViewModels;
 using Conqueror.Net.Shell.Views;
 
@@ -16,14 +17,29 @@ namespace Conqueror.Net.Shell.Services;
 /// </remarks>
 public sealed class ShellWindowManager
 {
-    /// <summary>XP's taskbar is 30 device-independent units tall.</summary>
+    /// <summary>XP's taskbar is 30 device-independent units thick.</summary>
     private const double TaskbarThickness = 30;
 
     /// <summary>Start menu width, as in XP's default 380 px menu.</summary>
     private const double StartMenuWidth = 380;
 
+    /// <summary>Start menu height.</summary>
+    private const double StartMenuHeight = 520;
+
+    private readonly ShellSettings _settings;
     private TaskbarWindow? _taskbar;
     private StartMenuWindow? _startMenu;
+
+    public ShellWindowManager(ShellSettings settings) => _settings = settings;
+
+    /// <summary>
+    /// Raised after the bar has been repositioned, with the edge actually in effect.
+    /// </summary>
+    /// <remarks>
+    /// Carries the resolved edge rather than the configured one, so the view reflects reality
+    /// when the setting is <see cref="TaskbarEdge.MatchWindows"/>.
+    /// </remarks>
+    public event Action<TaskbarEdge>? EdgeChanged;
 
     public void Attach(TaskbarWindow taskbar)
     {
@@ -128,7 +144,14 @@ public sealed class ShellWindowManager
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    /// <summary>Pins the taskbar to the bottom of the primary screen, and the menu above it.</summary>
+    /// <summary>
+    /// Pins the taskbar to its configured edge of the primary screen, and the Start menu
+    /// alongside it.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="TaskbarEdge.MatchWindows"/> is resolved here against the live working area, so
+    /// the bar tracks the Windows taskbar if it is moved while the shell is running.
+    /// </remarks>
     public void Reposition()
     {
         var screen = _taskbar?.Screens.Primary;
@@ -140,27 +163,81 @@ public sealed class ShellWindowManager
 
         var bounds = screen.Bounds;
         var scale = screen.Scaling;
+        var edge = _settings.Edge.Resolve(screen);
 
         // Screen bounds are in physical pixels; Avalonia's Position is too, but the taskbar's
-        // own height is set in DIPs, so convert once here rather than in each window.
-        var height = (int)(TaskbarThickness * scale);
+        // own thickness is in DIPs, so convert once here rather than in each window.
+        var thickness = (int)(TaskbarThickness * scale);
+
+        var horizontal = edge.IsHorizontal();
+
+        var width = horizontal ? bounds.Width : thickness;
+        var height = horizontal ? thickness : bounds.Height;
+
+        // No frame compensation. It was tried and reverted: Avalonia's Position already points at
+        // the content origin, so subtracting Window.FrameSize pulls the bar *away* from the
+        // edge and leaves a 30 px gap. Measured on a bottom-docked bar, compensation moved the
+        // content edge from 1080 to 1050.
+        var x = edge switch
+        {
+            TaskbarEdge.Left => bounds.X,
+            TaskbarEdge.Right => bounds.Right - thickness,
+            _ => bounds.X,
+        };
+
+        var y = edge switch
+        {
+            TaskbarEdge.Top => bounds.Y,
+            TaskbarEdge.Bottom => bounds.Bottom - thickness,
+            _ => bounds.Y,
+        };
 
         _taskbar.WindowStartupLocation = WindowStartupLocation.Manual;
-        _taskbar.Position = new PixelPoint(bounds.X, bounds.Y + bounds.Height - height);
-        _taskbar.Width = bounds.Width / scale;
-        _taskbar.Height = TaskbarThickness;
+        _taskbar.Position = new PixelPoint(x, y);
+        _taskbar.Width = width / scale;
+        _taskbar.Height = height / scale;
+
+        // The bar lays out horizontally or vertically depending on the edge, so the view needs
+        // to be told; a vertical bar with a horizontal DockPanel would look broken.
+        EdgeChanged?.Invoke(edge);
 
         if (_startMenu is not null)
         {
-            var menuHeight = 520 * scale;
-
-            _startMenu.WindowStartupLocation = WindowStartupLocation.Manual;
-            _startMenu.Position = new PixelPoint(
-                bounds.X,
-                bounds.Y + bounds.Height - height - (int)menuHeight
-            );
-            _startMenu.Width = StartMenuWidth;
-            _startMenu.Height = 520;
+            PositionStartMenu(edge, bounds, thickness, scale);
         }
+    }
+
+    /// <summary>
+    /// Places the Start menu against the taskbar's inner edge, the way XP did.
+    /// </summary>
+    /// <remarks>
+    /// With a bottom taskbar the menu opens up and to the right, which is XP's default. With a
+    /// left taskbar it opens rightwards, with a right taskbar leftwards, and with a top taskbar
+    /// downwards - always into the screen rather than off it.
+    /// </remarks>
+    private void PositionStartMenu(TaskbarEdge edge, PixelRect bounds, int thickness, double scale)
+    {
+        // Re-checked rather than assumed: Reposition guards this, but the field is mutable and
+        // the menu is created lazily, so a narrow guard here is cheaper than a null reference.
+        if (_startMenu is null)
+        {
+            return;
+        }
+
+        var menuWidth = (int)(StartMenuWidth * scale);
+        var menuHeight = (int)(StartMenuHeight * scale);
+
+        var (x, y) = edge switch
+        {
+            TaskbarEdge.Left => (bounds.X + thickness, bounds.Y),
+            TaskbarEdge.Right => (bounds.Right - thickness - menuWidth, bounds.Y),
+            TaskbarEdge.Top => (bounds.X, bounds.Y + thickness),
+            _ => (bounds.X, bounds.Bottom - thickness - menuHeight),
+        };
+
+        _startMenu.WindowStartupLocation = WindowStartupLocation.Manual;
+        _startMenu.Position = new PixelPoint(x, y);
+        _startMenu.Width = StartMenuWidth;
+        _startMenu.Height = StartMenuHeight;
     }
 }

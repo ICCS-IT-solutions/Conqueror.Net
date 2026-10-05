@@ -5,10 +5,23 @@
          The gradient brushes themselves are resources in Palette.axaml; a Styles file can
          only hold setters, not brushes. -->
 
+    <!--
+        XP's Start orb. It is a circle only when the bar is horizontal: on a vertical bar the
+        button is 30 wide, and a 30x30 circle inside it would be correct - but the earlier
+        30x30 orb inside a 54px-tall button was what produced the flattened ellipse. Sizing is
+        therefore driven by the Start button, not fixed here, and the label is rotated rather
+        than the orb so the gradient stays circular either way.
+    -->
     <Style Selector="Border.xpStartOrb">
-        <Setter Property="Width" Value="30" />
-        <Setter Property="Height" Value="30" />
-        <Setter Property="CornerRadius" Value="15" />
+        <!--
+            28x28 in both orientations, which is what keeps the orb circular. Sizing it here
+            rather than letting it fill its button is deliberate: the Start button is 30x54 on a
+            vertical bar, so a stretched orb renders as the ellipse seen in the first
+            left-docked screenshot.
+        -->
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="CornerRadius" Value="14" />
         <Setter Property="Background" Value="{StaticResource StartOrbGradient}" />
         <Setter Property="BorderBrush" Value="#1B4D10" />
         <Setter Property="BorderThickness" Value="1" />

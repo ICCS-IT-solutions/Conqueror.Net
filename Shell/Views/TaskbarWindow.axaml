@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Conqueror.Net.Shell.ViewModels"
+        xmlns:models="clr-namespace:Conqueror.Net.Shell.Models"
         xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
         x:Class="Conqueror.Net.Shell.Views.TaskbarWindow"
         x:DataType="vm:TaskbarViewModel"
@@ -24,9 +25,23 @@
     -->
     <Border Background="Transparent">
         <Grid>
-            <Border Height="2" VerticalAlignment="Top"
+            <!--
+                The highlight line sits on the bar's inner edge, so it follows the dock side
+                rather than being hard-coded to the top. Two borders rather than a rotated one,
+                because Avalonia has no rotated-border primitive here and the pair costs nothing.
+            -->
+            <Border Height="2"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Stretch"
                     Background="{StaticResource LunaLight}"
-                    Opacity="0.45" />
+                    Opacity="0.45"
+                    IsVisible="{Binding IsHorizontal}" />
+            <Border Width="2"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Stretch"
+                    Background="{StaticResource LunaLight}"
+                    Opacity="0.45"
+                    IsVisible="{Binding IsHorizontal, Converter={x:Static BoolConverters.Not}}" />
 
             <!--
                 The bar's own background. This must come FIRST: Avalonia draws Grid children
@@ -35,14 +50,19 @@
             -->
             <Border Background="{StaticResource TaskbarGradient}" />
 
+            <!--
+                Dock sides come from the view-model, so a vertical bar puts the Start button at
+                the top and the tray at the bottom without a second layout. DockPanel.Dock is a
+                bindable attached property, which is what makes this possible.
+            -->
             <DockPanel LastChildFill="True">
 
                 <!-- Start button: the green orb, as in XP. -->
-                <Button DockPanel.Dock="Left"
+                <Button DockPanel.Dock="{Binding StartDock}"
                         Classes="xpStart"
                         Command="{Binding ToggleStartMenuCommand}"
-                        Width="54"
-                        Height="30">
+                        Width="{Binding StartWidth}"
+                        Height="{Binding StartHeight}">
                     <Border Classes="xpStartOrb">
                         <TextBlock Text="start"
                                    Foreground="White"
@@ -50,17 +70,29 @@
                                    FontStyle="Italic"
                                    FontSize="10"
                                    HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
+                                   VerticalAlignment="Center">
+                            <!--
+                                Only the label is rotated. Rotating the orb itself squashed the
+                                circle into an ellipse, because the transform scales the whole
+                                border including its gradient. XP rotated the text, not the orb.
+                                RenderTransform is parsed by TransformParser at XAML-compile
+                                time, so this needs a real RotateTransform object - a binding
+                                inside a "rotate(...)" markup string throws "Invalid unit".
+                            -->
+                            <TextBlock.RenderTransform>
+                                <RotateTransform Angle="{Binding OrbRotation}" />
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
                     </Border>
                 </Button>
 
                 <!-- Quick launch, XP's row of shortcut buttons. -->
-                <ItemsControl DockPanel.Dock="Left"
+                <ItemsControl DockPanel.Dock="{Binding QuickLaunchDock}"
                               ItemsSource="{Binding Buttons}"
                               Margin="4,0,0,0">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
+                            <StackPanel Orientation="{Binding QuickLaunchOrientation}" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -82,8 +114,8 @@
                 </ItemsControl>
 
                 <!-- Notification area: the tray clock. -->
-                <StackPanel DockPanel.Dock="Right"
-                            Orientation="Horizontal"
+                <StackPanel DockPanel.Dock="{Binding TrayDock}"
+                            Orientation="{Binding TrayOrientation}"
                             VerticalAlignment="Center"
                             Margin="0,0,10,0">
                     <Border Classes="xpTray">
@@ -98,4 +130,33 @@
             </DockPanel>
         </Grid>
     </Border>
+
+    <!--
+        Right-click menu for choosing the dock edge. This is where XP put it too - the taskbar
+        context menu - rather than in the application, so the setting lives with the shell that
+        owns it. Each item passes its edge as CommandParameter, which RelayCommand binds to the
+        single parameter of SetEdge.
+    -->
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Taskbar position">
+                <MenuItem Header="Bottom (default)"
+                          Command="{Binding SetEdgeCommand}"
+                          CommandParameter="{x:Static models:TaskbarEdge.Bottom}" />
+                <MenuItem Header="Top"
+                          Command="{Binding SetEdgeCommand}"
+                          CommandParameter="{x:Static models:TaskbarEdge.Top}" />
+                <MenuItem Header="Left"
+                          Command="{Binding SetEdgeCommand}"
+                          CommandParameter="{x:Static models:TaskbarEdge.Left}" />
+                <MenuItem Header="Right"
+                          Command="{Binding SetEdgeCommand}"
+                          CommandParameter="{x:Static models:TaskbarEdge.Right}" />
+                <Separator />
+                <MenuItem Header="Follow the Windows taskbar"
+                          Command="{Binding SetEdgeCommand}"
+                          CommandParameter="{x:Static models:TaskbarEdge.MatchWindows}" />
+            </MenuItem>
+        </ContextMenu>
+    </Window.ContextMenu>
 </Window>

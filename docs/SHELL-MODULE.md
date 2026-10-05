@@ -83,6 +83,103 @@ Windows keeps an invisible resize border on a window even when decorations are o
 `tools/screenshot.ps1` grew a `-ByProcess` mode: a decorationless window has **no**
 `MainWindowHandle` and no `MainWindowTitle`, so title matching cannot find it.
 
+## Choosing the dock edge
+
+The taskbar can be anchored to any of the four screen edges, and the choice is remembered
+between runs. Right-click the taskbar → **Taskbar position**:
+
+| Option | Behaviour |
+| --- | --- |
+| Bottom (default) | XP's traditional position |
+| Top | |
+| Left | Bar runs vertically, Start at the top |
+| Right | |
+| Follow the Windows taskbar | Tracks the real taskbar if you move it |
+
+![Left-docked taskbar](screenshot-shell-left.png)
+
+The setting lives in `%LOCALAPPDATA%\Conqueror.Net\shell-settings.json`, next to the file
+manager's CEF cache:
+
+```json
+{
+  "Edge": "Bottom",
+  "MenuFollowsBar": true
+}
+```
+
+It is written the moment you choose, not on exit, so the preference survives the shell being
+killed. A missing or malformed file falls back to `Bottom` — XP's position — rather than
+preventing the shell from starting.
+
+`--edge bottom|top|left|right|windows` overrides the stored value for a single run without
+saving it, which is how each position is screenshotted.
+
+### Following the Windows taskbar
+
+`MatchWindows` infers the real taskbar's edge by comparing the screen's full bounds with its
+working area, and is re-evaluated on the clock tick — so moving the Windows taskbar moves this
+one too. Comparing the two rectangles rather than asking the shell directly also accounts for
+a third-party bar.
+
+### Verifying all four edges
+
+```powershell
+pwsh -File tools/test-taskbar-edges.ps1           # assert placement
+pwsh -File tools/test-taskbar-edges.ps1 -Capture  # assert and screenshot each edge
+```
+
+It launches the shell once per edge and compares the resulting window rectangle against the
+primary screen. All four pass:
+
+```
+OK   bottom  B     =1049  want=1080  delta=31   rect=0,1010 1920x39
+OK   top     T     =0     want=0     delta=0    rect=0,0 1920x39
+OK   left    L     =0     want=0     delta=0    rect=0,0 32x1080
+OK   right   R     =1922  want=1920  delta=2    rect=1890,0 32x1080
+```
+
+The `bottom` delta is not an error. `GetWindowRect` reports the window's **outer frame**, and
+Windows keeps an invisible resize border on a decorationless window; at the bottom edge that
+frame sits *above* the content, so a bar requested at `y=1050` reports `1010..1049`. Left and
+top report no offset, right reports 2 px. The test asserts the bar is flush with its edge
+within the frame (40 px, deliberately generous) rather than hard-coding per-side offsets that
+would change with DPI or Windows theme.
+
+**No frame compensation is applied in the code.** That was tried and reverted: Avalonia's
+`Position` already refers to the content origin, so subtracting `Window.FrameSize` pulls the
+bar *away* from the edge and measurably opened a 30 px gap.
+
+### How the layout follows the edge
+
+One template serves all four edges. The view-model exposes the orientation-dependent values and
+the XAML binds to them:
+
+| Property | Horizontal | Vertical |
+| --- | --- | --- |
+| `StartDock` / `QuickLaunchDock` | `Dock.Left` | `Dock.Top` |
+| `TrayDock` | `Dock.Right` | `Dock.Bottom` |
+| `StartWidth` × `StartHeight` | 54 × 30 | 30 × 54 |
+| `TrayOrientation` / `QuickLaunchOrientation` | Horizontal | Vertical |
+| `OrbRotation` | 0° | −90° |
+
+`DockPanel.Dock` is a bindable attached property, which is what lets a single `DockPanel` change
+shape without a second layout. Derived properties are re-announced together in
+`ApplyResolvedEdge`, because the source generator only raises change notification for
+`IsHorizontal` itself.
+
+Two things were wrong on the first vertical run and are fixed:
+
+- The four quick-launch icons were laid out horizontally and squeezed into a 30 px bar, showing
+  only the first one.
+- The Start orb stretched to fill its 30 × 54 button and rendered as an ellipse. It is now a
+  fixed 28 × 28 circle in both orientations, and only the *label* is rotated — rotating the orb
+  itself distorts the gradient.
+
+A `RotateTransform` **object** is required, not `RenderTransform="rotate({Binding ...})"`.
+`TransformParser` parses that attribute at XAML-compile time, so a binding inside the string
+throws `Invalid unit: {Binding OrbRotation}` and takes the whole window down.
+
 ## Start menu
 
 A second top-level window rather than a popup, so it can sit above the taskbar and above other

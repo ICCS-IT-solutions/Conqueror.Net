@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Conqueror.Net.Shell.Models;
 
 namespace Conqueror.Net.Shell.ViewModels;
 
@@ -8,13 +9,69 @@ namespace Conqueror.Net.Shell.ViewModels;
 public sealed partial class TaskbarViewModel : ObservableObject
 {
     private readonly Shell.Services.ShellWindowManager _windows;
+    private readonly Shell.Services.ShellSettings _settings;
 
     [ObservableProperty]
     private string _clock = DateTime.Now.ToString("HH:mm");
 
-    public TaskbarViewModel(Shell.Services.ShellWindowManager windows)
+    [ObservableProperty]
+    private Shell.Models.TaskbarEdge _edge;
+
+    /// <summary>Whether the bar is running along the top or bottom rather than a side.</summary>
+    [ObservableProperty]
+    private bool _isHorizontal = true;
+
+    /// <summary>Where the Start button sits within the bar.</summary>
+    /// <remarks>
+    /// A left-docked bar runs vertically, so the Start button docks to its top instead of its
+    /// left. <see cref="DockPanel.Dock"/> is a bindable attached property, so this drives the
+    /// layout directly rather than needing a second set of styles.
+    /// </remarks>
+    public Avalonia.Controls.Dock StartDock => IsHorizontal ? Avalonia.Controls.Dock.Left : Avalonia.Controls.Dock.Top;
+
+    /// <summary>Where the quick-launch row sits.</summary>
+    public Avalonia.Controls.Dock QuickLaunchDock => StartDock;
+
+    /// <summary>Where the tray clock sits - always the far end of the bar.</summary>
+    public Avalonia.Controls.Dock TrayDock => IsHorizontal ? Avalonia.Controls.Dock.Right : Avalonia.Controls.Dock.Bottom;
+
+    /// <summary>Start button width: wide on a horizontal bar, bar-thickness on a vertical one.</summary>
+    /// <remarks>
+    /// Without this a 54 px button is forced into a 30 px bar and Avalonia squashes it into an
+    /// ellipse, which is what the first left-docked screenshot showed.
+    /// </remarks>
+    public double StartWidth => IsHorizontal ? 54 : 30;
+
+    /// <summary>Start button height, the mirror of <see cref="StartWidth"/>.</summary>
+    public double StartHeight => IsHorizontal ? 30 : 54;
+
+    /// <summary>How far round the Start orb's label sits, so it reads along the bar.</summary>
+    /// <remarks>
+    /// XP rotated the orb's text when the taskbar was vertical. Binding the angle rather than
+    /// swapping in a second layout keeps one template for all four edges.
+    /// </remarks>
+    public double OrbRotation => IsHorizontal ? 0 : -90;
+
+    /// <summary>Whether the tray stacks its clock along the bar rather than across it.</summary>
+    public Avalonia.Layout.Orientation TrayOrientation =>
+        IsHorizontal ? Avalonia.Layout.Orientation.Horizontal : Avalonia.Layout.Orientation.Vertical;
+
+    /// <summary>Whether the quick-launch row runs along the bar or down it.</summary>
+    /// <remarks>
+    /// Without this, four 26 px buttons are laid out horizontally and squeezed into a 30 px bar,
+    /// which showed only the first icon. The first left-docked screenshot showed exactly that.
+    /// </remarks>
+    public Avalonia.Layout.Orientation QuickLaunchOrientation => TrayOrientation;
+
+    public TaskbarViewModel(Shell.Services.ShellWindowManager windows, Shell.Services.ShellSettings settings)
     {
         _windows = windows;
+        _settings = settings;
+        _edge = settings.Edge;
+
+        // The manager decides which edge is actually in effect - which differs from the
+        // configured one when following the Windows taskbar - and reports it here.
+        _windows.EdgeChanged += ApplyResolvedEdge;
 
         // Built here rather than in a field initializer: the items call Launch, which is an
         // instance method.
@@ -79,6 +136,65 @@ public sealed partial class TaskbarViewModel : ObservableObject
 
     [RelayCommand]
     private void ToggleStartMenu() => _windows.ToggleStartMenu();
+
+    /// <summary>
+    /// Reflects the edge the manager actually applied.
+    /// </summary>
+    /// <remarks>
+    /// Named <c>ApplyResolvedEdge</c> rather than <c>OnEdgeChanged</c> because the source
+    /// generator for <c>[ObservableProperty]</c> already emits a partial method of that name for
+    /// the Edge property, and the two would collide. The dock sides are re-announced here because
+    /// the generator only notifies for IsHorizontal itself, and the layout binds to these.
+    /// </remarks>
+    private void ApplyResolvedEdge(Shell.Models.TaskbarEdge edge)
+    {
+        var horizontal = edge.IsHorizontal();
+
+        if (horizontal != IsHorizontal)
+        {
+            IsHorizontal = horizontal;
+
+            foreach (var name in LayoutProperties)
+            {
+                OnPropertyChanged(name);
+            }
+        }
+    }
+
+    /// <summary>Properties that follow IsHorizontal and must be re-announced when it flips.</summary>
+    /// <remarks>
+    /// The source generator notifies only for IsHorizontal itself. Every derived property is
+    /// listed here because each one is bound from the XAML.
+    /// </remarks>
+    private static readonly string[] LayoutProperties =
+    [
+        nameof(StartDock),
+        nameof(QuickLaunchDock),
+        nameof(TrayDock),
+        nameof(StartWidth),
+        nameof(StartHeight),
+        nameof(OrbRotation),
+        nameof(TrayOrientation),
+        nameof(QuickLaunchOrientation),
+    ];
+
+    /// <summary>
+    /// Moves the taskbar to a new edge and remembers the choice.
+    /// </summary>
+    /// <remarks>
+    /// Invoked from the bar's context menu. Saving immediately rather than on exit means the
+    /// choice survives even if the shell is killed, which is a normal way to end a shell.
+    /// </remarks>
+    [RelayCommand]
+    private void SetEdge(Shell.Models.TaskbarEdge edge)
+    {
+        _settings.Edge = edge;
+        _settings.Save();
+
+        // Reposition resolves the edge and raises EdgeChanged, so the view-model's
+        // IsHorizontal follows without this having to update it directly.
+        _windows.Reposition();
+    }
 }
 
 /// <summary>
