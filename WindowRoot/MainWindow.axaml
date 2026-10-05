@@ -156,15 +156,22 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Grid DockPanel.Dock="Top" Margin="3,5,3,3" ColumnDefinitions="*,Auto" Height="24">
-                    <TextBox Grid.Column="0" Name="AddressBox" Classes="xpField"
+                <Grid DockPanel.Dock="Top" Margin="3,5,3,3" ColumnDefinitions="Auto,*,Auto" Height="24">
+                    <!-- Address bar lives on the tab strip, exactly as in XP Explorer. -->
+                    <!-- Address label - in file browser mode it should toggle the address bar between showing breadcrumbs and the full path. Shortcut: Alt + d -->
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                               Text="Address:" Margin="0,0,4,0" />
+
+                    <!--Text box for address input-->
+                    <TextBox Grid.Column="1" Name="AddressBox" Classes="xpField"
                              Text="{Binding AddressText, Mode=TwoWay}"
                              VerticalContentAlignment="Center">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding NavigateCommand}" />
                         </TextBox.KeyBindings>
                     </TextBox>
-                    <Button Grid.Column="1" Classes="xpButton" Margin="4,0,0,0"
+                    <!--Go button for address input-->
+                    <Button Grid.Column="2" Classes="xpButton" Margin="4,0,0,0"
                             Content="Go" Command="{Binding NavigateCommand}" />
                 </Grid>
             </DockPanel>
