@@ -328,6 +328,16 @@
             <!-- ================================ Content =========================== -->
             <DockPanel>
 
+                <!-- Inline rename editor (F2, or immediately after New File / New Folder).
+                     Enter or focus loss commits; Escape cancels. -->
+                <TextBox Name="RenameBox"
+                         DockPanel.Dock="Top"
+                         Margin="4,4,4,0"
+                         IsVisible="{Binding RenamingEntry, Converter={x:Static ObjectConverters.IsNotNull}}"
+                         Text="{Binding RenameText, Mode=TwoWay}"
+                         KeyDown="OnRenameKeyDown"
+                         LostFocus="OnRenameLostFocus" />
+
                 <!-- Sortable column headers, shown only in Details view. -->
                 <Border Name="DetailsHeader" DockPanel.Dock="Top" IsVisible="False"
                         Background="#FFFFFF"

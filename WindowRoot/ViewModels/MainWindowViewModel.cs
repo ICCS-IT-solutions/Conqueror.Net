@@ -32,72 +32,135 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private ITabViewModel? _selectedTab;
 
-    //Common edit actions
-    public RelayCommand NewFileCommand => new RelayCommand(() =>
-    {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.NewFileCommand.Execute(null);
-        }
-    });
-    public RelayCommand NewFolderCommand => new RelayCommand(() =>
-    {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.NewFolderCommand.Execute(null);
-        }
-    });
-    public RelayCommand CutCommand => new RelayCommand(() =>
-    {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.CutCommand.Execute(null);
-        }
-    });
+    //Common edit actions. These route to whichever tab is active: file tabs (and
+    //dual-pane via its active pane) get real file operations, browser tabs get the CEF
+    //edit commands, and terminal tabs get input-box editing. CanExecute consults the
+    //tab's Can* capabilities; NewFile/NewFolder are additionally guarded to file tabs.
+    public RelayCommand NewFileCommand => new(
+        () => ActiveFileTab?.NewFileCommand.Execute(null),
+        () => ActiveFileTab is not null);
 
-    public RelayCommand CopyCommand => new RelayCommand(() =>
-    {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.CopyCommand.Execute(null);
-        }
-    });
+    public RelayCommand NewFolderCommand => new(
+        () => ActiveFileTab?.NewFolderCommand.Execute(null),
+        () => ActiveFileTab is not null);
 
-    public RelayCommand PasteCommand => new RelayCommand(() =>
+    public RelayCommand CutCommand => new(
+        () => DispatchEdit(t => t.Cut()),
+        () => CanDispatchEdit(t => t.CanCut));
+
+    public RelayCommand CopyCommand => new(
+        () => DispatchEdit(t => t.Copy()),
+        () => CanDispatchEdit(t => t.CanCopy));
+
+    public RelayCommand PasteCommand => new(
+        () => DispatchEdit(t => t.Paste()),
+        () => CanDispatchEdit(t => t.CanPaste));
+
+    public RelayCommand DeleteCommand => new(
+        () => DispatchEdit(t => t.Delete()),
+        () => CanDispatchEdit(t => t.CanDelete));
+
+    public RelayCommand RenameCommand => new(
+        () => ActiveFileTab?.RenameCommand.Execute(null),
+        () => ActiveFileTab is not null);
+
+    public RelayCommand PropertiesCommand => new(
+        () => ActiveFileTab?.ShowPropertiesCommand.Execute(null),
+        () => ActiveFileTab is not null);
+
+    public RelayCommand SelectAllCommand => new(
+        () => DispatchEdit(t => t.SelectAll()),
+        () => CanDispatchEdit(t => t.CanSelectAll));
+
+    /// <summary>
+    /// Minimal edit-command surface every tab kind supports. Implemented as a private
+    /// interface over the four tab VMs so the shell dispatches without a type-switch per
+    /// verb; file-only verbs (new file/folder, rename, properties) stay on
+    /// <see cref="ActiveFileTab"/> instead.
+    /// </summary>
+    private interface IEditTarget
     {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.PasteCommand.Execute(null);
-        }
-    });
-    public RelayCommand DeleteCommand => new RelayCommand(() =>
+        void Cut();
+
+        void Copy();
+
+        void Paste();
+
+        void Delete();
+
+        void SelectAll();
+    }
+
+    private sealed class FileEditTarget(FileBrowserViewModel vm) : IEditTarget
     {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.DeleteCommand.Execute(null);
-        }
-    });
-    public RelayCommand RenameCommand => new RelayCommand(() =>
+        public void Cut() => vm.CutCommand.Execute(null);
+
+        public void Copy() => vm.CopyCommand.Execute(null);
+
+        public void Paste() => vm.PasteCommand.Execute(null);
+
+        public void Delete() => vm.DeleteCommand.Execute(null);
+
+        public void SelectAll() => vm.SelectAllCommand.Execute(null);
+    }
+
+    private sealed class BrowserEditTarget(BrowserTabViewModel vm) : IEditTarget
     {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.RenameCommand.Execute(null);
-        }
-    });
-    public RelayCommand PropertiesCommand => new RelayCommand(() =>
+        public void Cut() => vm.CutPageSelection();
+
+        public void Copy() => vm.CopyPageSelection();
+
+        public void Paste() => vm.PasteIntoPage();
+
+        public void Delete() => vm.DeletePageSelection();
+
+        public void SelectAll() => vm.SelectAllInPage();
+    }
+
+    private sealed class TerminalEditTarget(TerminalViewModel vm) : IEditTarget
     {
-        if (_selectedTab is FileBrowserViewModel fileTab)
-        {
-            fileTab.PropertiesCommand.Execute(null);
-        }
-    });
-    public RelayCommand SelectAllCommand => new RelayCommand(() =>
+        public void Cut() => vm.CutInputCommand.Execute(null);
+
+        public void Copy() => vm.CopyInputCommand.Execute(null);
+
+        public void Paste() => vm.PasteInputCommand.Execute(null);
+
+        public void Delete() => vm.DeleteInputCommand.Execute(null);
+
+        public void SelectAll() => vm.SelectAllInputCommand.Execute(null);
+    }
+
+    /// <summary>
+    /// The file tab the creation verbs act on: a plain file tab directly, or a dual-pane
+    /// tab's active pane. Null everywhere else, which disables the menu items.
+    /// </summary>
+    private FileBrowserViewModel? ActiveFileTab => SelectedTab switch
     {
-        if (_selectedTab is FileBrowserViewModel fileTab)
+        FileBrowserViewModel file => file,
+        SplitPaneViewModel split => split.ActivePane,
+        _ => null,
+    };
+
+    private IEditTarget? ActiveEditTarget => SelectedTab switch
+    {
+        FileBrowserViewModel file => new FileEditTarget(file),
+        SplitPaneViewModel split when split.ActivePane is not null => new FileEditTarget(split.ActivePane),
+        BrowserTabViewModel browser => new BrowserEditTarget(browser),
+        TerminalViewModel terminal => new TerminalEditTarget(terminal),
+        _ => null,
+    };
+
+    private void DispatchEdit(Action<IEditTarget> verb)
+    {
+        var target = ActiveEditTarget;
+        if (target is not null)
         {
-            fileTab.SelectAllCommand.Execute(null);
+            verb(target);
         }
-    });
+    }
+
+    private bool CanDispatchEdit(Func<ITabViewModel, bool> capability) =>
+        SelectedTab is not null && capability(SelectedTab) && ActiveEditTarget is not null;
 
     /// <summary>Text in the address bar. Kept in sync with the active tab's location.</summary>
     [ObservableProperty]

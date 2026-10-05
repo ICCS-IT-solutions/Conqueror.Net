@@ -57,6 +57,33 @@ public interface IFileSystemService
     /// <summary>Creates a directory; returns false and an error instead of throwing.</summary>
     (bool Success, string? Error) CreateDirectory(string parent, string name);
 
+    /// <summary>Creates an empty file; returns false and an error instead of throwing.</summary>
+    (bool Success, string? Error) CreateFile(string parent, string name);
+
+    /// <summary>
+    /// Renames a file or folder in place. Returns the new full path on success, or false
+    /// and an error instead of throwing.
+    /// </summary>
+    (bool Success, string? NewPath, string? Error) Rename(string path, string newName);
+
+    /// <summary>
+    /// Sends files/folders to the recycle bin (Explorer semantics). Falls back to permanent
+    /// deletion where no recycle bin exists; returns false and an error instead of throwing.
+    /// </summary>
+    (bool Success, string? Error) Delete(IEnumerable<string> paths);
+
+    /// <summary>
+    /// Copies files/folders into <paramref name="destinationDirectory"/>. Returns false and
+    /// an error instead of throwing.
+    /// </summary>
+    (bool Success, string? Error) Copy(IEnumerable<string> paths, string destinationDirectory);
+
+    /// <summary>
+    /// Moves files/folders into <paramref name="destinationDirectory"/>. Returns false and
+    /// an error instead of throwing.
+    /// </summary>
+    (bool Success, string? Error) Move(IEnumerable<string> paths, string destinationDirectory);
+
     /// <summary>Empty path (deleted items), so the status bar can report freed space.</summary>
     (long Total, long Free) GetDriveInfo(string pathOrDrive);
 

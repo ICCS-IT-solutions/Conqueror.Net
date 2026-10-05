@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Conqueror.Net.Core.Tabs;
 using Conqueror.Net.Core.Terminal;
+using Conqueror.Net.FileBrowserUi.Services;
+using Avalonia.Input.Platform;
 
 namespace Conqueror.Net.FileBrowserUi.ViewModels;
 
@@ -205,6 +207,142 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         await StopAsync();
         Lines.Clear();
         await StartAsync();
+    }
+
+    // ---- Input-box editing (driven by the shell's Edit menu) ----
+    //
+    // Cut and Delete act on the input TextBox only, never the transcript: the output
+    // lines are read-only TextBlocks, so there is nothing destructive to do there. The
+    // view registers the live TextBox via InputBoxProvider (set in TerminalView code-
+    // behind on DataContextChanged); when no box is registered the commands fall back
+    // to the Input string with whole-text semantics.
+
+    /// <summary>Provides the live input TextBox. Set by the view; null in tests/headless.</summary>
+    public Func<Avalonia.Controls.TextBox?>? InputBoxProvider { get; set; }
+
+    /// <summary>Cuts the input selection to the clipboard (input box only).</summary>
+    [RelayCommand]
+    private async Task CutInputAsync()
+    {
+        var box = InputBoxProvider?.Invoke();
+        if (box is null)
+        {
+            await CopyTextAsync(Input);
+            Input = string.Empty;
+            return;
+        }
+
+        var selected = box.SelectedText;
+        if (string.IsNullOrEmpty(selected))
+        {
+            return;
+        }
+
+        await CopyTextAsync(selected);
+        var caret = box.SelectionStart;
+        box.Text = (box.Text ?? string.Empty).Remove(caret, selected.Length);
+        box.CaretIndex = caret;
+    }
+
+    /// <summary>Copies input text: selection when present, else the whole input line.</summary>
+    [RelayCommand]
+    private async Task CopyInputAsync()
+    {
+        var box = InputBoxProvider?.Invoke();
+        var text = box?.SelectedText;
+        if (string.IsNullOrEmpty(text))
+        {
+            text = box?.Text ?? Input;
+        }
+
+        await CopyTextAsync(text);
+    }
+
+    /// <summary>Pastes the clipboard text at the input caret.</summary>
+    [RelayCommand]
+    private async Task PasteInputAsync()
+    {
+        var clipboard = ClipboardProvider.Current;
+        if (clipboard is null)
+        {
+            return;
+        }
+
+        var text = await clipboard.TryGetTextAsync();
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var box = InputBoxProvider?.Invoke();
+        if (box is null)
+        {
+            Input += text;
+            return;
+        }
+
+        var caret = box.CaretIndex;
+        var current = box.Text ?? string.Empty;
+
+        // Replace any selection first, matching TextBox paste semantics.
+        if (!string.IsNullOrEmpty(box.SelectedText))
+        {
+            current = current.Remove(box.SelectionStart, box.SelectedText.Length);
+            caret = box.SelectionStart;
+        }
+
+        box.Text = current.Insert(caret, text);
+        box.CaretIndex = caret + text.Length;
+    }
+
+    /// <summary>
+    /// Deletes the input selection, or the character after the caret (input box only).
+    /// </summary>
+    [RelayCommand]
+    private void DeleteInput()
+    {
+        var box = InputBoxProvider?.Invoke();
+        if (box is null)
+        {
+            Input = string.Empty;
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(box.SelectedText))
+        {
+            var caret = box.SelectionStart;
+            box.Text = (box.Text ?? string.Empty).Remove(caret, box.SelectedText.Length);
+            box.CaretIndex = caret;
+            return;
+        }
+
+        var current = box.Text ?? string.Empty;
+        if (box.CaretIndex < current.Length)
+        {
+            box.Text = current.Remove(box.CaretIndex, 1);
+        }
+    }
+
+    /// <summary>Selects all text in the input box.</summary>
+    [RelayCommand]
+    private void SelectAllInput()
+    {
+        var box = InputBoxProvider?.Invoke();
+        box?.SelectAll();
+    }
+
+    private static async Task CopyTextAsync(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var clipboard = ClipboardProvider.Current;
+        if (clipboard is not null)
+        {
+            await clipboard.SetTextAsync(text);
+        }
     }
 
     public async Task StopAsync()

@@ -32,6 +32,11 @@ public partial class TerminalView : UserControl
         Vm.PropertyChanged -= OnVmPropertyChanged;
         Vm.PropertyChanged += OnVmPropertyChanged;
 
+        // Registers the live input TextBox so the VM's cut/copy/paste/delete/select-all
+        // commands act on it. The transcript is read-only output and is never an edit
+        // target, so only the input box is exposed here.
+        Vm.InputBoxProvider = () => this.FindControl<TextBox>("InputBox");
+
         // The shell is started once the view exists, because a tab is constructed before its
         // view and a process must not be started for a tab that is never shown.
         _ = Vm.StartAsync();

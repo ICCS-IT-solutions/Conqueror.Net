@@ -23,9 +23,20 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         KeyDown += OnWindowKeyDown;
+        Loaded += OnLoaded;
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+    /// <summary>
+    /// Registers the platform clipboard once the window has a TopLevel, so the tab
+    /// view-models can cut/copy/paste without holding a visual reference.
+    /// </summary>
+    private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        // Window inherits TopLevel, so Clipboard is directly available here.
+        FileBrowserUi.Services.ClipboardProvider.Register(Clipboard);
+    }
 
     private MainWindowViewModel? Vm => DataContext as MainWindowViewModel;
 

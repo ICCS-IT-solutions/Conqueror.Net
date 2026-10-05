@@ -16,15 +16,9 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
 {
     //Handlers for new file, cut, copy, paste, delete, rename, properties, and select all.
     //Here these pertain to the file browser tab.
-    public IRelayCommand NewFileCommand { get; }
-    public IRelayCommand NewFolderCommand { get; }
-    public IRelayCommand CutCommand { get; }
-    public IRelayCommand CopyCommand { get; }
-    public IRelayCommand PasteCommand { get; }
-    public IRelayCommand DeleteCommand { get; }
-    public IRelayCommand RenameCommand { get; }
-    public IRelayCommand PropertiesCommand { get; }
-    public IRelayCommand SelectAllCommand { get; }
+    //
+    // The shell drives these through MainWindowViewModel's Edit menu; the [RelayCommand]
+    // methods below are the real implementations (hand-written methods, not stubs).
     //Capabilities:
     public bool CanNewFile => true;
     public bool CanNewFolder => true;
@@ -35,6 +29,30 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
     public bool CanRename => true;
     public bool CanProperties => true;
     public bool CanSelectAll => true;
+
+    /// <summary>
+    /// Pending rename target. Set by <see cref="Rename"/>; the view shows its rename box
+    /// when this is non-null, then calls <see cref="ConfirmRenameCommand"/> or
+    /// <see cref="CancelRenameCommand"/>.
+    /// </summary>
+    [ObservableProperty]
+    private FileSystemEntry? _renamingEntry;
+
+    [ObservableProperty]
+    private string _renameText = string.Empty;
+
+    /// <summary>
+    /// Multi-selection beyond <see cref="SelectedItem"/>. The view keeps this in sync with
+    /// its ListBox selection so cut/copy/delete act on every highlighted row.
+    /// </summary>
+    public ObservableCollection<FileSystemEntry> ExtraSelection { get; } = [];
+
+    /// <summary>
+    /// Confirmation hook for destructive actions. The view sets this to show an XP-style
+    /// dialog; when unset (tests, headless) actions proceed without prompting.
+    /// </summary>
+    public Func<string, string, Task<bool>>? ConfirmAsync { get; set; } =
+        (_, _) => Task.FromResult(true);
     private readonly IFileSystemService _fileSystem;
     private readonly ObservableCollection<FileSystemEntry> _allEntries = [];
 

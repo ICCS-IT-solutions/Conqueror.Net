@@ -296,6 +296,190 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
+    public (bool Success, string? Error) CreateFile(string parent, string name)
+    {
+        try
+        {
+            var full = Path.Combine(parent, name);
+            if (File.Exists(full) || Directory.Exists(full))
+            {
+                return (false, $"'{name}' already exists.");
+            }
+
+            using (File.Create(full))
+            {
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+            when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public (bool Success, string? NewPath, string? Error) Rename(string path, string newName)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(newName)
+                || newName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+            {
+                return (false, null, $"'{newName}' is not a valid name.");
+            }
+
+            var parent = Path.GetDirectoryName(Path.GetFullPath(path));
+            if (parent is null)
+            {
+                return (false, null, "Cannot rename a drive root.");
+            }
+
+            var dest = Path.Combine(parent, newName.Trim());
+            if (File.Exists(dest) || Directory.Exists(dest))
+            {
+                return (false, null, $"'{newName.Trim()}' already exists.");
+            }
+
+            if (Directory.Exists(path))
+            {
+                Directory.Move(path, dest);
+            }
+            else if (File.Exists(path))
+            {
+                File.Move(path, dest);
+            }
+            else
+            {
+                return (false, null, $"Cannot find '{path}'.");
+            }
+
+            return (true, dest, null);
+        }
+        catch (Exception ex)
+            when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return (false, null, ex.Message);
+        }
+    }
+
+    public (bool Success, string? Error) Delete(IEnumerable<string> paths)
+    {
+        var list = paths.Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+        if (list.Count == 0)
+        {
+            return (false, "Nothing selected.");
+        }
+
+        try
+        {
+            foreach (var path in list)
+            {
+                if (Directory.Exists(path))
+                {
+                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
+                        path,
+                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                        Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                }
+                else if (File.Exists(path))
+                {
+                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                        path,
+                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                        Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                }
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+            when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public (bool Success, string? Error) Copy(IEnumerable<string> paths, string destinationDirectory)
+    {
+        try
+        {
+            Directory.CreateDirectory(destinationDirectory);
+
+            foreach (var path in paths.Where(p => !string.IsNullOrWhiteSpace(p)))
+            {
+                if (Directory.Exists(path))
+                {
+                    CopyDirectory(path, Path.Combine(destinationDirectory, Path.GetFileName(path)));
+                }
+                else if (File.Exists(path))
+                {
+                    var dest = Path.Combine(destinationDirectory, Path.GetFileName(path));
+                    File.Copy(path, dest, overwrite: true);
+                }
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+            when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public (bool Success, string? Error) Move(IEnumerable<string> paths, string destinationDirectory)
+    {
+        try
+        {
+            Directory.CreateDirectory(destinationDirectory);
+
+            foreach (var path in paths.Where(p => !string.IsNullOrWhiteSpace(p)))
+            {
+                var dest = Path.Combine(destinationDirectory, Path.GetFileName(path));
+
+                if (Directory.Exists(path))
+                {
+                    try
+                    {
+                        Directory.Move(path, dest);
+                    }
+                    catch (IOException)
+                    {
+                        CopyDirectory(path, dest);
+                        Directory.Delete(path, recursive: true);
+                    }
+                }
+                else if (File.Exists(path))
+                {
+                    File.Move(path, dest, overwrite: true);
+                }
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+            when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    private static void CopyDirectory(string source, string dest)
+    {
+        Directory.CreateDirectory(dest);
+
+        foreach (var file in Directory.GetFiles(source))
+        {
+            File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), overwrite: true);
+        }
+
+        foreach (var dir in Directory.GetDirectories(source))
+        {
+            CopyDirectory(dir, Path.Combine(dest, Path.GetFileName(dir)));
+        }
+    }
+
     public string GetVolumeLabel(string pathOrDrive)
     {
         try

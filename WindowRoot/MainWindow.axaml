@@ -35,15 +35,26 @@
             </MenuItem>
             <MenuItem Header="_Edit" Classes="xpMenuItem">
                 <!--Common edit actions-->
-                <MenuItem Header="New _File" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N" />
+                <MenuItem Header="New _File" Command="{Binding NewFileCommand}"
+                          IsEnabled="{Binding CanNewFile}" InputGesture="Ctrl+N" />
+                <MenuItem Header="New F_older" Command="{Binding NewFolderCommand}"
+                          IsEnabled="{Binding CanNewFolder}" />
                 <Separator />
-                <MenuItem Header="_Cut" Command="{Binding CutCommand}" InputGesture="Ctrl+X" />
-                <MenuItem Header="_Copy" Command="{Binding CopyCommand}" InputGesture="Ctrl+C" />
-                <MenuItem Header="_Paste" Command="{Binding PasteCommand}" InputGesture="Ctrl+V" />
+                <MenuItem Header="_Cut" Command="{Binding CutCommand}"
+                          IsEnabled="{Binding CanCut}" InputGesture="Ctrl+X" />
+                <MenuItem Header="_Copy" Command="{Binding CopyCommand}"
+                          IsEnabled="{Binding CanCopy}" InputGesture="Ctrl+C" />
+                <MenuItem Header="_Paste" Command="{Binding PasteCommand}"
+                          IsEnabled="{Binding CanPaste}" InputGesture="Ctrl+V" />
                 <Separator />
-                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" InputGesture="Delete" />
-                <MenuItem Header="_Rename" Command="{Binding RenameCommand}" InputGesture="F2" />
-                <MenuItem Header="Select _All" Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A" />
+                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}"
+                          IsEnabled="{Binding CanDelete}" InputGesture="Delete" />
+                <MenuItem Header="_Rename" Command="{Binding RenameCommand}"
+                          IsEnabled="{Binding CanRename}" InputGesture="F2" />
+                <MenuItem Header="_Properties" Command="{Binding PropertiesCommand}"
+                          IsEnabled="{Binding CanProperties}" InputGesture="Alt+Return" />
+                <MenuItem Header="Select _All" Command="{Binding SelectAllCommand}"
+                          IsEnabled="{Binding CanSelectAll}" InputGesture="Ctrl+A" />
             </MenuItem>
             <MenuItem Header="_View" Classes="xpMenuItem">
                 <MenuItem Header="_Folder Pane" Name="FolderPaneMenuItem"

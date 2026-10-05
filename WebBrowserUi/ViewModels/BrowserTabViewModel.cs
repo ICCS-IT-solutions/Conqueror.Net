@@ -21,13 +21,14 @@ namespace Conqueror.Net.WebBrowserUi.ViewModels;
 /// </remarks>
 public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewModel, IDisposable
 {
-    //Capabilities: cut, copy, paste, delete, select all: true.
+    //Capabilities: cut, copy, paste, select all: true.
+    //Delete is false: there is no page-level delete semantic, so the shell menu stays off.
     public bool CanNewFile => false;
     public bool CanNewFolder => false;
     public bool CanCut => true;
     public bool CanCopy => true;
     public bool CanPaste => true;
-    public bool CanDelete => true;
+    public bool CanDelete => false;
     public bool CanRename => false;
     public bool CanProperties => false;
     public bool CanSelectAll => true;
@@ -73,15 +74,6 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
 
     [ObservableProperty]
     private bool _canGoForward;
-    private bool _canNewFile;
-    private bool _canNewFolder;
-    private bool _canCut;
-    private bool _canCopy;
-    private bool _canPaste;
-    private bool _canDelete;
-    private bool _canRename;
-    private bool _canProperties;
-    private bool _canSelectAll;
 
     [ObservableProperty]
     private bool _isBusy;
@@ -121,6 +113,69 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     {
         get => StatusMessage;
         set => StatusMessage = value;
+    }
+
+    // ---- Page editing (driven by the shell's Edit menu through MainWindowViewModel) ----
+
+    /// <summary>Cuts the page selection via the CEF edit commands; no-op before attach.</summary>
+    public void CutPageSelection()
+    {
+        try
+        {
+            _browser?.EditCommands.Cut();
+        }
+        catch (InvalidOperationException)
+        {
+            // Engine busy or torn down during tab close.
+        }
+    }
+
+    /// <summary>Copies the page selection via the CEF edit commands; no-op before attach.</summary>
+    public void CopyPageSelection()
+    {
+        try
+        {
+            _browser?.EditCommands.Copy();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    /// <summary>Pastes the clipboard into the focused page field; no-op before attach.</summary>
+    public void PasteIntoPage()
+    {
+        try
+        {
+            _browser?.EditCommands.Paste();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    /// <summary>Deletes the page selection; no-op before attach.</summary>
+    public void DeletePageSelection()
+    {
+        try
+        {
+            _browser?.EditCommands.Delete();
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+
+    /// <summary>Selects the whole page; no-op before attach.</summary>
+    public void SelectAllInPage()
+    {
+        try
+        {
+            _browser?.EditCommands.SelectAll();
+        }
+        catch (InvalidOperationException)
+        {
+        }
     }
 
     /// <summary>
