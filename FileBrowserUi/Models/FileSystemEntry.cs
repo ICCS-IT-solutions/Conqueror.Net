@@ -13,6 +13,7 @@ public sealed class FileSystemEntry
     private FileAttributes? _attributes;
     private long? _length;
     private string? _typeDescription;
+    private string? _iconKey;
 
     public FileSystemEntry(FileSystemInfo info)
     {
@@ -45,6 +46,12 @@ public sealed class FileSystemEntry
 
     /// <summary>Human readable kind shown in the "Type" column, e.g. "Text Document".</summary>
     public string TypeDescription => _typeDescription ??= ResolveTypeDescription();
+
+    /// <summary>Key into the SVG icon theme; see <see cref="FileIconResolver"/>.</summary>
+    public string IconKey =>
+        _iconKey ??= IsDirectory
+            ? Icons.FileIconResolver.ForFolder(FullPath)
+            : Icons.FileIconResolver.ForFile(this);
 
     public string SizeDisplay => IsDirectory ? string.Empty : ByteSizeFormatter.Format(Length);
 

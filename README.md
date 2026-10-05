@@ -15,8 +15,12 @@ can hold either a **folder** or a **web page** rendered by an embedded **Chromiu
 - **Embedded Chromium** — real browser tabs powered by CEF 120, with zoom, DevTools, and
   `target=_blank` / `window.open` links opening as new tabs rather than new windows.
 - **Windows XP "Luna" theming** — the original Luna palette (#ECE9D8 face, #316AC5 highlight,
-  #0A246A→#A6CAF0 title gradient) applied through Avalonia styles, with vector-drawn icons so
-  nothing depends on binary image assets.
+  #0A246A→#A6CAF0 title gradient) applied through Avalonia styles, with vector icons so nothing
+  rasterises or depends on platform icon caches.
+- **SVG icon theme** — file, folder, drive and task-pane icons come from a scalable XP icon
+  theme rendered by `Avalonia.Svg.Skia`, with per-extension mapping (PDF, Word, images, media,
+  archives, executables) and a size per view mode. See [docs/ICON-THEME.md](docs/ICON-THEME.md),
+  which also covers the licensing position.
 
 ## Running it
 
@@ -66,6 +70,7 @@ MainWindowViewModel ──owns──> ObservableCollection<ITabViewModel>
 | UI framework | Avalonia 11.3.22 | Cross-platform; the scaffold was already Avalonia 11.0.10 |
 | MVVM | CommunityToolkit.Mvvm 8.4.2 | Source generators match `AvaloniaUseCompiledBindingsByDefault` |
 | Browser engine | WebViewControl-Avalonia 3.120.13 | Actively maintained wrapper over CefGlue (CEF 120), ships native binaries |
+| SVG rendering | Avalonia.Svg.Skia 11.3.0 | MIT, tracks Avalonia 11.3, exposes `EnableCache` so one parsed vector serves every row |
 
 ### Why Avalonia 11 and not 12
 
@@ -113,6 +118,21 @@ and reports any unhandled exception from stderr.
 ```powershell
 pwsh -File tools/run-capture.ps1 -ProcessName 'Conqueror.Net' -AppArgs 'https://example.com'
 ```
+
+### Swapping the icon theme
+
+The upstream pack is not committed — `Icons_source/` is gitignored. To populate
+`Assets/Icons/` from a theme on disk:
+
+```powershell
+pwsh -File tools/verify-icon-manifest.ps1 -SourceRoot .\Icons_source\<theme-dir>   # dry run
+pwsh -File tools/import-icon-theme.ps1  -SourceRoot .\Icons_source\<theme-dir>     # copy
+```
+
+The import script dereferences the pack's symlinks, flattens names to stable semantic keys
+and reports the size of each icon it copies. To use a different theme, edit the manifest in
+`tools/import-icon-theme.ps1` and the extension map in `FileBrowserUi/Icons/FileIconResolver.cs`;
+nothing else hard-codes an icon path. See [docs/ICON-THEME.md](docs/ICON-THEME.md).
 
 ### Troubleshooting
 

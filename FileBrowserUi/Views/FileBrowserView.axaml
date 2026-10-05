@@ -5,6 +5,8 @@
              xmlns:vm="clr-namespace:Conqueror.Net.FileBrowserUi.ViewModels"
              xmlns:models="clr-namespace:Conqueror.Net.FileBrowserUi.Models"
              xmlns:conv="clr-namespace:Conqueror.Net.WindowRoot.ViewModels"
+             xmlns:icons="clr-namespace:Conqueror.Net.FileBrowserUi.Icons"
+             xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="520"
              x:Class="Conqueror.Net.FileBrowserUi.Views.FileBrowserView"
              x:DataType="vm:FileBrowserViewModel">
@@ -16,9 +18,7 @@
         <ResourceDictionary>
         <DataTemplate x:Key="EntryIconsTemplate" DataType="models:FileSystemEntry">
             <StackPanel Spacing="3" HorizontalAlignment="Center" Width="96">
-                <Path Width="32" Height="32"
-                      Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
-                      Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="32" Height="32" />
                 <TextBlock Text="{Binding Name}"
                            FontSize="11"
                            TextAlignment="Center"
@@ -30,9 +30,7 @@
 
         <DataTemplate x:Key="EntryListTemplate" DataType="models:FileSystemEntry">
             <StackPanel Orientation="Horizontal" Spacing="4" Width="200">
-                <Path Width="16" Height="16"
-                      Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
-                      Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="18" Height="18" />
                 <TextBlock Text="{Binding Name}"
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis" />
@@ -42,9 +40,7 @@
         <DataTemplate x:Key="EntryDetailsTemplate" DataType="models:FileSystemEntry">
             <Grid ColumnDefinitions="*,110,150,140" Width="700">
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
-                    <Path Width="16" Height="16"
-                          Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
-                          Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="18" Height="18" />
                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
                                TextTrimming="CharacterEllipsis" />
                 </StackPanel>
@@ -57,9 +53,8 @@
 
         <DataTemplate x:Key="EntryTilesTemplate" DataType="models:FileSystemEntry">
             <Grid ColumnDefinitions="Auto,*" Margin="2" Width="460">
-                <Path Grid.Column="0" Width="32" Height="32"
-                      Data="{Binding IsDirectory, Converter={x:Static conv:FileEntryIconConverter.Instance}}"
-                      Fill="{Binding IsDirectory, Converter={x:Static conv:FileEntryFillConverter.Instance}}" Stroke="{Binding IsDirectory, Converter={x:Static conv:FileEntryStrokeConverter.Instance}}" StrokeThickness="0.6" />
+                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="48" Height="48"
+                                  VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                     <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding TypeDescription}" FontSize="10" Foreground="#555" />
@@ -96,13 +91,9 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="models:ShellFolder">
                                 <Grid ColumnDefinitions="Auto,*" Margin="0,1">
-                                    <Path Grid.Column="0"
-                                          Width="14" Height="14"
-                                          VerticalAlignment="Center"
-                                          Data="{StaticResource Icon.Folder}"
-                                          Fill="#E8B84A"
-                                          Stroke="#9C7B22"
-                                          StrokeThickness="0.8" />
+                                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform"
+                                                      Width="16" Height="16"
+                                                      VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1"
                                                Margin="5,0,0,0"
                                                VerticalAlignment="Center"

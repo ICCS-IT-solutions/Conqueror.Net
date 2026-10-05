@@ -20,6 +20,9 @@ artifacts/
 *.log
 ceflog.txt
 
+## Upstream icon packs (not redistributed - see docs/ICON-THEME.md for licensing)
+Icons_source/
+
 ## OS
 Thumbs.db
 desktop.ini
