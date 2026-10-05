@@ -24,13 +24,6 @@ public partial class FileBrowserView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-
-        // The entry list is created by XAML load, so subscribe once here: it survives
-        // every DataContext swap, and subscribing per-VM would stack duplicate handlers.
-        if (this.FindControl<ListBox>("EntryList") is { } list)
-        {
-            list.SelectionChanged += OnEntrySelectionChanged;
-        }
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
@@ -79,6 +72,14 @@ public partial class FileBrowserView : UserControl
         // Destructive verbs (delete) ask through this hook; the view answers with an
         // XP-style Yes/No dialog. Headless contexts never assign, keeping the default.
         Vm.ConfirmAsync = ConfirmAsync;
+
+        // Selection sync, guarded with -= first: DataContextChanged can fire more than
+        // once for the same view and the ListBox instance outlives individual events.
+        if (this.FindControl<ListBox>("EntryList") is { } list)
+        {
+            list.SelectionChanged -= OnEntrySelectionChanged;
+            list.SelectionChanged += OnEntrySelectionChanged;
+        }
 
         ApplyViewMode(Vm.ViewMode);
         WireTreeSelection();

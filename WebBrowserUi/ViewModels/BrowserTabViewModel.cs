@@ -191,7 +191,11 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         {
             if (SetProperty(ref _zoomPercentage, value) && _browser is not null)
             {
-                _browser.ZoomPercentage = value;
+                // WebViewControl's ZoomPercentage is a factor (1.0 = 100%): the setter
+                // computes ZoomLevel = log(value, 1.2), so pushing the 100-based display
+                // value straight through asks for log_1.2(100) ~= 25 zoom levels — a 100x
+                // zoom — instead of the intended one. Divide to convert display -> factor.
+                _browser.ZoomPercentage = value / 100.0;
             }
         }
     }
@@ -216,7 +220,8 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         {
             _browser = new WebView { AllowDeveloperTools = true };
             WireBrowserEvents(_browser);
-            _browser.ZoomPercentage = ZoomPercentage;
+            // Library takes a factor (1.0 = 100%), view-model keeps 100-based display units.
+            _browser.ZoomPercentage = ZoomPercentage / 100.0;
         }
 
         // Re-parent our own engine instance into the visible host.
