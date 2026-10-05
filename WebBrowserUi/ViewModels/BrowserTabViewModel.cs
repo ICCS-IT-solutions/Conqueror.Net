@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Conqueror.Net.Core.Tabs;
+using Conqueror.Net.WebBrowserUi.Services;
+using Conqueror.Net.WebBrowserUi.Views;
 using WebViewControl;
 
 namespace Conqueror.Net.WebBrowserUi.ViewModels;
@@ -16,12 +19,47 @@ namespace Conqueror.Net.WebBrowserUi.ViewModels;
 /// be created once there is a live visual root), so navigation requests made before that are
 /// queued into <see cref="_pendingAddress"/> and replayed on attach.
 /// </remarks>
-public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewModel
+public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewModel, IDisposable
 {
+    //Capabilities: cut, copy, paste, delete, select all: true.
+    public bool CanNewFile => false;
+    public bool CanNewFolder => false;
+    public bool CanCut => true;
+    public bool CanCopy => true;
+    public bool CanPaste => true;
+    public bool CanDelete => true;
+    public bool CanRename => false;
+    public bool CanProperties => false;
+    public bool CanSelectAll => true;
+
+    private readonly IExtensionService _extensionService;
+    private IRelayCommand? _extensionsCommand;
+    public IRelayCommand ExtensionsCommand
+    {
+        get
+        {
+            if (_extensionsCommand is null)
+            {
+                _extensionsCommand = new RelayCommand(OnExtensionsClicked);
+            }
+            return _extensionsCommand;
+        }
+    }
+
+    private async void OnExtensionsClicked()
+    {
+        var dialogVm = new ExtensionManagementDialogViewModel(_extensionService);
+        await dialogVm.InitializeCommand.ExecuteAsync(null);
+        var dialog = new ExtensionManagementDialog { Title = "Extensions" };
+        dialog.DataContext = dialogVm;
+        dialog.Show();
+    }
     private const string HomeAddress = "about:blank";
 
     private WebView? _browser;
+    private Border? _host;
     private string? _pendingAddress;
+    private bool _handlersWired;
     private double _zoomPercentage = 100;
 
     [ObservableProperty]
@@ -35,12 +73,27 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
 
     [ObservableProperty]
     private bool _canGoForward;
+    private bool _canNewFile;
+    private bool _canNewFolder;
+    private bool _canCut;
+    private bool _canCopy;
+    private bool _canPaste;
+    private bool _canDelete;
+    private bool _canRename;
+    private bool _canProperties;
+    private bool _canSelectAll;
 
     [ObservableProperty]
     private bool _isBusy;
 
     public BrowserTabViewModel(string? initialAddress = null)
+        : this(initialAddress, App.Extensions)
     {
+    }
+
+    public BrowserTabViewModel(string? initialAddress, IExtensionService extensionService)
+    {
+        _extensionService = extensionService ?? throw new ArgumentNullException(nameof(extensionService));
         Address = NormalizeAddress(initialAddress);
     }
 
@@ -91,26 +144,116 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     /// <summary>Raised when a page asks for a new window (target=_blank, window.open).</summary>
     public event Action<string>? NewTabRequested;
 
-    /// <summary>Wires the VM to the real Chromium control and replays any queued navigation.</summary>
-    public void Attach(WebView browser)
+    /// <summary>Raised after <see cref="Dispose"/> tears the engine down (shell unhooks popups).</summary>
+    public event Action? Disposed;
+
+    /// <summary>
+    /// Hosts this tab's own Chromium control inside <paramref name="host"/>.
+    /// Each tab owns a dedicated WebView (created lazily on the UI thread) that is
+    /// re-parented here — a single ContentControl/DataTemplate reuses its visual, so
+    /// sharing one WebView across tabs is what forced every tab onto the same page.
+    /// </summary>
+    public void Attach(Border host)
     {
-        if (_browser is not null)
+        _host = host ?? throw new ArgumentNullException(nameof(host));
+
+        if (_browser is null)
+        {
+            _browser = new WebView { AllowDeveloperTools = true };
+            WireBrowserEvents(_browser);
+            _browser.ZoomPercentage = ZoomPercentage;
+        }
+
+        // Re-parent our own engine instance into the visible host.
+        if (!ReferenceEquals(_browser.Parent, host))
+        {
+            if (_browser.Parent is Panel oldPanel)
+            {
+                oldPanel.Children.Remove(_browser);
+            }
+
+            if (_browser.Parent is Decorator oldDecorator)
+            {
+                oldDecorator.Child = null;
+            }
+
+            if (_browser.Parent is ContentControl oldContent)
+            {
+                oldContent.Content = null;
+            }
+
+            host.Child = _browser;
+        }
+
+        var toLoad = _pendingAddress ?? Address;
+        _pendingAddress = null;
+
+        // Only drive navigation when the target differs from what this engine shows,
+        // otherwise switching back to a tab would reload it.
+        if (!string.Equals(_browser.Address?.TrimEnd('/'), toLoad.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+        {
+            LoadUrl(toLoad);
+        }
+        else
+        {
+            // Still refresh chrome state so the tab strip/address bar match this tab.
+            UpdateNavigationState();
+            OnPropertyChanged(nameof(Location));
+        }
+    }
+
+    /// <summary>Removes our WebView from the shared host so the next tab can dock its own.</summary>
+    public void Detach()
+    {
+        if (_host is not null && ReferenceEquals(_browser?.Parent, _host))
+        {
+            _host.Child = null;
+        }
+
+        _host = null;
+    }
+
+    private void WireBrowserEvents(WebView browser)
+    {
+        if (_handlersWired)
         {
             return;
         }
 
-        _browser = browser;
-
+        _handlersWired = true;
         browser.Navigated += OnNavigated;
         browser.TitleChanged += OnTitleChanged;
         browser.LoadFailed += OnLoadFailed;
         browser.PopupOpening += OnPopupOpening;
+    }
 
-        browser.ZoomPercentage = ZoomPercentage;
+    public void Dispose()
+    {
+        if (_browser is not null)
+        {
+            _browser.Navigated -= OnNavigated;
+            _browser.TitleChanged -= OnTitleChanged;
+            _browser.LoadFailed -= OnLoadFailed;
+            _browser.PopupOpening -= OnPopupOpening;
+            if (_browser.Parent is Decorator oldHost)
+            {
+                oldHost.Child = null;
+            }
+            try
+            {
+                _browser.Dispose();
+            }
+            catch (InvalidOperationException)
+            {
+                // Engine already torn down during shutdown.
+            }
 
-        var toLoad = _pendingAddress ?? Address;
-        _pendingAddress = null;
-        LoadUrl(toLoad);
+            _browser = null;
+        }
+
+        _host = null;
+        _handlersWired = false;
+        Disposed?.Invoke();
     }
 
     // ---- ITabViewModel -------------------------------------------------------
@@ -167,7 +310,7 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     private void Stop() => ((ITabViewModel)this).Stop();
 
     [RelayCommand]
-    private void ShowDeveloperTools() => _browser?.ShowDeveloperTools();
+    public void ShowDeveloperTools() => _browser?.ShowDeveloperTools();
 
     [RelayCommand]
     private void ZoomIn() => ZoomPercentage = Math.Clamp(ZoomPercentage + 10, 25, 500);
@@ -214,6 +357,7 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         UpdateNavigationState();
 
         RefreshTitleFromDocument();
+        InjectExtensionContentScripts();
     }
 
     private void OnTitleChanged()
@@ -285,6 +429,57 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         IsBusy = false;
         StatusMessage = $"Cannot display '{url}' (error {errorCode}).";
         UpdateNavigationState();
+    }
+
+    /// <summary>
+    /// Runs each enabled extension's content scripts in the page. This is the injection
+    /// half of the extension handler: WebViewControl exposes no extension host, so the
+    /// closest faithful behaviour is executing manifest content_scripts via EvaluateScript.
+    /// Failures are swallowed per-file — one broken script must not break the page.
+    /// </summary>
+    private async void InjectExtensionContentScripts()
+    {
+        if (_browser is null)
+        {
+            return;
+        }
+
+        IReadOnlyList<string> scripts;
+        try
+        {
+            scripts = _extensionService.GetEnabledContentScripts();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return;
+        }
+
+        foreach (var path in scripts)
+        {
+            string js;
+            try
+            {
+                js = await File.ReadAllTextAsync(path);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(js))
+            {
+                continue;
+            }
+
+            try
+            {
+                _browser.ExecuteScript(js, null);
+            }
+            catch (Exception ex) when (ex is InvalidOperationException or WebView.JavascriptException)
+            {
+                // Engine busy or script error — keep the page alive.
+            }
+        }
     }
 
     private void OnPopupOpening(string url)

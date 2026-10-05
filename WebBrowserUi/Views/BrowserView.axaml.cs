@@ -1,44 +1,53 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Conqueror.Net.WebBrowserUi.ViewModels;
-using WebViewControl;
 
 namespace Conqueror.Net.WebBrowserUi.Views;
 
 /// <summary>
-/// Hosts the embedded Chromium control. Chromium can only be created once the control has
-/// been attached to a live visual root, so the view-model is wired up on Loaded and any
-/// navigation requested beforehand is replayed there.
+/// Hosts the tab's dedicated Chromium control. Each <see cref="BrowserTabViewModel"/>
+/// owns its own WebView (Chromium needs a live visual root, so it is created on the
+/// UI thread during attach) which is re-parented into the host Border here.
 /// </summary>
-/// <remarks>
-/// Process-wide CEF settings are applied in <see cref="App.ConfigureChromium"/> rather than
-/// here: this control starts the Chromium engine inside its own constructor, so by the time
-/// a BrowserView body runs it is already too late to set them.
-/// </remarks>
 public partial class BrowserView : UserControl
 {
+    private BrowserTabViewModel? _attachedVm;
+
     public BrowserView()
     {
         InitializeComponent();
 
         // A control realised from a DataTemplate can receive Loaded and DataContext in
-        // either order, so hook both and let the view-model's own guard make a repeated
-        // attempt harmless. Relying on Loaded alone silently skipped Attach() entirely.
+        // either order, so hook both. DataContextChanged also fires when the shared
+        // ContentControl swaps tabs — detach the old VM so its engine leaves the host
+        // before the new tab docks its own.
         Loaded += (_, _) => TryAttach();
-        DataContextChanged += (_, _) => TryAttach();
+        DataContextChanged += (_, _) => SwitchAttachment();
+        DetachedFromVisualTree += (_, _) => DetachCurrent();
     }
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
+    private void SwitchAttachment()
+    {
+        DetachCurrent();
+        TryAttach();
+    }
+
+    private void DetachCurrent()
+    {
+        _attachedVm?.Detach();
+        _attachedVm = null;
+    }
+
     private void TryAttach()
     {
-        // The generated Name="Browser" field is not yet populated this early in the
-        // template's lifetime, so resolve the control from the live name scope instead.
-        var browser = this.FindControl<WebView>("Browser");
+        var host = this.FindControl<Border>("BrowserHost");
 
-        if (DataContext is BrowserTabViewModel vm && browser is not null)
+        if (DataContext is BrowserTabViewModel vm && host is not null)
         {
-            vm.Attach(browser);
+            _attachedVm = vm;
+            vm.Attach(host);
         }
     }
 }

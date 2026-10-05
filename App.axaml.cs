@@ -19,6 +19,13 @@ public partial class App : Application
     public static IFileSystemService FileSystem { get; } = new FileSystemService();
 
     /// <summary>
+    /// Shared extension registry. One instance serves every browser tab so enable/disable
+    /// state stays consistent in memory as well as on disk.
+    /// </summary>
+    public static WebBrowserUi.Services.IExtensionService Extensions { get; } =
+        new WebBrowserUi.Services.FileBasedExtensionService();
+
+    /// <summary>
     /// Applies CEF's process-wide settings. This must run before the first <c>WebView</c>
     /// control is constructed: the control spins the Chromium engine up during its own
     /// constructor, and every setting then throws "after WebView engine has been loaded".

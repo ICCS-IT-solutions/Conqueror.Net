@@ -13,6 +13,11 @@
         MinWidth="640" MinHeight="420"
         WindowStartupLocation="CenterScreen">
 
+        <!--Design-time datacontext for previews and ASXG:-->
+        <Design.DataContext>
+            <vm:MainWindowViewModel />
+        </Design.DataContext>
+
     <DockPanel LastChildFill="True">
 
         <!-- ================= Menu bar: File / Edit / View / Favorites / Help ===== -->
@@ -29,7 +34,16 @@
                 <MenuItem Header="E_xit" Click="OnExitClick" />
             </MenuItem>
             <MenuItem Header="_Edit" Classes="xpMenuItem">
-                <MenuItem Header="Select _All" Click="OnSelectAllClick" InputGesture="Ctrl+A" />
+                <!--Common edit actions-->
+                <MenuItem Header="New _File" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N" />
+                <Separator />
+                <MenuItem Header="_Cut" Command="{Binding CutCommand}" InputGesture="Ctrl+X" />
+                <MenuItem Header="_Copy" Command="{Binding CopyCommand}" InputGesture="Ctrl+C" />
+                <MenuItem Header="_Paste" Command="{Binding PasteCommand}" InputGesture="Ctrl+V" />
+                <Separator />
+                <MenuItem Header="_Delete" Command="{Binding DeleteCommand}" InputGesture="Delete" />
+                <MenuItem Header="_Rename" Command="{Binding RenameCommand}" InputGesture="F2" />
+                <MenuItem Header="Select _All" Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A" />
             </MenuItem>
             <MenuItem Header="_View" Classes="xpMenuItem">
                 <MenuItem Header="_Folder Pane" Name="FolderPaneMenuItem"
@@ -66,6 +80,29 @@
                 <MenuItem Header="Refresh _Left" Click="OnRefreshPaneClick" Tag="Left" />
                 <MenuItem Header="Refresh _Right" Click="OnRefreshPaneClick" Tag="Right" />
             </MenuItem>
+            <!--Browser menu-->
+            <MenuItem Header="Web Browser" Classes="xpMenuItem"
+                      IsVisible="{Binding IsWebBrowserActive}">
+                <MenuItem Header="_New Web Tab" Click="OnNewWebTabClick"
+                          InputGesture="Ctrl+T" />
+                <Separator />
+                <MenuItem Header="_Back" Command="{Binding GoBackCommand}"
+                          IsEnabled="{Binding SelectedTab.CanGoBack, Mode=OneWay}"
+                          InputGesture="Alt+Left" />
+                <MenuItem Header="_Forward" Command="{Binding GoForwardCommand}"
+                          IsEnabled="{Binding SelectedTab.CanGoForward, Mode=OneWay}"
+                          InputGesture="Alt+Right" />
+                <MenuItem Header="_Refresh" Command="{Binding RefreshCommand}" InputGesture="F5" />
+                <MenuItem Header="_Stop" Command="{Binding StopCommand}" />
+                <Separator />
+                <MenuItem Header="_Zoom In" Command="{Binding ZoomInCommand}" InputGesture="Ctrl+OemPlus" />
+                <MenuItem Header="_Zoom Out" Command="{Binding ZoomOutCommand}" InputGesture="Ctrl+OemMinus" />
+                <MenuItem Header="_Zoom Reset" Command="{Binding ZoomResetCommand}" InputGesture="Ctrl+0" />
+                <Separator />
+                <MenuItem Header="_Show Developer Tools" Command="{Binding ShowDeveloperToolsCommand}" />
+                <MenuItem Header="_Extensions" Command="{Binding ExtensionsCommand}" />
+            </MenuItem>
+
             <MenuItem Header="_Terminal" Classes="xpMenuItem">
                 <MenuItem Header="_New Terminal Tab" Click="OnNewTerminalTabClick"
                           InputGesture="Ctrl+OemTilde" />
@@ -166,6 +203,126 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <!--Separator between the navigation buttons and the edit actions. The separator is a 1 px rectangle with a Luna shadow brush, not a Border, so it does not add extra padding to the toolbar. -->
+                <Border DockPanel.Dock="Left" Width="1" Background="{StaticResource BrushLunaShadow}" />
+                <!--Show cut, copy, paste, delete and select all. These are available throughout the application -->
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding CutCommand}"
+                        IsEnabled="{Binding CanCut}"
+                        ToolTip.Tip="Cut (Ctrl+X)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-cut32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Cut" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding CopyCommand}"
+                        IsEnabled="{Binding CanCopy}"
+                        ToolTip.Tip="Copy (Ctrl+C)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-copy32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Copy" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding PasteCommand}"
+                        IsEnabled="{Binding CanPaste}"
+                        ToolTip.Tip="Paste (Ctrl+V)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-paste32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Paste" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding DeleteCommand}"
+                        IsEnabled="{Binding CanDelete}"
+                        ToolTip.Tip="Delete (Del)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-delete32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Delete" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding SelectAllCommand}"
+                        IsEnabled="{Binding CanSelectAll}"
+                        ToolTip.Tip="Select All (Ctrl+A)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectall32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Select All" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <!--Separator here-->
+                <Border DockPanel.Dock="Left" Width="1" Background="{StaticResource BrushLunaShadow}" />
+                <!--New file, new folder, properties and rename are available only in file browser tabs, so they are hidden on web and terminal tabs.-->
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding NewFileCommand}"
+                        IsEnabled="{Binding CanNewFile}"
+                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                        ToolTip.Tip="New file (Ctrl+N)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfile32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="New File" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding NewFolderCommand}"
+                        IsEnabled="{Binding CanNewFolder}"
+                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                        ToolTip.Tip="New folder">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfolder32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="New Folder" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding RenameCommand}"
+                        IsEnabled="{Binding CanRename}"
+                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                        ToolTip.Tip="Rename (F2)">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-rename32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Rename" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
+                        Command="{Binding PropertiesCommand}"
+                        IsEnabled="{Binding CanProperties}"
+                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                        ToolTip.Tip="Properties">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-properties32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Properties" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+
             </DockPanel>
         </Border>
 
@@ -177,40 +334,46 @@
                               ItemsSource="{Binding Tabs}"
                               Margin="2,4,2,0"
                               Height="23">
-                    <!-- Tabs are Buttons so the whole strip is keyboard reachable and gives the
-                         hover/pressed feedback Explorer has. The visual is styled back to a
-                         plain tab so it does not look like a push button. -->
+                    <!-- Tabs are Buttons so the whole strip is keyboard reachable. The layout
+                         follows Firefox 4: even, compact tabs sitting on the strip, the active
+                         one raised and lit while the rest rest back. Colours come from the Luna
+                         palette so the strip reads as XP chrome rather than a flat list. -->
                     <ItemsControl.Styles>
                         <Style Selector="ItemsControl > Button" x:DataType="tabs:ITabViewModel">
-                            <Setter Property="Background" Value="#FFFFFF" />
-                            <Setter Property="BorderBrush" Value="{StaticResource BrushDarkShadow}" />
+                            <Setter Property="Background" Value="{StaticResource BrushFace}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
                             <Setter Property="BorderThickness" Value="1" />
                             <Setter Property="Padding" Value="0" />
-                            <Setter Property="Margin" Value="0,0,2,0" />
+                            <Setter Property="Margin" Value="0,0,3,0" />
                             <Setter Property="Cursor" Value="Hand" />
                             <Setter Property="Template">
                                 <ControlTemplate>
+                                    <!-- Two stacked borders: the outer keeps the tab's base colour
+                                         and corner radius; the thin Luna-blue lip on top echoes the
+                                         highlight Windows paints along an active tab's edge. -->
                                     <Border x:Name="TabSurface"
                                             Background="{TemplateBinding Background}"
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
-                                            CornerRadius="3,3,0,0">
+                                            CornerRadius="4,4,0,0">
                                         <ContentPresenter Content="{TemplateBinding Content}"
-                                                          Margin="1" />
+                                                          Margin="0,2,0,0" />
                                     </Border>
                                 </ControlTemplate>
                             </Setter>
                         </Style>
 
-                        <!-- Inactive tabs sit back; the selected one is bright and opens downward. -->
+                        <!-- Inactive tabs rest back on the strip; hovering lifts them toward the
+                             active colour, and pressing confirms the selection. -->
                         <Style Selector="ItemsControl > Button:pointerover /template/ Border#TabSurface">
-                            <Setter Property="Background" Value="#F3F0E6" />
+                            <Setter Property="Background" Value="#F5F3EC" />
                         </Style>
                         <Style Selector="ItemsControl > Button:pressed /template/ Border#TabSurface">
-                            <Setter Property="Background" Value="#E8E4D4" />
+                            <Setter Property="Background" Value="#EBE7DA" />
                         </Style>
                         <Style Selector="ItemsControl > Button.isActive /template/ Border#TabSurface">
-                            <Setter Property="Background" Value="#FFFFFF" />
+                            <Setter Property="Background" Value="{StaticResource LunaLight}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource LunaHighlight}" />
                         </Style>
                     </ItemsControl.Styles>
                     <ItemsControl.ItemsPanel>
@@ -224,31 +387,25 @@
                                     Click="OnTabClick"
                                     CommandParameter="{Binding}">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <!-- Tab icon. XP artwork is raster, so it needs an Image; the vector
-                                     converter is kept as a fallback for any tab still using a
-                                     Geometry key, and the Path stays collapsed when it returns null. -->
-                                    <Panel Grid.Column="0" Width="16" Height="16"
-                                           Margin="4,0,3,0" VerticalAlignment="Center">
-                                        <!-- ConverterParameter is the render size in px; 16 selects the
-                                             16 px downscale, which is what the 16x16 tab wants. -->
-                                        <Image Source="{Binding IconKey, Converter={x:Static vm:IconKeyToXpImageConverter.Instance}, ConverterParameter=16}"
-                                               Stretch="Uniform" />
-                                        <Path Width="13" Height="13"
-                                              Data="{Binding IconKey, Converter={x:Static vm:IconKeyToGeometryConverter.Instance}}"
-                                              Fill="#2A5DB0" />
-                                    </Panel>
+                                    <!-- Tab icon: 16 px XP artwork centred in a fixed cell so the
+                                         titles line up whether or not a glyph resolves. -->
+                                    <Image Grid.Column="0"
+                                           Source="{Binding IconKey, Converter={x:Static vm:IconKeyToXpImageConverter.Instance}, ConverterParameter=16}"
+                                           Stretch="Uniform"
+                                           Width="16" Height="16"
+                                           Margin="4,0,4,0"
+                                           VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1"
                                                Text="{Binding Title}"
                                                VerticalAlignment="Center"
-                                               MaxWidth="140"
-                                               TextTrimming="CharacterEllipsis"
-                                               Margin="0,4" />
+                                               MaxWidth="150"
+                                               TextTrimming="CharacterEllipsis" />
                                     <!-- The close button is a child of the tab button, so it
                                          deliberately keeps its own hit testing: it consumes
                                          the click and does not bubble up to select the tab. -->
                                     <Button Grid.Column="2" Classes="xpToolbarButton"
                                             Width="16" Height="16" Padding="0"
-                                            Margin="0,0,1,0"
+                                            Margin="0,0,2,0"
                                             VerticalAlignment="Center"
                                             Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
                                             CommandParameter="{Binding}"

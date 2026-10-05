@@ -14,6 +14,27 @@ namespace Conqueror.Net.FileBrowserUi.ViewModels;
 /// <summary>Drives a file-system tab: navigation history, the entry list and the status bar.</summary>
 public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewModel
 {
+    //Handlers for new file, cut, copy, paste, delete, rename, properties, and select all.
+    //Here these pertain to the file browser tab.
+    public IRelayCommand NewFileCommand { get; }
+    public IRelayCommand NewFolderCommand { get; }
+    public IRelayCommand CutCommand { get; }
+    public IRelayCommand CopyCommand { get; }
+    public IRelayCommand PasteCommand { get; }
+    public IRelayCommand DeleteCommand { get; }
+    public IRelayCommand RenameCommand { get; }
+    public IRelayCommand PropertiesCommand { get; }
+    public IRelayCommand SelectAllCommand { get; }
+    //Capabilities:
+    public bool CanNewFile => true;
+    public bool CanNewFolder => true;
+    public bool CanCut => true;
+    public bool CanCopy => true;
+    public bool CanPaste => true;
+    public bool CanDelete => true;
+    public bool CanRename => true;
+    public bool CanProperties => true;
+    public bool CanSelectAll => true;
     private readonly IFileSystemService _fileSystem;
     private readonly ObservableCollection<FileSystemEntry> _allEntries = [];
 

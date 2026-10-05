@@ -23,6 +23,17 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
     private readonly FileBrowserViewModel _left;
     private readonly FileBrowserViewModel _right;
 
+    //Capabilities:
+    public bool CanNewFile => true;
+    public bool CanNewFolder => true;
+    public bool CanCut => true;
+    public bool CanCopy => true;
+    public bool CanPaste => true;
+    public bool CanDelete => true;
+    public bool CanRename => true;
+    public bool CanProperties => true;
+    public bool CanSelectAll => true;
+
     [ObservableProperty]
     private FileBrowserViewModel _activePane;
 

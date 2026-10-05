@@ -25,11 +25,79 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private readonly IFileSystemService _fileSystem;
 
+
     /// <summary>The tab whose property changes currently drive the window chrome.</summary>
     private ITabViewModel? _subscribedTab;
 
     [ObservableProperty]
     private ITabViewModel? _selectedTab;
+
+    //Common edit actions
+    public RelayCommand NewFileCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.NewFileCommand.Execute(null);
+        }
+    });
+    public RelayCommand NewFolderCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.NewFolderCommand.Execute(null);
+        }
+    });
+    public RelayCommand CutCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.CutCommand.Execute(null);
+        }
+    });
+
+    public RelayCommand CopyCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.CopyCommand.Execute(null);
+        }
+    });
+
+    public RelayCommand PasteCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.PasteCommand.Execute(null);
+        }
+    });
+    public RelayCommand DeleteCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.DeleteCommand.Execute(null);
+        }
+    });
+    public RelayCommand RenameCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.RenameCommand.Execute(null);
+        }
+    });
+    public RelayCommand PropertiesCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.PropertiesCommand.Execute(null);
+        }
+    });
+    public RelayCommand SelectAllCommand => new RelayCommand(() =>
+    {
+        if (_selectedTab is FileBrowserViewModel fileTab)
+        {
+            fileTab.SelectAllCommand.Execute(null);
+        }
+    });
 
     /// <summary>Text in the address bar. Kept in sync with the active tab's location.</summary>
     [ObservableProperty]
@@ -96,7 +164,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
         }
 
         var vm = new BrowserTabViewModel(address ?? DefaultStartPage);
-        vm.NewTabRequested += url => AddWebTab(url);
+        void OnNewTab(string url) => AddWebTab(url);
+        vm.NewTabRequested += OnNewTab;
+        // Unsubscribe the popup handler when the tab is closed, otherwise the dead VM
+        // (and its WebView) stays rooted by the event and leaks.
+        vm.Disposed += () => vm.NewTabRequested -= OnNewTab;
         AttachTab(vm);
     }
 
@@ -171,6 +243,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
         foreach (var tab in Tabs.Where(t => !ReferenceEquals(t, SelectedTab)).ToList())
         {
             Tabs.Remove(tab);
+
+            // Same as CloseTab: a WebView owns a CEF browser + HWND and must be torn
+            // down, otherwise every "close other tabs" leaks a renderer.
+            if (tab is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
     }
 
@@ -220,6 +299,58 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     [RelayCommand]
     private void Stop() => SelectedTab?.Stop();
+
+    // ---- Zoom commands (browser-tab only; delegate to the tab so the menu and the
+    // in-view +/- buttons share one step/clamp path) ----
+
+    [RelayCommand]
+    private void ZoomIn()
+    {
+        if (SelectedTab is BrowserTabViewModel browser)
+        {
+            browser.ZoomInCommand.Execute(null);
+        }
+    }
+
+    [RelayCommand]
+    private void ZoomOut()
+    {
+        if (SelectedTab is BrowserTabViewModel browser)
+        {
+            browser.ZoomOutCommand.Execute(null);
+        }
+    }
+
+    [RelayCommand]
+    private void ZoomReset()
+    {
+        if (SelectedTab is BrowserTabViewModel browser)
+        {
+            browser.ZoomResetCommand.Execute(null);
+        }
+    }
+
+    // ---- Developer tools (browser-tab only)
+
+    [RelayCommand]
+    private void ShowDeveloperTools()
+    {
+        if (SelectedTab is BrowserTabViewModel browser)
+        {
+            browser.ShowDeveloperTools();
+        }
+    }
+
+    // ---- Extensions (browser-tab only)
+
+    [RelayCommand]
+    private void Extensions()
+    {
+        if (SelectedTab is BrowserTabViewModel browser)
+        {
+            browser.ExtensionsCommand.Execute(null);
+        }
+    }
 
     /// <summary>Explorer-only: goes to the parent folder of a file tab.</summary>
     [RelayCommand]
@@ -358,6 +489,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         // Contextual menus re-evaluate against the newly selected tab.
         OnPropertyChanged(nameof(IsSplitPaneActive));
+        OnPropertyChanged(nameof(IsWebBrowserActive));
         OnPropertyChanged(nameof(IsTerminalActive));
         OnPropertyChanged(nameof(ActiveSplitPane));
 
@@ -400,11 +532,32 @@ public sealed partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(CanGoBack));
         OnPropertyChanged(nameof(CanGoForward));
         OnPropertyChanged(nameof(CanGoUp));
+        OnPropertyChanged(nameof(CanNewFile));
+        OnPropertyChanged(nameof(CanNewFolder));
+        OnPropertyChanged(nameof(CanCut));
+        OnPropertyChanged(nameof(CanCopy));
+        OnPropertyChanged(nameof(CanPaste));
+        OnPropertyChanged(nameof(CanDelete));
+        OnPropertyChanged(nameof(CanRename));
+        OnPropertyChanged(nameof(CanProperties));
+        OnPropertyChanged(nameof(CanSelectAll));
     }
 
     public bool CanGoBack => SelectedTab?.CanGoBack ?? false;
 
     public bool CanGoForward => SelectedTab?.CanGoForward ?? false;
+
+    //New: capabilities for new file, new folder, cut, copy, paste, delete, rename, properties, and select all.
+    //For now hard-coding them to the file browser tab, but will add these as contextual capabilities for other tabs in the future.
+    public bool CanNewFile => SelectedTab?.CanNewFile ?? false;
+    public bool CanNewFolder => SelectedTab?.CanNewFolder ?? false;
+    public bool CanCut => SelectedTab?.CanCut ?? false;
+    public bool CanCopy => SelectedTab?.CanCopy ?? false;
+    public bool CanPaste => SelectedTab?.CanPaste ?? false;
+    public bool CanDelete => SelectedTab?.CanDelete ?? false;
+    public bool CanRename => SelectedTab?.CanRename ?? false;
+    public bool CanProperties => SelectedTab?.CanProperties ?? false;
+    public bool CanSelectAll => SelectedTab?.CanSelectAll ?? false;
 
     public bool CanGoUp => SelectedTab is FileBrowserViewModel { CanGoUp: true }
         || SelectedTab is SplitPaneViewModel { CanGoUp: true };
@@ -416,6 +569,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// in the pane-specific items rather than showing them where they would do nothing.
     /// </summary>
     public bool IsSplitPaneActive => SelectedTab is SplitPaneViewModel;
+    public bool IsWebBrowserActive => SelectedTab is BrowserTabViewModel;
 
     /// <summary>The dual-pane tab currently in front, or null.</summary>
     public SplitPaneViewModel? ActiveSplitPane => SelectedTab as SplitPaneViewModel;

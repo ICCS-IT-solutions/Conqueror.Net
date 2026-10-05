@@ -25,6 +25,15 @@ public interface ITabViewModel : INotifyPropertyChanged
     bool CanGoBack { get; }
 
     bool CanGoForward { get; }
+    public bool CanNewFile { get; }
+    public bool CanNewFolder { get; }
+    public bool CanCut { get; }
+    public bool CanCopy { get; }
+    public bool CanPaste { get; }
+    public bool CanDelete { get; }
+    public bool CanRename { get; }
+    public bool CanProperties { get; }
+    public bool CanSelectAll { get; }
 
     /// <summary>True while the tab is busy loading, so the shell can show a stop button.</summary>
     bool IsBusy { get; }

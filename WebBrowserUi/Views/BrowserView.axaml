@@ -3,26 +3,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:Conqueror.Net.WebBrowserUi.ViewModels"
-             xmlns:webview="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="520"
              x:Class="Conqueror.Net.WebBrowserUi.Views.BrowserView"
              x:DataType="vm:BrowserTabViewModel">
 
     <Grid RowDefinitions="*,Auto">
 
-        <!-- Chromium. WebViewControl hosts a real child HWND, so it must be given a
-             concrete size by its parent layout rather than being left to stretch.
-
-             Address is deliberately NOT bound here. Binding it would start navigation
-             while the template is still being built, before BrowserView.Loaded has
-             attached the view-model's event handlers, and the load callbacks would be
-             missed (leaving the tab stuck on its placeholder title). BrowserTabViewModel
-             drives navigation in Attach() instead, so it stays the single owner. -->
-        <Border Grid.Row="0" Background="#FFFFFF">
-            <webview:WebView Name="Browser"
-                             Focusable="True"
-                             AllowDeveloperTools="True" />
-        </Border>
+        <!-- Chromium host. Each BrowserTabViewModel owns a dedicated WebView that is
+             re-parented into this Border on attach: a single ContentControl reuses its
+             visual across tabs, so declaring one <WebView> here shared a single HWND
+             and forced every tab onto the same page. The VM's own engine instance is
+             the single owner of navigation and zoom. -->
+        <Border Grid.Row="0" Background="#FFFFFF" Name="BrowserHost" />
 
         <!-- Zoom / DevTools strip -->
         <Border Grid.Row="1" Classes="xpStatusSurface">

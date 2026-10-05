@@ -43,6 +43,17 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         Title = _backend.ShellName;
     }
 
+    //Capabilities: cut, copy, paste, delete, select all.
+    public bool CanNewFile => false;
+    public bool CanNewFolder => false;
+    public bool CanCut => true;
+    public bool CanCopy => true;
+    public bool CanPaste => true;
+    public bool CanDelete => true;
+    public bool CanRename => false;
+    public bool CanProperties => false;
+    public bool CanSelectAll => true;
+
     /// <summary>Rendered output, oldest first.</summary>
     public ObservableCollection<string> Lines { get; } = [];
 

@@ -1,0 +1,64 @@
+# Conqueror.Net — Development Roadmap & TODOs
+
+> **Language Note:** All interface text and documentation must remain strictly in **US English** for current development phases (I18n/L10n translation systems deferred to future milestones).
+
+---
+
+## 1. File Browser & Shell QoL Features (High Priority)
+
+### Core File Operations & Actions
+- [ ] **Tab Context Menu:**
+  - [ ] Implement right-click context menu on tab headers.
+  - [ ] Actions: `Close Tab`, `Close Other Tabs`, `Close Tabs to the Right`, `Duplicate Tab`, `Pin Tab`.
+- [ ] **File Manipulation Commands:**
+  - [ ] **New File Creation:** Prompt for filename/template in target directory.
+  - [ ] **Clipboard Operations:** Implement standard `Cut`, `Copy`, `Paste` (with support for native OS mime-types/clipboards via Avalonia `IClipboard`).
+  - [ ] **Delete:** Move to OS Trash/Recycle Bin by default, with `Shift + Delete` for permanent deletion.
+
+---
+
+## 2. Advanced & Power-User Tools
+
+### Cross-Platform Configuration / "RegEdit" Visualizer
+- [ ] **Unified Config Engine:**
+  - [ ] **Windows:** Native Windows Registry provider via `Microsoft.Win32.Registry`.
+  - [ ] **Linux (Virtual Registry Abstraction):** Build a unified tree view interface that presents system/user configuration files as a hierarchical registry structure:
+    - [ ] `HKCU` equivalent mapped to `~/.config/`, `~/.local/share/`, and `dconf`/`gsettings`.
+    - [ ] `HKLM` equivalent mapped to `/etc/` system configuration files and `/var/lib/`.
+    - [ ] Parsers for `.ini`, `.json`, `.yaml`, Keyfile (`/etc/fstab`, `/etc/environment`), and binary dconf databases.
+- [ ] **Registry Editor UI (`RegEdit` style):**
+  - [ ] Dual-pane view: TreeView navigation on the left, key-value data grid on the right.
+  - [ ] Value editors for String, DWORD/Int, Binary, and Multi-String types.
+  - [ ] Search, bookmarking, and export/import functionality.
+
+---
+
+## 3. Desktop Shell & System Integration
+
+### UI & Configuration
+- [ ] **Main Menu Cleanup:** Streamline application main menu items and layout for low visual clutter.
+- [ ] **Shell Customization Settings:**
+  - [ ] Dedicated Taskbar settings editor (positioning, auto-hide, widget pinning, window grouping).
+  - [ ] Main menu / App Launcher configuration editor.
+
+### OS & Display Manager Integration
+- [ ] **Session & Login Management:**
+  - [ ] Interface with system session/display managers for desktop environment functionality.
+  - [ ] **Linux:** Integrate with Display Managers (SDDM, LightDM, or GDM via D-Bus / PAM interfaces) and Freedesktop session protocols (`Org.Freedesktop.DisplayManager`, logind).
+  - [ ] **Windows:** Handle session state, lock screen triggers, and power state events.
+
+---
+
+## 4. Web Browser & Extension Management (In Progress)
+
+- [ ] Complete `ExtensionManagementDialogViewModel` and `IExtensionService` implementation.
+- [ ] CefSharp `RequestContext` and `IExtensionHandler` integration for Chrome/Chromium extensions.
+- [ ] Local CRX extraction and unpacked directory manifest loading.
+
+---
+
+## 5. Long-Term / Future Milestones
+
+- [ ] **Internationalization (I18n):**
+  - [ ] Extract string resources into localized dictionary assets (`.resx` or JSON).
+  - [ ] Prepare localized language packages (including custom/fictional languages like Neo-Quenya).

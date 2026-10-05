@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Conqueror.Net.WebBrowserUi.ViewModels"
+        x:Class="Conqueror.Net.WebBrowserUi.Views.ExtensionManagementDialog"
+        x:DataType="vm:ExtensionManagementDialogViewModel"
+        Title="Extensions" Width="450" Height="360"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Extensions" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10" />
+
+        <!-- Search box filters the list; Install opens a file picker for an unpacked manifest. -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+            <TextBox Grid.Column="0" Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Watermark="Search extensions" VerticalContentAlignment="Center" />
+            <Button Grid.Column="1" Content="Install unpacked…" Margin="8,0,0,0"
+                    Click="Install_Click" />
+        </Grid>
+
+        <ListBox Grid.Row="2" Margin="0,0,0,10" ItemsSource="{Binding FilteredExtensions}">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ExtensionItemViewModel">
+                    <DockPanel LastChildFill="True" Margin="4">
+                        <!-- Uninstall button triggering ExtensionItemViewModel.UninstallCommand -->
+                        <Button Content="Remove" 
+                                Command="{Binding UninstallCommand}" 
+                                DockPanel.Dock="Right" 
+                                Margin="8,0,0,0" 
+                                VerticalAlignment="Center" />
+
+                        <!-- The switch itself drives the toggle via OnIsEnabledChanged; binding
+                             Command here as well would double-fire and flip the state back. -->
+                        <ToggleSwitch IsChecked="{Binding IsEnabled}" 
+                                      DockPanel.Dock="Right" 
+                                      OffContent="" OnContent="" 
+                                      VerticalAlignment="Center" />
+
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding DisplayName}" FontSize="11" Foreground="Gray" />
+                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="Gray"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Grid.Row="2" Text="{Binding StatusMessage}" Foreground="Gray"
+                   IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                   VerticalAlignment="Center" HorizontalAlignment="Center" />
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Close" Width="100" Height="30" Click="Close_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
