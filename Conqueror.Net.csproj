@@ -18,6 +18,26 @@
     <AvaloniaResource Include="Assets/Icons/*.svg" />
   </ItemGroup>
 
+  <!--
+    Shell/ is a separate project whose obj/ directory sits underneath this one. The SDK's
+    default **/*.cs glob would pull Shell/obj/**/Conqueror.Net.Shell.AssemblyInfo.cs into this
+    project as well as Shell's own, producing duplicate assembly attributes (CS0579) whenever
+    the solution is built. Excluding it here means the two projects can coexist in one tree.
+  -->
+  <ItemGroup>
+    <Compile Remove="Shell/**" />
+    <!--
+      Also remove the nested project's Avalonia XAML. The XAML compiler otherwise picks up
+      Shell/Views/*.axaml and fails with AXN0001, since those classes belong to the other
+      assembly. AvaloniaXaml is the item type the SDK assigns to .axaml files; the others are
+      removed for the same reason as above.
+    -->
+    <AvaloniaXaml Remove="Shell/**" />
+    <AvaloniaResource Remove="Shell/**" />
+    <None Remove="Shell/**" />
+    <EmbeddedResource Remove="Shell/**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.22" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />

@@ -21,6 +21,10 @@ can hold either a **folder** or a **web page** rendered by an embedded **Chromiu
   theme rendered by `Avalonia.Svg.Skia`, with per-extension mapping (PDF, Word, images, media,
   archives, executables) and a size per view mode. See [docs/ICON-THEME.md](docs/ICON-THEME.md),
   which also covers the licensing position.
+- **MIME-based icon selection** — icons are chosen from the file's *detected* MIME type, so a
+  `.png` that is really a PDF gets the PDF icon. See [docs/ICON-THEME.md](docs/ICON-THEME.md).
+- **Shell module** — an XP taskbar and Start menu, built as a **separate program** in `Shell/`
+  so it survives the file manager closing. See [docs/SHELL-MODULE.md](docs/SHELL-MODULE.md).
 
 ## Running it
 

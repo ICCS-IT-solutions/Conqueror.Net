@@ -1,0 +1,83 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- XP taskbar: the round Start orb, the quick-launch buttons and the tray clock.
+         The gradient brushes themselves are resources in Palette.axaml; a Styles file can
+         only hold setters, not brushes. -->
+
+    <Style Selector="Border.xpStartOrb">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="Background" Value="{StaticResource StartOrbGradient}" />
+        <Setter Property="BorderBrush" Value="#1B4D10" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.xpStart">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.xpStart:pointerover Border.xpStartOrb">
+        <Setter Property="BorderBrush" Value="#8FD46A" />
+    </Style>
+
+    <Style Selector="Button.xpStart:pressed Border.xpStartOrb">
+        <Setter Property="RenderTransform" Value="scale(0.94)" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    </Style>
+
+    <Style Selector="Button.xpQuickLaunch">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.xpQuickLaunch:pointerover">
+        <Setter Property="Background" Value="#3A78D8" />
+        <Setter Property="BorderBrush" Value="#8CB4F0" />
+    </Style>
+
+    <Style Selector="Border.xpTray">
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="#1E5C12" />
+        <Setter Property="BorderBrush" Value="#5FA33A" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <!-- Start menu: the blue header banner and the Luna face below it. -->
+    <Style Selector="Border.xpMenuHeader">
+        <Setter Property="Background" Value="{StaticResource MenuHeaderGradient}" />
+        <Setter Property="Height" Value="58" />
+    </Style>
+
+    <Style Selector="Border.xpMenuBody">
+        <Setter Property="Background" Value="{StaticResource LunaFace}" />
+        <Setter Property="BorderBrush" Value="{StaticResource LunaDarkShadow}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style Selector="Button.xpMenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.xpMenuItem:pointerover">
+        <Setter Property="Background" Value="{StaticResource LunaHighlight}" />
+    </Style>
+
+    <Style Selector="Button.xpMenuItem:pointerover TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource LunaHighlightText}" />
+    </Style>
+
+
+
+</Styles>

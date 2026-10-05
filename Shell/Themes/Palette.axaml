@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <!-- The XP Luna palette, duplicated from the file manager's Themes/Palette.axaml rather
+         than referenced, because the shell is a separate assembly and cannot reach into
+         another project's resources. The values are the original Luna colours. -->
+    <Color x:Key="LunaFace">#ECE9D8</Color>
+    <Color x:Key="LunaLight">#FFFFFF</Color>
+    <Color x:Key="LunaShadow">#ACA899</Color>
+    <Color x:Key="LunaDarkShadow">#716F64</Color>
+    <Color x:Key="LunaHighlight">#316AC5</Color>
+    <Color x:Key="LunaHighlightText">#FFFFFF</Color>
+
+    <!-- XP taskbar: the blue gradient running along the bar, and the round Start orb. -->
+    <LinearGradientBrush x:Key="TaskbarGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#3168D5" />
+        <GradientStop Offset="0.08" Color="#4A8CE0" />
+        <GradientStop Offset="0.55" Color="#245FDC" />
+        <GradientStop Offset="1" Color="#1941A5" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="StartOrbGradient" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#5FA33A" />
+        <GradientStop Offset="0.45" Color="#3B8C24" />
+        <GradientStop Offset="1" Color="#1E5C12" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="MenuHeaderGradient" StartPoint="0%,0%" EndPoint="100%,0%">
+        <GradientStop Offset="0" Color="#0A246A" />
+        <GradientStop Offset="0.55" Color="#3A6EA5" />
+        <GradientStop Offset="1" Color="#A6CAF0" />
+    </LinearGradientBrush>
+
+    <FontFamily x:Key="XpFontFamily">Tahoma, Segoe UI, DejaVu Sans, sans-serif</FontFamily>
+    <sys:Double x:Key="XpFontSize">11</sys:Double>
+
+</ResourceDictionary>

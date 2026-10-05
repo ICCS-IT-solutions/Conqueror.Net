@@ -1,0 +1,101 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Conqueror.Net.Shell.ViewModels"
+        xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+        x:Class="Conqueror.Net.Shell.Views.TaskbarWindow"
+        x:DataType="vm:TaskbarViewModel"
+        Title="Conqueror.Net Shell"
+        Width="800"
+        Height="30"
+        FontFamily="{StaticResource XpFontFamily}"
+        FontSize="{StaticResource XpFontSize}"
+
+        SystemDecorations="None"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <!--
+        A decorationless transparent window pinned to the screen edge. Topmost keeps it above
+        ordinary windows; ShowInTaskbar=False stops it appearing as its own taskbar entry,
+        which would be circular.
+    -->
+    <Border Background="Transparent">
+        <Grid>
+            <Border Height="2" VerticalAlignment="Top"
+                    Background="{StaticResource LunaLight}"
+                    Opacity="0.45" />
+
+            <!--
+                The bar's own background. This must come FIRST: Avalonia draws Grid children
+                in declaration order, so a background declared last paints on top of the
+                Start button and quick-launch icons and hides them.
+            -->
+            <Border Background="{StaticResource TaskbarGradient}" />
+
+            <DockPanel LastChildFill="True">
+
+                <!-- Start button: the green orb, as in XP. -->
+                <Button DockPanel.Dock="Left"
+                        Classes="xpStart"
+                        Command="{Binding ToggleStartMenuCommand}"
+                        Width="54"
+                        Height="30">
+                    <Border Classes="xpStartOrb">
+                        <TextBlock Text="start"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   FontStyle="Italic"
+                                   FontSize="10"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center" />
+                    </Border>
+                </Button>
+
+                <!-- Quick launch, XP's row of shortcut buttons. -->
+                <ItemsControl DockPanel.Dock="Left"
+                              ItemsSource="{Binding Buttons}"
+                              Margin="4,0,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <!-- x:DataType is required, not just DataType: the project compiles
+                             bindings by default, and compiled bindings need the type spelled
+                             out to resolve bindings inside the template. -->
+                        <DataTemplate x:DataType="vm:TaskbarButton">
+                            <Button Classes="xpQuickLaunch"
+                                    Width="26" Height="26"
+                                    Margin="1,0"
+                                    Command="{Binding ActivateCommand}"
+                                    ToolTip.Tip="{Binding Label}">
+                                    <svg:Svg Width="16" Height="16"
+                                         EnableCache="True" Stretch="Uniform"
+                                         Path="{Binding IconKey, Converter={x:Static vm:IconKeyToUriConverter.Instance}}" />
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Notification area: the tray clock. -->
+                <StackPanel DockPanel.Dock="Right"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,10,0">
+                    <Border Classes="xpTray">
+                        <TextBlock Text="{Binding Clock}"
+                                   Foreground="White"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0" />
+                    </Border>
+                </StackPanel>
+
+            </DockPanel>
+        </Grid>
+    </Border>
+</Window>

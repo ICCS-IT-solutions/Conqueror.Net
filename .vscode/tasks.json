@@ -2,22 +2,7 @@
     // Ordered by how often you will reach for them: build, run, watch, publish, format.
     "version": "2.0.0",
     "tasks": [
-        {
-            "label": "build",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/Conqueror.Net.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary;ForceNoAlign"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": "$msCompile"
-        },
+        
         {
             "label": "run",
             "command": "dotnet",
@@ -61,6 +46,49 @@
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
             ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            // The default build. Kept alongside build:all because launch.json's preLaunchTask
+            // references this label, and a file-manager-only build is faster than the solution.
+            "label": "build",
+            "detail": "Build the file manager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Conqueror.Net.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run:shell",
+            "detail": "Launch the XP taskbar and Start menu module",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/Shell/Conqueror.Net.Shell.csproj"
+            ],
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            // Builds both projects. Nothing here references build:all, but it is what CI
+            // should use: the two projects are independent, and the shell links the shared
+            // icon assets rather than referencing the file manager's output.
+            "label": "build:all",
+            "detail": "Build the file manager and the shell module",
+            "command": "dotnet",
+            "type": "process",
+            "args": ["build", "${workspaceFolder}/Conqueror.Net.sln", "--nologo"],
             "problemMatcher": "$msCompile"
         },
         {

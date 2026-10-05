@@ -1,0 +1,22 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Conqueror.Net.Shell.ShellApp"
+             RequestedThemeVariant="Light">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Conqueror.Net.Shell/Themes/Palette.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <!-- Fluent supplies the un-themed control internals (scrollbars, menus, popups);
+             the Luna stylesheet then repaints them in XP colours. Same split as the
+             file manager: colours are resources, control styles are styles. -->
+        <FluentTheme />
+        <StyleInclude Source="avares://Conqueror.Net.Shell/Themes/Luna.Controls.axaml" />
+    </Application.Styles>
+
+</Application>

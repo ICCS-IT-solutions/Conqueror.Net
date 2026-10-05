@@ -66,6 +66,19 @@
             "console": "internalConsole"
         },
         {
+            // The shell is a decorationless always-on-top window, so F5 focuses it but the
+            // window cannot be stepped through in the usual way. Stop it from opening a
+            // console window; stdout diagnostics go to the debug console instead.
+            "name": "Launch (shell)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build:all",
+            "program": "${workspaceFolder}/Shell/bin/Debug/net8.0/Conqueror.Net.Shell.dll",
+            "cwd": "${workspaceFolder}/Shell",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        },
+        {
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach"

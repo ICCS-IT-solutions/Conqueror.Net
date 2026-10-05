@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    XP-style taskbar and Start menu, built as its own program.
+
+    This is deliberately a separate executable rather than a window inside Conqueror.Net. A
+    shell has to keep running when the file manager is closed, own the primary screen edge, and
+    survive a crash in the browser host. One process per responsibility keeps that blast radius
+    small, and lets the shell be reused by other windows later.
+
+    It is a *standalone* shell, not a replacement for the Windows taskbar. Replacing the real one
+    means injecting into explorer.exe the way ExplorerPatcher and Windhawk do, which is native,
+    per-Windows-build work. See docs/SHELL-MODULE.md.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Compiled bindings stay ON, matching the file manager. These views work with them
+         because every view-model type is named explicitly in x:DataType. -->
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <PlatformTarget>x64</PlatformTarget>
+    <RootNamespace>Conqueror.Net.Shell</RootNamespace>
+    <AssemblyName>Conqueror.Net.Shell</AssemblyName>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.22" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.22" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <!-- Same SVG renderer and icon assets as the file manager, so the two stay visually
+         consistent. Icons are linked, not copied: one source of truth in ../Assets. -->
+    <PackageReference Include="Avalonia.Svg.Skia" Version="11.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Icons are linked, not copied, so ../Assets/Icons stays the single source of truth.
+         They must be declared only as AvaloniaResource: adding them to Compile as well makes
+         the C# compiler try to parse the SVG markup as source. -->
+    <AvaloniaResource Include="../Assets/Icons/*.svg" Link="Assets/Icons/%(Filename)%(Extension)" />
+    <AvaloniaResource Include="Themes/*.axaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="app.manifest" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

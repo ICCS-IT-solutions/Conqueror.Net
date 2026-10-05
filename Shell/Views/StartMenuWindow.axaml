@@ -1,0 +1,97 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Conqueror.Net.Shell.ViewModels"
+        xmlns:svg="clr-namespace:Avalonia.Svg.Skia;assembly=Avalonia.Svg.Skia"
+        x:Class="Conqueror.Net.Shell.Views.StartMenuWindow"
+        x:DataType="vm:StartMenuViewModel"
+        Title="Start"
+        Width="380"
+        Height="520"
+        FontFamily="{StaticResource XpFontFamily}"
+        FontSize="{StaticResource XpFontSize}"
+
+        SystemDecorations="None"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent">
+
+    <Border Classes="xpMenuBody">
+        <DockPanel LastChildFill="True">
+
+            <!-- XP's banner: username on the blue gradient. -->
+            <Border DockPanel.Dock="Top" Classes="xpMenuHeader">
+                <TextBlock Text="{Binding UserName}"
+                           Foreground="White"
+                           FontWeight="Bold"
+                           FontSize="16"
+                           VerticalAlignment="Center"
+                           Margin="12,0"
+                           TextTrimming="CharacterEllipsis" />
+            </Border>
+
+            <!-- XP's footer strip. -->
+            <Border DockPanel.Dock="Bottom"
+                    Height="46"
+                    Background="{StaticResource LunaFace}">
+                <DockPanel LastChildFill="True">
+                    <Border DockPanel.Dock="Right" Width="54" Background="#3B8C24">
+                        <Button Classes="xpMenuItem"
+                                Command="{Binding CloseCommand}"
+                                Width="54" Height="46">
+                            <TextBlock Text="Log Off"
+                                       Foreground="White"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Button>
+                    </Border>
+                    <TextBlock Text="Conqueror.Net"
+                               Foreground="#0A246A"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               Margin="12,0" />
+                </DockPanel>
+            </Border>
+
+            <!-- Menu items, as a two-column grid exactly like XP's.
+
+                 UniformGrid rather than WrapPanel: WrapPanel wraps only at the width it is
+                 offered, and inside a DockPanel the ItemsPanel is offered unbounded width, so
+                 it never wrapped and the menu rendered as one column. There is no ScrollViewer
+                 either - six items do not need one. -->
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="2" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:StartMenuItem">
+                        <!-- Width is left unset so each cell fills half the 380 px menu. -->
+                        <Button Classes="xpMenuItem"
+                                Height="58"
+                                Command="{Binding ActivateCommand}"
+                                ToolTip.Tip="{Binding Label}">
+                            <StackPanel Orientation="Vertical"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Spacing="3">
+                                <svg:Svg Width="32" Height="32"
+                                         EnableCache="True" Stretch="Uniform"
+                                         Path="{Binding IconKey, Converter={x:Static vm:IconKeyToUriConverter.Instance}}" />
+                                <TextBlock Text="{Binding Label}"
+                                           FontSize="10"
+                                           Foreground="#0A246A"
+                                           HorizontalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </DockPanel>
+    </Border>
+</Window>
