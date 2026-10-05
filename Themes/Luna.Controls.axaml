@@ -103,6 +103,130 @@
     </Style>
 
     <!-- ====================================================================
+         Large navigation buttons: the 32 px Luna Back / Forward / Up arrows with
+         their labels beside them, as on the classic XP toolbar.
+
+         These cannot reuse xpToolbarButton, which fixes Width and Height to a
+         23x22 square sized for a 16 px icon. That clips both the 32 px artwork and
+         the label, so they get their own metrics and their own template that honours
+         the alignment properties.
+         ==================================================================== -->
+
+    <Style Selector="Button.xpToolbarButtonLarge">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <!-- Only horizontal padding: vertical padding here would push the 32 px icon
+             out of the 44 px button. -->
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="MinWidth" Value="82" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="3">
+                    <Border x:Name="PART_Inner"
+                            Margin="1"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="2">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          Padding="{TemplateBinding Padding}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.xpToolbarButtonLarge:pointerover">
+        <Setter Property="Background" Value="#FDE79B" />
+        <Setter Property="BorderBrush" Value="#F5A300" />
+    </Style>
+    <Style Selector="Button.xpToolbarButtonLarge:pointerover /template/ Border#PART_Inner">
+        <Setter Property="BorderBrush" Value="{StaticResource LunaLight}" />
+    </Style>
+    <Style Selector="Button.xpToolbarButtonLarge:pressed">
+        <Setter Property="Background" Value="#F5A300" />
+    </Style>
+    <Style Selector="Button.xpToolbarButtonLarge:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+    <!-- ====================================================================
+         Task pane tabs and Common Tasks rows.
+
+         The tabs are small square-cornered buttons in the style of an XP
+         toolbar button rather than the rounded window tabs used in the main
+         strip, because they sit inside a sunken pane.
+         ==================================================================== -->
+
+    <Style Selector="Border.xpPaneTabStrip">
+        <Setter Property="Background" Value="#F4F2E8" />
+        <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="RadioButton.xpPaneTab">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="#4A4A44" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Padding" Value="7,3" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="2,2,0,0"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      Background="Transparent"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="RadioButton.xpPaneTab:pointerover /template/ Border#PART_Root">
+        <Setter Property="Background" Value="#E8E4D4" />
+    </Style>
+    <Style Selector="RadioButton.xpPaneTab:checked /template/ Border#PART_Root">
+        <Setter Property="Background" Value="#FFFFFF" />
+    </Style>
+    <Style Selector="RadioButton.xpPaneTab:checked">
+        <Setter Property="Foreground" Value="#0A246A" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <!-- Common Tasks rows read as links, the way Explorer's task links do:
+         flat until hovered, then the usual amber highlight. -->
+    <Style Selector="Button.xpTaskLink">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="3,2" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border x:Name="PART_Root"
+                        Background="{TemplateBinding Background}"
+                        CornerRadius="2"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="Stretch" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.xpTaskLink:pointerover /template/ Border#PART_Root">
+        <Setter Property="Background" Value="#FDE79B" />
+    </Style>
+
+    <!-- ====================================================================
          Sunken text fields: the address bar and the search box.
          ==================================================================== -->
 
@@ -113,6 +237,17 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="3,2" />
         <Setter Property="MinHeight" Value="21" />
+    </Style>
+
+    <!-- The Vista+ style toolbar search is a 16 px slot. It carries both classes, so
+         it needs the extra .xpField in the selector to outrank xpField: a class
+         selector has the same specificity as xpField, so a plain xpFieldCompact would
+         lose on document order. Setting Height alone would also do nothing, because
+         xpField's MinHeight of 21 coerces the result back up to 21. -->
+    <Style Selector="TextBox.xpField.xpFieldCompact">
+        <Setter Property="MinHeight" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Padding" Value="3,0" />
     </Style>
     <Style Selector="TextBox.xpField:focus">
         <Setter Property="BorderBrush" Value="{StaticResource LunaHighlight}" />
@@ -176,6 +311,135 @@
         <Setter Property="Height" Value="2" />
         <Setter Property="BorderBrush" Value="{StaticResource BrushShadow}" />
         <Setter Property="BorderThickness" Value="0,1,0,1" />
+    </Style>
+
+    <!-- ====================================================================
+         Folder pane: the +/- expander box, the section header and the
+         pane's close button, as in the Explorer reference screenshots.
+         ==================================================================== -->
+
+    <!-- A small sunken square carrying a + or a -, drawn rather than taken
+         from artwork so it stays crisp at 11px and follows the theme. -->
+    <Style Selector="ToggleButton.xpExpander">
+        <Setter Property="Width" Value="11" />
+        <Setter Property="Height" Value="11" />
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="BorderBrush" Value="#7A7A8C" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid>
+                        <!-- Horizontal stroke is always present: a minus when open. -->
+                        <Rectangle Width="7" Height="1" Fill="#3A3A46" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                        <!-- The vertical stroke is dropped when open, leaving the minus. -->
+                        <Rectangle Width="1" Height="7" Fill="#3A3A46" VerticalAlignment="Center"
+                                   HorizontalAlignment="Center" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ToggleButton.xpExpander:checked /template/ Rectangle:nth-child(2)">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <Style Selector="Button.xpSectionHeader">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.xpSectionHeader:pointerover">
+        <Setter Property="Background" Value="#E4ECF9" />
+    </Style>
+
+    <Style Selector="Button.xpPaneClose">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.xpPaneClose:pointerover">
+        <Setter Property="Background" Value="#C8D4EC" />
+    </Style>
+
+    <!-- ====================================================================
+         Address bar: the "Address:" label that doubles as the path /
+         breadcrumb toggle, and the breadcrumb segments it reveals.
+         ==================================================================== -->
+
+    <!-- The label is a real control rather than a caption, because clicking it is
+         how XP switches the address bar between a path and breadcrumbs. -->
+    <Style Selector="ToggleButton.xpAddressLabel">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="3,1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <!--
+          The stock ToggleButton template paints a rounded accent fill on focus and on the
+          checked state, which reads as a modern button rather than the flat caption XP draws.
+          Replaced with a flat bordered label; the checked state is carried by the xpChecked
+          pseudo-class below instead.
+        -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <!-- Hover shows the same focus rectangle Windows draws on the address label. -->
+    <Style Selector="ToggleButton.xpAddressLabel:pointerover">
+        <Setter Property="BorderBrush" Value="#7F9DB9" />
+        <Setter Property="Background" Value="#EFF5FC" />
+    </Style>
+    <!-- Checked, i.e. breadcrumbs are showing: a sunken tint rather than a filled pill. -->
+    <Style Selector="ToggleButton.xpAddressLabel:checked">
+        <Setter Property="BorderBrush" Value="#7F9DB9" />
+        <Setter Property="Background" Value="#DCE6F4" />
+    </Style>
+
+    <!-- One breadcrumb segment. Flat until hovered, so a long path does not read
+         as a row of buttons. -->
+    <Style Selector="Button.xpBreadcrumb">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="3,1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <!-- Flat template, so a segment reads as text until it is hovered. -->
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}" VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.xpBreadcrumb:pointerover">
+        <Setter Property="BorderBrush" Value="#7F9DB9" />
+        <Setter Property="Background" Value="#EFF5FC" />
     </Style>
 
     <!-- Flat, bordered column captions for the details view. -->

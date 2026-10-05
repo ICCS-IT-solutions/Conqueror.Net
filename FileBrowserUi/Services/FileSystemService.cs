@@ -186,6 +186,102 @@ public sealed class FileSystemService : IFileSystemService
         return folders;
     }
 
+    public IReadOnlyList<string> ListChildDirectories(string path)
+    {
+        try
+        {
+            var directory = new DirectoryInfo(path);
+            if (!directory.Exists)
+            {
+                return [];
+            }
+
+            return directory
+                .EnumerateDirectories()
+                .Select(d => d.FullName)
+                .ToList();
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or ArgumentException)
+        {
+            // A denied junction or a vanished folder leaves the node simply childless.
+            return [];
+        }
+    }
+
+    public void Search(
+        string root,
+        string term,
+        IProgress<FileSystemEntry> progress,
+        CancellationToken cancellationToken
+    )
+    {
+        if (string.IsNullOrWhiteSpace(term) || !IsDirectory(root))
+        {
+            return;
+        }
+
+        var needle = term.Trim();
+
+        // The loop is explicit rather than EnumerationOptions.RecurseSubdirectories because
+        // that option swallows nothing useful here and still rethrows on the first denied
+        // directory; taking control of the walk is what lets a single bad branch be skipped.
+        var pending = new Stack<string>();
+        pending.Push(root);
+
+        while (pending.Count > 0)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var current = pending.Pop();
+
+            string[] children;
+            try
+            {
+                children = Directory.GetFileSystemEntries(current);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or ArgumentException)
+            {
+                continue;
+            }
+
+            foreach (var child in children)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                FileSystemInfo info;
+                var isDirectory = false;
+
+                try
+                {
+                    var attributes = File.GetAttributes(child);
+                    isDirectory = attributes.HasFlag(FileAttributes.Directory);
+                    info = isDirectory ? new DirectoryInfo(child) : new FileInfo(child);
+                }
+                catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or ArgumentException)
+                {
+                    continue;
+                }
+
+                if (isDirectory)
+                {
+                    // Queue for descent before testing the name, so a folder is both a
+                    // result and a branch - which is what "All files and folders" means.
+                    pending.Push(child);
+                }
+
+                if (
+                    !info.Name.Contains(needle, StringComparison.CurrentCultureIgnoreCase)
+                    && !info.Name.Contains(needle, StringComparison.OrdinalIgnoreCase)
+                )
+                {
+                    continue;
+                }
+
+                progress.Report(new FileSystemEntry(info));
+            }
+        }
+    }
+
     public (bool Success, string? Error) CreateDirectory(string parent, string name)
     {
         try
@@ -197,6 +293,26 @@ public sealed class FileSystemService : IFileSystemService
             when (ex is IOException or UnauthorizedAccessException or ArgumentException)
         {
             return (false, ex.Message);
+        }
+    }
+
+    public string GetVolumeLabel(string pathOrDrive)
+    {
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(pathOrDrive));
+            if (root is null)
+            {
+                return string.Empty;
+            }
+
+            var drive = new DriveInfo(root);
+            return drive.IsReady ? drive.VolumeLabel : string.Empty;
+        }
+        catch (Exception ex)
+            when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return string.Empty;
         }
     }
 

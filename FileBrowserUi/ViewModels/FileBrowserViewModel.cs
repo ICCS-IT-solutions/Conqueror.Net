@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
     private readonly ObservableCollection<FileSystemEntry> _allEntries = [];
 
     /// <summary>Back/forward history, held as an index into <see cref="_history"/>.</summary>
-    private readonly System.Collections.Generic.List<string> _history = [];
+    private readonly List<string> _history = [];
 
     private int _historyIndex = -1;
 
@@ -34,6 +35,10 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
             _fileSystem.ResolvePath(initialPath ?? string.Empty)
             ?? _fileSystem.GetShellFolders().FirstOrDefault()?.Path
             ?? Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+        // Built after the shell folders are collected, and before the first LoadFolder so the
+        // tree can reveal the starting folder without a second pass over the roots.
+        BuildFolderPane();
 
         LoadFolder(start ?? string.Empty);
     }
@@ -117,7 +122,8 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
 
     public string Location => CurrentPath;
 
-    public string IconKey => "Icon.Folder";
+    /// <summary>The real XP Explorer folder artwork, downscaled by tools/import-xp-chrome-icons.ps1.</summary>
+    public string IconKey => "Icon.Xp.Explorer";
 
     public bool IsFileBrowser => true;
 
@@ -159,7 +165,10 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
 
     void ITabViewModel.Stop()
     {
-        // Folder enumeration is synchronous, so there is never anything in flight to abort.
+        // A recursive search is the one thing that can be in flight here, so Stop cancels it
+        // rather than simply clearing the busy flags as it did when everything was
+        // synchronous.
+        CancelSearch();
         IsBusy = false;
         LoadProgress = null;
     }
@@ -189,5 +198,11 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
     }
 }
 
-/// <summary>One clickable segment of the breadcrumb bar.</summary>
-public sealed record BreadcrumbSegment(string Name, string Path, bool IsLast);
+/// <summary>
+/// One clickable segment of the breadcrumb bar.
+/// </summary>
+/// <param name="Name">Text shown in the bar.</param>
+/// <param name="Path">Full path this segment navigates to.</param>
+/// <param name="IsLast">True for the deepest segment, which is the current folder.</param>
+/// <param name="IsRoot">True for the drive/mount root, which is rendered in bold.</param>
+public sealed record BreadcrumbSegment(string Name, string Path, bool IsLast, bool IsRoot = false);

@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Conqueror.Net.WindowRoot.ViewModels"
         xmlns:tabs="clr-namespace:Conqueror.Net.Core.Tabs"
+        xmlns:fileVm="clr-namespace:Conqueror.Net.FileBrowserUi.ViewModels"
         mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="640"
         x:Class="Conqueror.Net.WindowRoot.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -19,6 +20,8 @@
             <MenuItem Header="_File" Classes="xpMenuItem">
                 <MenuItem Header="_New Web Tab" Click="OnNewWebTabClick" InputGesture="Ctrl+T" />
                 <MenuItem Header="New _Folder" Click="OnNewFolderClick" />
+                <MenuItem Header="New _Dual-Pane Tab" Click="OnNewSplitPaneTabClick"
+                          InputGesture="Ctrl+P" />
                 <Separator />
                 <MenuItem Header="_Open..." Click="OnOpenLocationClick" InputGesture="Ctrl+O" />
                 <MenuItem Header="Close _Tab" Command="{Binding CloseTabCommand}" InputGesture="Ctrl+W" />
@@ -49,6 +52,28 @@
             <MenuItem Header="Fa_vorites" Classes="xpMenuItem">
                 <MenuItem Header="Open _Location..." Click="OnOpenLocationClick" />
             </MenuItem>
+            <!--
+                Contextual menus. These appear only when the active tab is an orthodox
+                dual-pane tab; on a single-pane or web tab they would have nothing to act on,
+                so they are hidden rather than shown greyed out.
+            -->
+            <MenuItem Header="_Pane" Classes="xpMenuItem"
+                      IsVisible="{Binding IsSplitPaneActive}">
+                <MenuItem Header="_Swap Panes" Command="{Binding SwapPanesCommand}"
+                          InputGesture="Ctrl+U" />
+                <MenuItem Header="_Even Split" Command="{Binding ResetSplitCommand}" />
+                <Separator />
+                <MenuItem Header="Refresh _Left" Click="OnRefreshPaneClick" Tag="Left" />
+                <MenuItem Header="Refresh _Right" Click="OnRefreshPaneClick" Tag="Right" />
+            </MenuItem>
+            <MenuItem Header="_Terminal" Classes="xpMenuItem">
+                <MenuItem Header="_New Terminal Tab" Click="OnNewTerminalTabClick"
+                          InputGesture="Ctrl+OemTilde" />
+                <Separator />
+                <!-- Shell actions are meaningless on a page, so they follow the active tab. -->
+                <MenuItem Header="_Restart Shell" Command="{Binding SelectedTab.Reload}"
+                          IsVisible="{Binding IsTerminalActive}" />
+            </MenuItem>
             <MenuItem Header="_Help" Classes="xpMenuItem">
                 <MenuItem Header="_About Conqueror.Net" Click="OnAboutClick" />
             </MenuItem>
@@ -56,54 +81,91 @@
 
         <!-- ============================ Toolbar ================================= -->
         <Border DockPanel.Dock="Top" Classes="xpToolbarSurface">
-            <DockPanel Margin="2,3" LastChildFill="True">
-
+            <DockPanel Margin="2,3" LastChildFill="True" Height="48">
+                <!--Terminal tab-->
+                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
+                        Command="{Binding AddTerminalTabCommand}"
+                        ToolTip.Tip="New terminal tab (Ctrl+`)">
+                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-command-prompt16.png"
+                           Stretch="Uniform" Width="16" Height="16" />
+                </Button>
+                <!--Web browser tab-->
                 <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
                         Command="{Binding AddWebTabCommand}"
                         ToolTip.Tip="New web tab (Ctrl+T)">
-                    <Path Data="{StaticResource Icon.Globe}" Fill="#2A5DB0" />
+                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-connection16.png"
+                           Stretch="Uniform" Width="16" Height="16" />
                 </Button>
+                <!--File browser tab-->
                 <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
                         Command="{Binding AddFileTabCommand}"
                         ToolTip.Tip="New file tab">
-                    <Path Data="{StaticResource Icon.Folder}" Fill="#E8B84A" Stroke="#9C7B22" StrokeThickness="0.7" />
+                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-explorer16.png"
+                           Stretch="Uniform" Width="16" Height="16" />
                 </Button>
                 <Rectangle DockPanel.Dock="Right" Width="1" Margin="4,2,8,2"
                            Fill="{StaticResource BrushShadow}" />
                 <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
                         Command="{Binding RefreshCommand}"
                         ToolTip.Tip="Refresh (F5)">
-                    <Path Data="{StaticResource Icon.Refresh}" Fill="#3A7A2E" />
+                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-refresh16.png"
+                           Stretch="Uniform" Width="16" Height="16" />
                 </Button>
 
-                <!-- Search box lives on the toolbar, exactly as in XP Explorer. -->
-                <TextBox DockPanel.Dock="Right" Classes="xpField"
+
+                <!-- Search box lives on the toolbar, exactly as in Windows Vista+ Explorer.
+                     xpFieldCompact keeps it at 16 px so it stays the same size as before
+                     the toolbar grew to fit the 32 px navigation buttons.
+
+                     The classes are space separated, not comma separated. Avalonia parses
+                     Classes="a,b" as one class literally named "a,b", which silently fails
+                     to match any selector; only whitespace separates them. -->
+                <TextBox DockPanel.Dock="Right" Classes="xpField xpFieldCompact"
                          Width="150" Margin="4,0,6,0"
                          VerticalContentAlignment="Center"
                          Text="{Binding SelectedTab.SearchText, Mode=TwoWay}"
                          Watermark="Search" />
 
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButton"
+                <!-- Back / Forward / Up use the real Luna buttons at 32 px with their labels
+                     beside them. xpToolbarButtonLarge replaces xpToolbarButton here, whose
+                     fixed 23x22 box clips both the larger icon and the label. The icon column
+                     is Auto rather than * so the label sits immediately beside the artwork. -->
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
                         Command="{Binding GoBackCommand}"
                         IsEnabled="{Binding CanGoBack}"
                         ToolTip.Tip="Back (Alt+Left)">
-                    <Path Data="{StaticResource Icon.Back}" Fill="#1E6B3A" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-back32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Back" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
                 </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButton"
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
                         Command="{Binding GoForwardCommand}"
                         IsEnabled="{Binding CanGoForward}"
                         ToolTip.Tip="Forward (Alt+Right)">
-                    <Path Data="{StaticResource Icon.Forward}" Fill="#1E6B3A" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-forward32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Forward" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
                 </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButton"
+                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
                         Command="{Binding GoUpCommand}"
                         IsEnabled="{Binding CanGoUp}"
                         ToolTip.Tip="Up one level (Alt+Up)">
-                    <Path Data="{StaticResource Icon.Up}" Fill="#B8860B" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-up32.png"
+                               Stretch="Uniform" Width="32" Height="32"
+                               VerticalAlignment="Center" />
+                        <TextBlock Text="Up" Margin="5,0,0,0"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
                 </Button>
-
-                <Rectangle DockPanel.Dock="Left" Width="1" Margin="2,2"
-                           Fill="{StaticResource BrushShadow}" />
             </DockPanel>
         </Border>
 
@@ -115,6 +177,42 @@
                               ItemsSource="{Binding Tabs}"
                               Margin="2,4,2,0"
                               Height="23">
+                    <!-- Tabs are Buttons so the whole strip is keyboard reachable and gives the
+                         hover/pressed feedback Explorer has. The visual is styled back to a
+                         plain tab so it does not look like a push button. -->
+                    <ItemsControl.Styles>
+                        <Style Selector="ItemsControl > Button" x:DataType="tabs:ITabViewModel">
+                            <Setter Property="Background" Value="#FFFFFF" />
+                            <Setter Property="BorderBrush" Value="{StaticResource BrushDarkShadow}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0,0,2,0" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <Border x:Name="TabSurface"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="3,3,0,0">
+                                        <ContentPresenter Content="{TemplateBinding Content}"
+                                                          Margin="1" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter>
+                        </Style>
+
+                        <!-- Inactive tabs sit back; the selected one is bright and opens downward. -->
+                        <Style Selector="ItemsControl > Button:pointerover /template/ Border#TabSurface">
+                            <Setter Property="Background" Value="#F3F0E6" />
+                        </Style>
+                        <Style Selector="ItemsControl > Button:pressed /template/ Border#TabSurface">
+                            <Setter Property="Background" Value="#E8E4D4" />
+                        </Style>
+                        <Style Selector="ItemsControl > Button.isActive /template/ Border#TabSurface">
+                            <Setter Property="Background" Value="#FFFFFF" />
+                        </Style>
+                    </ItemsControl.Styles>
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" />
@@ -122,24 +220,32 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="tabs:ITabViewModel">
-                            <Border x:Name="TabRoot"
-                                    Margin="0,0,2,0"
-                                    CornerRadius="3,3,0,0"
-                                    BorderThickness="1"
-                                    BorderBrush="{StaticResource BrushDarkShadow}"
-                                    Background="#FFFFFF">
+                            <Button Classes="xpTab"
+                                    Click="OnTabClick"
+                                    CommandParameter="{Binding}">
                                 <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <Path Grid.Column="0" Width="13" Height="13"
-                                          Margin="4,0,3,0"
-                                          VerticalAlignment="Center"
-                                          Data="{Binding IconKey, Converter={x:Static vm:IconKeyToGeometryConverter.Instance}}"
-                                          Fill="#2A5DB0" />
+                                    <!-- Tab icon. XP artwork is raster, so it needs an Image; the vector
+                                     converter is kept as a fallback for any tab still using a
+                                     Geometry key, and the Path stays collapsed when it returns null. -->
+                                    <Panel Grid.Column="0" Width="16" Height="16"
+                                           Margin="4,0,3,0" VerticalAlignment="Center">
+                                        <!-- ConverterParameter is the render size in px; 16 selects the
+                                             16 px downscale, which is what the 16x16 tab wants. -->
+                                        <Image Source="{Binding IconKey, Converter={x:Static vm:IconKeyToXpImageConverter.Instance}, ConverterParameter=16}"
+                                               Stretch="Uniform" />
+                                        <Path Width="13" Height="13"
+                                              Data="{Binding IconKey, Converter={x:Static vm:IconKeyToGeometryConverter.Instance}}"
+                                              Fill="#2A5DB0" />
+                                    </Panel>
                                     <TextBlock Grid.Column="1"
                                                Text="{Binding Title}"
                                                VerticalAlignment="Center"
                                                MaxWidth="140"
                                                TextTrimming="CharacterEllipsis"
                                                Margin="0,4" />
+                                    <!-- The close button is a child of the tab button, so it
+                                         deliberately keeps its own hit testing: it consumes
+                                         the click and does not bubble up to select the tab. -->
                                     <Button Grid.Column="2" Classes="xpToolbarButton"
                                             Width="16" Height="16" Padding="0"
                                             Margin="0,0,1,0"
@@ -147,32 +253,83 @@
                                             Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
                                             CommandParameter="{Binding}"
                                             ToolTip.Tip="Close this tab">
-                                        <Path Data="M4,4 L9,9 M9,4 L4,9"
-                                              Stroke="#5A5A5A" StrokeThickness="1.3" />
+                                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-close16.png"
+                                               Stretch="Uniform" Width="16" Height="16" />
                                     </Button>
                                 </Grid>
-                            </Border>
+                            </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <Grid DockPanel.Dock="Top" Margin="3,5,3,3" ColumnDefinitions="Auto,*,Auto" Height="24">
-                    <!-- Address bar lives on the tab strip, exactly as in XP Explorer. -->
-                    <!-- Address label - in file browser mode it should toggle the address bar between showing breadcrumbs and the full path. Shortcut: Alt + d -->
+                    <!-- The "Address:" label doubles as the mode toggle on a folder tab, which is
+                     how XP reaches the breadcrumb view. On a web tab there is no breadcrumb
+                     form of a URL, so it stays a plain caption. -->
+                    <ToggleButton Grid.Column="0" Classes="xpAddressLabel"
+                                  IsVisible="{Binding IsAddressLabelToggleable}"
+                                  IsChecked="{Binding IsBreadcrumbModeVisible}"
+                                  Command="{Binding ToggleAddressBarModeCommand}"
+                                  Content="Address:">
+                        <ToolTip.Tip>
+                            <ToolTip>
+                                <TextBlock Text="Click to switch between the folder path and breadcrumbs" />
+                            </ToolTip>
+                        </ToolTip.Tip>
+                    </ToggleButton>
                     <TextBlock Grid.Column="0" VerticalAlignment="Center"
-                               Text="Address:" Margin="0,0,4,0" />
+                               Text="Address:" Margin="0,0,4,0"
+                               IsVisible="{Binding !IsAddressLabelToggleable}" />
 
-                    <!--Text box for address input-->
+                    <!-- Path view: the editable box, which is the default. -->
                     <TextBox Grid.Column="1" Name="AddressBox" Classes="xpField"
+                             IsVisible="{Binding IsPathModeVisible}"
                              Text="{Binding AddressText, Mode=TwoWay}"
                              VerticalContentAlignment="Center">
                         <TextBox.KeyBindings>
                             <KeyBinding Gesture="Enter" Command="{Binding NavigateCommand}" />
                         </TextBox.KeyBindings>
                     </TextBox>
-                    <!--Go button for address input-->
+
+                    <!-- Breadcrumb view: clickable segments joined by arrows. -->
+                    <ItemsControl Grid.Column="1"
+                                  IsVisible="{Binding IsBreadcrumbModeVisible}"
+                                  ItemsSource="{Binding AddressBreadcrumbs}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="fileVm:BreadcrumbSegment">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Classes="xpBreadcrumb"
+                                            Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).NavigateToAddressBreadcrumbCommand}"
+                                            CommandParameter="{Binding}"
+                                            Content="{Binding Name}"
+                                            ToolTip.Tip="{Binding Path}" />
+                                    <!-- No arrow after the final segment, so the row does not
+                                         trail a separator past the current folder. -->
+                                    <TextBlock Text="→" Margin="3,0" VerticalAlignment="Center"
+                                               Foreground="#5A5A5A"
+                                               IsVisible="{Binding !IsLast}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!--This replicates the windows XP explorer "Go" button exactly, and the word "Go" is visible by default--> 
                     <Button Grid.Column="2" Classes="xpButton" Margin="4,0,0,0"
-                            Content="Go" Command="{Binding NavigateCommand}" />
+                            IsVisible="{Binding IsPathModeVisible}"
+                            Command="{Binding NavigateCommand}"
+                            ToolTip.Tip="Go to this address (Enter)">
+                        <Grid ColumnDefinitions="Auto,Auto" Margin="4,0,4,0">
+                            <Image Grid.Column ="0" Source="avares://Conqueror.Net/Assets/Icons/xp/xp-go16.png"
+                                Stretch="Uniform" Width="16" Height="16" />
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0"
+                                Text="Go" />
+                        </Grid>   
+                    </Button>
                 </Grid>
             </DockPanel>
         </Border>

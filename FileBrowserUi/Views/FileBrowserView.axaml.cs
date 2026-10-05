@@ -2,6 +2,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Conqueror.Net.FileBrowserUi.Models;
 using Conqueror.Net.FileBrowserUi.ViewModels;
@@ -24,6 +25,19 @@ public partial class FileBrowserView : UserControl
 
     private FileBrowserViewModel? Vm => DataContext as FileBrowserViewModel;
 
+    /// <summary>
+    /// Runs a Common Tasks row. The task carries its own <c>Action</c> rather than an
+    /// <c>ICommand</c>, because the commands it invokes already live on the view-model and
+    /// wrapping each one again would add a layer with no behaviour in it.
+    /// </summary>
+    private void OnTaskLinkClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: TaskPaneTask task })
+        {
+            task.Invoke();
+        }
+    }
+
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
         if (Vm is null)
@@ -35,7 +49,7 @@ public partial class FileBrowserView : UserControl
         Vm.PropertyChanged += OnVmPropertyChanged;
 
         ApplyViewMode(Vm.ViewMode);
-        WireShellFolderSelection();
+        WireTreeSelection();
     }
 
     private void OnVmPropertyChanged(
@@ -49,13 +63,16 @@ public partial class FileBrowserView : UserControl
         }
     }
 
-    /// <summary>Keeps the task pane in step when the user picks a folder or drive.</summary>
-    private void WireShellFolderSelection()
+    /// <summary>Keeps the folder tree in step when the user picks a folder or drive.</summary>
+    private void WireTreeSelection()
     {
-        if (this.FindControl<ListBox>("ShellFolderList") is { } list)
+        // A single click on a tree row navigates, matching Explorer; the view-model owns the
+        // command so the same rule applies whether the click came from here or a keyboard
+        // selection change.
+        if (this.FindControl<TreeView>("FolderTree") is { } tree)
         {
-            list.SelectionChanged -= OnShellFolderSelected;
-            list.SelectionChanged += OnShellFolderSelected;
+            tree.SelectionChanged -= OnTreeSelectionChanged;
+            tree.SelectionChanged += OnTreeSelectionChanged;
         }
 
         // Opening a web page must not desync the sidebar, so subscribe on attach.
@@ -66,11 +83,11 @@ public partial class FileBrowserView : UserControl
         }
     }
 
-    private void OnShellFolderSelected(object? sender, SelectionChangedEventArgs e)
+    private void OnTreeSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.AddedItems.Count > 0 && e.AddedItems[0] is ShellFolder folder && Vm is not null)
+        if (e.AddedItems.Count > 0 && e.AddedItems[0] is FolderTreeNode node && Vm is not null)
         {
-            Vm.NavigateToShellFolderCommand.Execute(folder);
+            Vm.NavigateToTreeNodeCommand.Execute(node);
         }
     }
 

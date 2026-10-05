@@ -23,20 +23,46 @@ public partial class App : Application
     /// control is constructed: the control spins the Chromium engine up during its own
     /// constructor, and every setting then throws "after WebView engine has been loaded".
     /// </summary>
-    public static void ConfigureChromium()
+    /// <remarks>
+    /// Guarded because CEF is the one genuinely Windows-bound dependency in the app. Skipping
+    /// it off-Windows is what lets the file manager, dual-pane and terminal tabs run on Linux
+    /// and macOS; only the browser tab is unavailable there.
+    /// </remarks>
+    public static bool TryConfigureChromium()
     {
-        var cachePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Conqueror.Net",
-            "cef-cache"
-        );
+        if (!OperatingSystem.IsWindows())
+        {
+            Log?.Invoke(
+                $"CEF is not configured on {Environment.OSVersion.Platform}: the browser tab "
+                    + "is unavailable, the other tab kinds are unaffected."
+            );
+            return false;
+        }
 
-        Directory.CreateDirectory(cachePath);
+        try
+        {
+            var cachePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Conqueror.Net",
+                "cef-cache"
+            );
 
-        WebViewControl.WebView.Settings.CachePath = cachePath;
+            Directory.CreateDirectory(cachePath);
 
-        // System.Drawing colour: the control predates Avalonia's colour type.
-        WebViewControl.WebView.Settings.BackgroundColor = System.Drawing.Color.White;
+            WebViewControl.WebView.Settings.CachePath = cachePath;
+
+            // System.Drawing colour: the control predates Avalonia's colour type.
+            WebViewControl.WebView.Settings.BackgroundColor = System.Drawing.Color.White;
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // A failed engine init must not take the whole window down with it; the browser
+            // tab degrades to an error page and everything else keeps working.
+            Log?.Invoke($"Could not configure CEF: {ex.Message}");
+            return false;
+        }
     }
 
     /// <summary>
@@ -56,10 +82,12 @@ public partial class App : Application
         return string.IsNullOrWhiteSpace(candidate) || candidate.StartsWith('-') ? null : candidate;
     }
 
+    public static bool ChromiumAvailable { get; private set; }
+
     public override void Initialize()
     {
         // Before AvaloniaXamlLoader runs, so no DataTemplate can build a WebView first.
-        ConfigureChromium();
+        ChromiumAvailable = TryConfigureChromium();
 
         AvaloniaXamlLoader.Load(this);
     }

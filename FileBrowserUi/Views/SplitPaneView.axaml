@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Conqueror.Net.FileBrowserUi.ViewModels"
+             xmlns:views="clr-namespace:Conqueror.Net.FileBrowserUi.Views"
+             xmlns:conv="clr-namespace:Conqueror.Net.WindowRoot.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="520"
+             x:Class="Conqueror.Net.FileBrowserUi.Views.SplitPaneView"
+             x:DataType="vm:SplitPaneViewModel">
+
+    <!--
+        The orthodox (dual-pane) layout: two independent file browsers side by side with a
+        splitter between them. Each pane keeps its own history and its own folder tree.
+
+        The splitter position is bound to a fraction rather than a pixel width, so the ratio
+        between the panes survives a window resize.
+    -->
+    <Grid Name="PaneGrid" ColumnDefinitions="*,Auto,*" Background="{StaticResource BrushFace}">
+
+        <views:FileBrowserView Grid.Column="0"
+                              DataContext="{Binding LeftPane}" />
+
+        <!-- The grip. XP draws it as a narrow raised bar with a three-line handle. -->
+        <GridSplitter Grid.Column="1" Width="7" ResizeDirection="Columns"
+                      Background="#D4D0C8" HorizontalAlignment="Stretch"
+                      DragCompleted="OnSplitterDragCompleted">
+            <GridSplitter.Template>
+                <ControlTemplate>
+                    <Border Background="#D4D0C8" BorderBrush="#808080" BorderThickness="1,0">
+                        <Grid>
+                            <Rectangle Width="2" Fill="#808080" HorizontalAlignment="Center" />
+                            <Rectangle Width="2" Fill="#FFFFFF" HorizontalAlignment="Center"
+                                       Margin="1,0,0,0" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </GridSplitter.Template>
+        </GridSplitter>
+
+        <views:FileBrowserView Grid.Column="2"
+                              DataContext="{Binding RightPane}" />
+    </Grid>
+</UserControl>

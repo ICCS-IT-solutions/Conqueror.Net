@@ -18,7 +18,13 @@
         <ResourceDictionary>
         <DataTemplate x:Key="EntryIconsTemplate" DataType="models:FileSystemEntry">
             <StackPanel Spacing="3" HorizontalAlignment="Center" Width="96">
-                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="32" Height="32" />
+                <!-- Panel holds both so they occupy one slot: XpIconKey is null for most entries
+                     and the converter then draws nothing, leaving the SVG underneath visible. -->
+                <Panel Width="32" Height="32">
+                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="32" Height="32" />
+                    <Image Source="{Binding XpIconKey, Converter={x:Static conv:IconKeyToXpImageConverter.Instance}, ConverterParameter=32}"
+                           Stretch="Uniform" Width="32" Height="32" />
+                </Panel>
                 <TextBlock Text="{Binding Name}"
                            FontSize="11"
                            TextAlignment="Center"
@@ -30,7 +36,11 @@
 
         <DataTemplate x:Key="EntryListTemplate" DataType="models:FileSystemEntry">
             <StackPanel Orientation="Horizontal" Spacing="4" Width="200">
-                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="18" Height="18" />
+                <Panel Width="18" Height="18">
+                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="18" Height="18" />
+                    <Image Source="{Binding XpIconKey, Converter={x:Static conv:IconKeyToXpImageConverter.Instance}, ConverterParameter=16}"
+                           Stretch="Uniform" Width="18" Height="18" />
+                </Panel>
                 <TextBlock Text="{Binding Name}"
                            VerticalAlignment="Center"
                            TextTrimming="CharacterEllipsis" />
@@ -40,7 +50,11 @@
         <DataTemplate x:Key="EntryDetailsTemplate" DataType="models:FileSystemEntry">
             <Grid ColumnDefinitions="*,110,150,140" Width="700">
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4">
-                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="18" Height="18" />
+                    <Panel Width="18" Height="18">
+                        <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="18" Height="18" />
+                        <Image Source="{Binding XpIconKey, Converter={x:Static conv:IconKeyToXpImageConverter.Instance}, ConverterParameter=16}"
+                               Stretch="Uniform" Width="18" Height="18" />
+                    </Panel>
                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
                                TextTrimming="CharacterEllipsis" />
                 </StackPanel>
@@ -53,8 +67,13 @@
 
         <DataTemplate x:Key="EntryTilesTemplate" DataType="models:FileSystemEntry">
             <Grid ColumnDefinitions="Auto,*" Margin="2" Width="460">
-                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="48" Height="48"
-                                  VerticalAlignment="Center" />
+                <!-- The raster pack has no 48 px artwork, so the 32 px file is scaled up rather
+                     than left blank; the vector theme has nothing this size-specific to lose. -->
+                <Panel Width="48" Height="48" VerticalAlignment="Center">
+                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform" Width="48" Height="48" />
+                    <Image Source="{Binding XpIconKey, Converter={x:Static conv:IconKeyToXpImageConverter.Instance}, ConverterParameter=32}"
+                           Stretch="Uniform" Width="48" Height="48" />
+                </Panel>
                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                     <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding TypeDescription}" FontSize="10" Foreground="#555" />
@@ -74,6 +93,37 @@
                     Classes="xpTaskPaneSurface"
                     IsVisible="{Binding ShowFolderPane}">
                 <DockPanel LastChildFill="True">
+
+                    <!-- Tab strip. XP's task pane is not a tab strip, but the pane has to carry
+                         three different things and the width is fixed; tabs keep all three
+                         reachable without stealing horizontal space from the file list. -->
+                    <Border DockPanel.Dock="Top" Classes="xpPaneTabStrip">
+                        <ItemsControl ItemsSource="{Binding TaskPaneTabs}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="models:TaskPaneTabItem">
+                                    <!-- IsChecked is one-way: the radio group owns the check mark,
+                                         and the click is reported through the command instead.
+                                         Two-way here would fight the group and leave two tabs
+                                         looking selected. -->
+                                    <RadioButton GroupName="TaskPaneTabs"
+                                                 Classes="xpPaneTab"
+                                                 Content="{Binding Name}"
+                                                 IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                 Command="{Binding $parent[ItemsControl].((vm:FileBrowserViewModel)DataContext).SelectTaskPaneTabCommand}"
+                                                 CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+
+                    <!-- ============================ Folders tab ============================ -->
+                    <Grid IsVisible="{Binding IsFoldersTabVisible}">
+                    <DockPanel LastChildFill="True">
                     <TextBlock DockPanel.Dock="Top"
                                Text="Folders"
                                Margin="8,7,6,5"
@@ -81,29 +131,197 @@
                                Foreground="#0A246A" />
                     <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="6,0" />
 
-                    <ListBox Name="ShellFolderList"
-                             Classes="xpList"
-                             BorderThickness="0"
-                             Background="Transparent"
-                             ItemsSource="{Binding ShellFolders}"
-                             SelectedItem="{Binding SelectedShellFolder, Mode=TwoWay}"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="models:ShellFolder">
-                                <Grid ColumnDefinitions="Auto,*" Margin="0,1">
-                                    <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform"
-                                                      Width="16" Height="16"
-                                                      VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1"
-                                               Margin="5,0,0,0"
+                    <!-- The search box now lives on the Search tab. Both tabs share the same
+                         SearchText, so the toolbar search still drives the same filter. -->
+
+                    <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="6,0" />
+
+                    <!-- The folder tree. Children are enumerated on expand, so opening the
+                         pane stays instant even with several drives present. -->
+                    <TreeView Name="FolderTree"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              Padding="0"
+                              ItemsSource="{Binding TreeRoots}"
+                              SelectedItem="{Binding SelectedTreeNode, Mode=TwoWay}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <TreeView.Styles>
+                            <!-- x:DataType pins these bindings to the node rather than the
+                                 page view-model, which is what compiled bindings assume. -->
+                            <Style Selector="TreeViewItem" x:DataType="models:FolderTreeNode">
+                                <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                            </Style>
+                        </TreeView.Styles>
+                        <TreeView.ItemTemplate>
+                            <TreeDataTemplate ItemsSource="{Binding Children}" DataType="models:FolderTreeNode">
+                                <Grid ColumnDefinitions="Auto,Auto,*" Margin="0,1">
+                                    <!-- The +/- expander box from the screenshot. -->
+                                    <ToggleButton Grid.Column="0" Classes="xpExpander"
+                                                  IsChecked="{Binding IsExpanded, Mode=TwoWay}"
+                                                  IsVisible="{Binding CanExpand}"
+                                                  Margin="0,0,4,0" />
+                                    <svg:Svg Grid.Column="1" Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform"
+                                          Width="16" Height="16" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Name}"
+                                               Margin="4,0,0,0"
                                                VerticalAlignment="Center"
-                                               Text="{Binding Name}"
                                                TextTrimming="CharacterEllipsis"
                                                ToolTip.Tip="{Binding Path}" />
                                 </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                            </TreeDataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+
+                    <!-- The collapsible sections from the task-pane screenshot, docked under
+                         the tree. "Other Places" repeats the shell folders as plain links. -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,3,0,0">
+                        <ItemsControl ItemsSource="{Binding TaskPaneSections}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="models:TaskPaneSection">
+                                    <StackPanel Margin="0,0,0,4">
+                                        <Button Classes="xpSectionHeader"
+                                                HorizontalAlignment="Stretch"
+                                                Command="{Binding $parent[ItemsControl].((vm:FileBrowserViewModel)DataContext).ToggleSectionCommand}"
+                                                CommandParameter="{Binding}">
+                                            <Grid ColumnDefinitions="Auto,*" Margin="6,2">
+                                                <!-- Chevron points down when open, right when shut. -->
+                                                <Path Grid.Column="0" Data="M0,0 L7,0 L3.5,5 Z"
+                                                      Fill="#31498C"
+                                                      VerticalAlignment="Center"
+                                                      IsVisible="{Binding IsExpanded}" />
+                                                <Path Grid.Column="0" Data="M0,0 L5,3.5 L0,7 Z"
+                                                      Fill="#31498C"
+                                                      VerticalAlignment="Center"
+                                                      IsVisible="{Binding !IsExpanded}" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Title}"
+                                                           Margin="4,0,0,0"
+                                                           VerticalAlignment="Center"
+                                                           FontWeight="Bold"
+                                                           Foreground="#0A246A"
+                                                           FontSize="11" />
+                                            </Grid>
+                                        </Button>
+                                        <Border Classes="xpGroove" Margin="6,0" />
+
+                                        <ItemsControl ItemsSource="{Binding Items}"
+                                                      IsVisible="{Binding IsExpanded}"
+                                                      Margin="18,2,0,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="models:ShellFolder">
+                                                    <Grid ColumnDefinitions="Auto,*" Margin="0,1">
+                                                        <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}" EnableCache="True" Stretch="Uniform"
+                                                              Width="16" Height="16"
+                                                              VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1"
+                                                                   Margin="4,0,0,0"
+                                                                   VerticalAlignment="Center"
+                                                                   Text="{Binding Name}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   ToolTip.Tip="{Binding Path}" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    </DockPanel>
+                    </Grid>
+
+                    <!-- ============================= Search tab ============================= -->
+                    <!-- The recursive walk moved off the Folders tab and onto its own, so the
+                         tree keeps its expansion state while a search runs. -->
+                    <Grid IsVisible="{Binding IsSearchTabVisible}">
+                        <DockPanel LastChildFill="True" Margin="6,6">
+                            <TextBlock DockPanel.Dock="Top"
+                                       Text="Search"
+                                       Margin="2,0,0,5"
+                                       FontWeight="Bold"
+                                       Foreground="#0A246A" />
+                            <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="0,0,0,6" />
+
+                            <TextBox DockPanel.Dock="Top"
+                                     Classes="xpField xpFieldCompact"
+                                     Text="{Binding SearchText, Mode=TwoWay}"
+                                     Watermark="Search all subfolders"
+                                     Margin="0,0,0,4"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.KeyBindings>
+                                    <KeyBinding Gesture="Enter" Command="{Binding StartSearchCommand}" />
+                                </TextBox.KeyBindings>
+                            </TextBox>
+
+                            <!-- Go and Stop occupy the same slot, so the row does not change
+                                 height when the walk starts. -->
+                            <Button DockPanel.Dock="Top" Classes="xpButton"
+                                    Padding="6,1" MinHeight="20"
+                                    Margin="0,0,0,4"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding StartSearchCommand}"
+                                    IsVisible="{Binding !IsSearching}"
+                                    Content="Search" />
+                            <Button DockPanel.Dock="Top" Classes="xpButton"
+                                    Padding="6,1" MinHeight="20"
+                                    Margin="0,0,0,4"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding CancelSearchCommand}"
+                                    IsVisible="{Binding IsSearching}"
+                                    Content="Stop searching..." />
+
+                            <TextBlock DockPanel.Dock="Top"
+                                       Margin="2,0,0,6"
+                                       FontSize="10"
+                                       Foreground="#555"
+                                       TextWrapping="Wrap"
+                                       Text="Searches this folder and everything below it, then shows the matches in the file list." />
+                        </DockPanel>
+                    </Grid>
+
+                    <!-- =========================== Common Tasks tab ========================== -->
+                    <Grid IsVisible="{Binding IsCommonTasksTabVisible}">
+                        <DockPanel LastChildFill="True" Margin="6,6">
+                            <TextBlock DockPanel.Dock="Top"
+                                       Text="Common Tasks"
+                                       Margin="2,0,0,5"
+                                       FontWeight="Bold"
+                                       Foreground="#0A246A" />
+                            <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="0,0,0,4" />
+
+                            <ItemsControl ItemsSource="{Binding CommonTasks}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="models:TaskPaneTask">
+                                        <!-- Tag carries the task so the view can invoke it; a
+                                             Command would mean wrapping each existing command
+                                             in another ICommand for no added behaviour. -->
+                                        <Button Classes="xpTaskLink"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Stretch"
+                                                Click="OnTaskLinkClick"
+                                                Tag="{Binding}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <svg:Svg Path="{Binding IconKey, Converter={x:Static icons:IconKeyToUriConverter.Instance}}"
+                                                        EnableCache="True" Stretch="Uniform"
+                                                        Width="16" Height="16"
+                                                        VerticalAlignment="Center" />
+                                                <StackPanel Margin="5,0,0,0">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Foreground="#0A246A"
+                                                               TextWrapping="Wrap" />
+                                                    <TextBlock Text="{Binding Description}"
+                                                               FontSize="10"
+                                                               Foreground="#555"
+                                                               TextWrapping="Wrap" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DockPanel>
+                    </Grid>
                 </DockPanel>
             </Border>
 

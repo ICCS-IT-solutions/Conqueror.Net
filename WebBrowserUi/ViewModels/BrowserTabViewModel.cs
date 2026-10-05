@@ -49,7 +49,11 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
 
     public string Location => Address;
 
-    public string IconKey => "Icon.Globe";
+    /// <summary>
+    /// Connection Status artwork: a magnifier over a stylised globe, which is XP's stand-in for
+    /// the old Internet Explorer "e". Closer to the original than a plain globe.
+    /// </summary>
+    public string IconKey => "Icon.Xp.Connection";
 
     public bool IsFileBrowser => false;
 

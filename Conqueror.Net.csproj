@@ -5,9 +5,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!--
+      app.manifest carries the Windows version-compatibility GUIDs and means nothing elsewhere,
+      so it is applied on Windows only rather than unconditionally.
+    -->
+    <ApplicationManifest Condition="$([MSBuild]::IsOSPlatform('Windows'))">app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <PlatformTarget>x64</PlatformTarget>
+    <!--
+      PlatformTarget is deliberately not pinned to x64. Hard-coding it would break the arm64
+      Linux and Apple-silicon macOS builds a cross-platform build has to include; the RID the
+      SDK selects now decides the architecture.
+    -->
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
 
@@ -16,6 +24,16 @@
        Avalonia.Svg.Skia at runtime. See tools/import-icon-theme.ps1. -->
   <ItemGroup>
     <AvaloniaResource Include="Assets/Icons/*.svg" />
+  </ItemGroup>
+
+  <!--
+       Raster XP chrome icons (tab strip, toolbar buttons). These must ship as PNGs because
+       they are the real Windows XP artwork, which is photographic raster rather than vector -
+       there is no vector equivalent of the Luna back/forward/go buttons. Produced by
+       tools/import-xp-chrome-icons.ps1 from the CC0-1.0 Marchmountain pack.
+  -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/Icons/xp/*.png" />
   </ItemGroup>
 
   <!--

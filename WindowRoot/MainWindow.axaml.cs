@@ -53,6 +53,18 @@ public partial class MainWindow : Window
                 Vm.AddFileTabCommand.Execute(null);
                 e.Handled = true;
                 break;
+            case Key.P when ctrl:
+                Vm.AddSplitPaneTabCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.OemTilde when ctrl:
+                Vm.AddTerminalTabCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.U when ctrl && Vm.IsSplitPaneActive:
+                Vm.SwapPanesCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.W when ctrl:
                 Vm.CloseTabCommand.Execute(Vm.SelectedTab);
                 e.Handled = true;
@@ -84,6 +96,44 @@ public partial class MainWindow : Window
 
     private void OnNewWebTabClick(object? sender, RoutedEventArgs e) =>
         Vm?.AddWebTabCommand.Execute(null);
+
+    /// <summary>
+    /// Selects the clicked tab.
+    /// </summary>
+    /// <remarks>
+    /// The tab's own close button sits inside this one, and <see cref="Button.Click"/> bubbles, so
+    /// a click that just closed a tab arrives here too. Ignoring any tab that is no longer in
+    /// <c>Tabs</c> stops that click from re-selecting the tab it just closed, which would leave
+    /// the content area showing a closed tab.
+    /// </remarks>
+    private void OnTabClick(object? sender, RoutedEventArgs e)
+    {
+        if (
+            Vm is { } vm
+            && sender is Button { CommandParameter: ITabViewModel tab }
+            && vm.Tabs.Contains(tab)
+        )
+        {
+            vm.SelectedTab = tab;
+        }
+    }
+    private void OnNewSplitPaneTabClick(object? sender, RoutedEventArgs e) =>
+        Vm?.AddSplitPaneTabCommand.Execute(null);
+
+    private void OnNewTerminalTabClick(object? sender, RoutedEventArgs e) =>
+        Vm?.AddTerminalTabCommand.Execute(null);
+
+    /// <summary>Reloads one pane of the dual-pane tab, named by the menu item's Tag.</summary>
+    private void OnRefreshPaneClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.ActiveSplitPane is not { } split)
+        {
+            return;
+        }
+
+        var pane = (sender as MenuItem)?.Tag as string == "Left" ? split.LeftPane : split.RightPane;
+        pane.RefreshCommand.Execute(null);
+    }
 
     private void OnNewFolderClick(object? sender, RoutedEventArgs e) =>
         CurrentFileTab?.CreateNewFolderCommand.Execute(null);

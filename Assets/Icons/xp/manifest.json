@@ -1,0 +1,38 @@
+{
+  "source": "Marchmountain Windows XP Icons (CC0-1.0)",
+  "method": "alpha-weighted direct box filter",
+  "sizes": [
+    16,
+    32
+  ],
+  "icons": {
+    "xp-explorer": {
+      "16": "xp-explorer16.png",
+      "32": "xp-explorer32.png"
+    },
+    "xp-command-prompt": {
+      "16": "xp-command-prompt16.png",
+      "32": "xp-command-prompt32.png"
+    },
+    "xp-connection": {
+      "16": "xp-connection16.png",
+      "32": "xp-connection32.png"
+    },
+    "xp-back": {
+      "16": "xp-back16.png",
+      "32": "xp-back32.png"
+    },
+    "xp-forward": {
+      "16": "xp-forward16.png",
+      "32": "xp-forward32.png"
+    },
+    "xp-up": {
+      "16": "xp-up16.png",
+      "32": "xp-up32.png"
+    },
+    "xp-go": {
+      "16": "xp-go16.png",
+      "32": "xp-go32.png"
+    }
+  }
+}

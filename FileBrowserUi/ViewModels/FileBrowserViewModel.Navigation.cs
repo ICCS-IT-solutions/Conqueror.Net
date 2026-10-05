@@ -8,6 +8,12 @@ public sealed partial class FileBrowserViewModel
     /// <summary>Loads a folder without touching history. Also used by the initial construction.</summary>
     private void LoadFolder(string path)
     {
+        // Moving to another folder abandons any results, so the list never shows hits from a
+        // place the user is no longer in.
+        CancelSearch();
+        IsSearchActive = false;
+        _searchResults.Clear();
+
         var listing = _fileSystem.ListDirectory(path);
 
         _allEntries.Clear();
@@ -21,6 +27,7 @@ public sealed partial class FileBrowserViewModel
         ApplyFilterAndSort();
         UpdateStatus(listing.Error);
         SelectedItem = null;
+        RevealInTree(path);
     }
 
     private void PushHistory(string path)
@@ -57,7 +64,15 @@ public sealed partial class FileBrowserViewModel
 
         if (!string.IsNullOrEmpty(root))
         {
-            Breadcrumbs.Add(new BreadcrumbSegment(root, root, full.Length <= root.Length));
+            // Explorer shows the drive as "Win10 (C:\)" when the volume carries a label, and
+            // as a bare "C:\" when it does not. The trailing backslash is kept so a labelled
+            // root still reads as a drive rather than as a folder named "C:".
+            var label = _fileSystem.GetVolumeLabel(full);
+            var rootName = string.IsNullOrWhiteSpace(label) ? root : $"{label} ({root})";
+
+            Breadcrumbs.Add(
+                new BreadcrumbSegment(rootName, root, full.Length <= root.Length, IsRoot: true)
+            );
         }
 
         // Everything after the root, e.g. "C:\a\b" -> "a\b".

@@ -24,13 +24,20 @@
     </Application.Styles>
 
     <!-- Tab content is resolved from its view-model type, which is what lets the shell
-         swap file tabs and Chromium tabs through one ContentControl. -->
+         swap file tabs, Chromium tabs, dual-pane tabs and terminals through one
+         ContentControl. -->
     <Application.DataTemplates>
         <DataTemplate DataType="fileVm:FileBrowserViewModel">
             <fileViews:FileBrowserView />
         </DataTemplate>
         <DataTemplate DataType="webVm:BrowserTabViewModel">
             <webViews:BrowserView />
+        </DataTemplate>
+        <DataTemplate DataType="fileVm:SplitPaneViewModel">
+            <fileViews:SplitPaneView />
+        </DataTemplate>
+        <DataTemplate DataType="fileVm:TerminalViewModel">
+            <fileViews:TerminalView />
         </DataTemplate>
     </Application.DataTemplates>
 </Application>

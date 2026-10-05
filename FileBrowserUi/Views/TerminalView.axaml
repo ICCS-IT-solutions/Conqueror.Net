@@ -1,0 +1,71 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Conqueror.Net.FileBrowserUi.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480"
+             x:Class="Conqueror.Net.FileBrowserUi.Views.TerminalView"
+             x:DataType="vm:TerminalViewModel">
+
+    <Border Background="#0C0C0C" BorderBrush="{StaticResource BrushShadow}" BorderThickness="1">
+        <DockPanel LastChildFill="True">
+
+            <!-- A small header naming the shell, with a restart control. -->
+            <Grid DockPanel.Dock="Top" Height="22" Background="#F0F0F0"
+                  ColumnDefinitions="*,Auto" Margin="0,0,0,1">
+                <TextBlock Grid.Column="0" Text="{Binding StatusText}"
+                           Margin="5,0,0,0" VerticalAlignment="Center"
+                           FontSize="11" TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1" Classes="xpButton" Margin="0,0,3,0"
+                        Padding="6,0" MinHeight="18" FontSize="11"
+                        Command="{Binding RestartCommand}"
+                        Content="Restart" />
+            </Grid>
+
+            <!--
+                The buffered input box. Text is collected here and sent on Enter rather than
+                being written to the process keystroke by keystroke, which is what a piped
+                shell can actually accept. The hint is deliberately explicit about the TTY
+                limitation so the behaviour is not mistaken for a bug.
+            -->
+            <Grid DockPanel.Dock="Bottom" Margin="4" ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Input, Mode=OneWay}"
+                           Margin="0,0,6,0" VerticalAlignment="Center"
+                           Foreground="#C8C8C8" FontFamily="Consolas,Menlo,Monospace"
+                           FontSize="12" IsVisible="False" />
+                <TextBox Grid.Column="1" Name="InputBox"
+                         Text="{Binding Input, Mode=TwoWay}"
+                         Watermark="Type a command and press Enter"
+                         Background="#1E1E1E" Foreground="#E6E6E6"
+                         BorderBrush="#5A5A5A" CaretBrush="#E6E6E6"
+                         FontFamily="Consolas,Menlo,Monospace"
+                         FontSize="12" MinHeight="22" Padding="4,2"
+                         KeyDown="OnInputKeyDown" />
+                <Button Grid.Column="2" Classes="xpButton" Margin="4,0,0,0"
+                        Padding="8,1" MinHeight="22"
+                        Command="{Binding SendInputCommand}"
+                        IsEnabled="{Binding IsRunning}"
+                        Content="Send" />
+            </Grid>
+
+            <!-- Scrollback. Each line is its own TextBlock rather than one SelectableTextBox
+                 because a piped shell emits no cursor addressing, so a real cell grid would
+                 be tracking semantics the backend does not provide. -->
+            <ScrollViewer Name="OutputScroll"
+                          Background="#0C0C0C" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Lines}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <TextBlock Text="{Binding}"
+                                       Foreground="#D4D4D4"
+                                       FontFamily="Consolas,Menlo,Monospace"
+                                       FontSize="12"
+                                       TextWrapping="NoWrap" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>
