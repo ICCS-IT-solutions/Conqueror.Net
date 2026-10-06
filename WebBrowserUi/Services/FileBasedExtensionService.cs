@@ -1,9 +1,13 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Conqueror.Net.WebBrowserUi.Services;
 
-/// <summary>Default <see cref="IExtensionService"/>: manifest.json folders under the extensions store.</summary>
 public sealed class FileBasedExtensionService : IExtensionService
 {
     private readonly string _storeDir;
@@ -27,10 +31,7 @@ public sealed class FileBasedExtensionService : IExtensionService
         foreach (var dir in Directory.GetDirectories(_storeDir))
         {
             var manifest = Path.Combine(dir, "manifest.json");
-            if (!File.Exists(manifest))
-            {
-                continue;
-            }
+            if (!File.Exists(manifest)) continue;
 
             try
             {
@@ -38,12 +39,13 @@ public sealed class FileBasedExtensionService : IExtensionService
             }
             catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
             {
-                // One bad folder must not hide the rest.
+                // Prevent one corrupted extension from crashing enumeration
             }
         }
 
         return Task.FromResult<IEnumerable<ExtensionInfo>>(list);
     }
+
     public Task<ExtensionInfo> LoadUnpackedExtensionAsync(string manifestPath)
     {
         if (string.IsNullOrWhiteSpace(manifestPath) || !File.Exists(manifestPath))
@@ -103,46 +105,55 @@ public sealed class FileBasedExtensionService : IExtensionService
         return Task.CompletedTask;
     }
 
-    /// <summary>Content-script files for the enabled extensions, injected after navigation.</summary>
-    public IReadOnlyList<string> GetEnabledContentScripts()
+    /// <summary>
+    /// Evaluates active extensions against the current tab URL and returns 
+    /// matching content-script file paths in execution order.
+    /// </summary>
+    public IReadOnlyList<string> GetEnabledContentScripts(string? targetUrl = null)
     {
         var scripts = new List<string>();
+
         foreach (var dir in Directory.GetDirectories(_storeDir))
         {
             var id = Path.GetFileName(dir);
-            if (!IsEnabled(id))
-            {
-                continue;
-            }
+            if (!IsEnabled(id)) continue;
 
-            var manifest = Path.Combine(dir, "manifest.json");
-            if (!File.Exists(manifest))
-            {
-                continue;
-            }
+            var manifestPath = Path.Combine(dir, "manifest.json");
+            if (!File.Exists(manifestPath)) continue;
 
             try
             {
-                using var doc = JsonDocument.Parse(File.ReadAllText(manifest));
-                if (doc.RootElement.TryGetProperty("content_scripts", out var cs)
-                    && cs.ValueKind == JsonValueKind.Array)
+                using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath));
+                if (!doc.RootElement.TryGetProperty("content_scripts", out var contentScripts) ||
+                    contentScripts.ValueKind != JsonValueKind.Array)
                 {
-                    foreach (var entry in cs.EnumerateArray())
+                    continue;
+                }
+
+                foreach (var csBlock in contentScripts.EnumerateArray())
+                {
+                    // Match URL patterns against Chrome extension match rules
+                    if (!string.IsNullOrEmpty(targetUrl) && csBlock.TryGetProperty("matches", out var matchesArr))
                     {
-                        if (entry.TryGetProperty("js", out var js)
-                            && js.ValueKind == JsonValueKind.Array)
+                        var patterns = matchesArr.EnumerateArray().Select(m => m.GetString()).OfType<string>();
+                        if (!IsUrlMatchingPatterns(targetUrl, patterns))
                         {
-                            foreach (var f in js.EnumerateArray())
+                            continue;
+                        }
+                    }
+
+                    // Collect script files in order
+                    if (csBlock.TryGetProperty("js", out var jsArr) && jsArr.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var jsFile in jsArr.EnumerateArray())
+                        {
+                            var rel = jsFile.GetString();
+                            if (string.IsNullOrWhiteSpace(rel)) continue;
+
+                            var full = Path.Combine(dir, rel);
+                            if (File.Exists(full))
                             {
-                                var rel = f.GetString();
-                                if (!string.IsNullOrWhiteSpace(rel))
-                                {
-                                    var full = Path.Combine(dir, rel);
-                                    if (File.Exists(full))
-                                    {
-                                        scripts.Add(full);
-                                    }
-                                }
+                                scripts.Add(full);
                             }
                         }
                     }
@@ -150,10 +161,31 @@ public sealed class FileBasedExtensionService : IExtensionService
             }
             catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
             {
+                // Ignore faulty extension files during active navigation
             }
         }
 
         return scripts;
+    }
+
+    private static bool IsUrlMatchingPatterns(string url, IEnumerable<string> matchPatterns)
+    {
+        foreach (var pattern in matchPatterns)
+        {
+            if (pattern == "<all_urls>") return true;
+
+            // Translate Chrome Extension glob pattern into Regex
+            // e.g. "*://*.google.com/*" -> "^(http|https)://.*\.google\.com/.*$"
+            var regexPattern = "^" + Regex.Escape(pattern)
+                .Replace(@"\*", ".*")
+                .Replace(@"\:\/\/\.\*", @":\/\/(http|https|ftp):\/\/") + "$";
+
+            if (Regex.IsMatch(url, regexPattern, RegexOptions.IgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ExtensionInfo ReadManifest(string id, string manifestPath)
@@ -197,7 +229,7 @@ public sealed class FileBasedExtensionService : IExtensionService
 
             if (doc.RootElement.TryGetProperty("name", out var name))
             {
-                var slug = new string(name.GetString()?.Where(c => char.IsLetterOrDigit(c)).ToArray());
+                var slug = new string(name.GetString()?.Where(char.IsLetterOrDigit).ToArray());
                 return string.IsNullOrEmpty(slug) ? null : slug.ToLowerInvariant();
             }
         }
@@ -229,10 +261,7 @@ public sealed class FileBasedExtensionService : IExtensionService
     {
         try
         {
-            if (!File.Exists(_statePath))
-            {
-                return;
-            }
+            if (!File.Exists(_statePath)) return;
 
             using var doc = JsonDocument.Parse(File.ReadAllText(_statePath));
             foreach (var prop in doc.RootElement.EnumerateObject())

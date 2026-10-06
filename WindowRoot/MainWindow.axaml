@@ -129,212 +129,192 @@
 
         <!-- ============================ Toolbar ================================= -->
         <Border DockPanel.Dock="Top" Classes="xpToolbarSurface">
-            <DockPanel Margin="2,3" LastChildFill="True" Height="48">
-                <!--Terminal tab-->
-                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
-                        Command="{Binding AddTerminalTabCommand}"
-                        ToolTip.Tip="New terminal tab (Ctrl+`)">
-                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-command-prompt16.png"
-                           Stretch="Uniform" Width="16" Height="16" />
-                </Button>
-                <!--Web browser tab-->
-                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
-                        Command="{Binding AddWebTabCommand}"
-                        ToolTip.Tip="New web tab (Ctrl+T)">
-                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-connection16.png"
-                           Stretch="Uniform" Width="16" Height="16" />
-                </Button>
-                <!--File browser tab-->
-                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
-                        Command="{Binding AddFileTabCommand}"
-                        ToolTip.Tip="New file tab">
-                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-explorer16.png"
-                           Stretch="Uniform" Width="16" Height="16" />
-                </Button>
-                <Rectangle DockPanel.Dock="Right" Width="1" Margin="4,2,8,2"
-                           Fill="{StaticResource BrushShadow}" />
-                <Button DockPanel.Dock="Right" Classes="xpToolbarButton"
-                        Command="{Binding RefreshCommand}"
-                        ToolTip.Tip="Refresh (F5)">
-                    <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-refresh16.png"
-                           Stretch="Uniform" Width="16" Height="16" />
-                </Button>
+            <Grid ColumnDefinitions="Auto,*, Auto" Height="48" Margin="2,3">
+            <!-- Fixed Left: Core Navigation -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Classes="xpToolbarButtonLarge"
+                            Command="{Binding GoBackCommand}"
+                            IsEnabled="{Binding CanGoBack}"
+                            ToolTip.Tip="Back (Alt+Left)"
+                            Margin="0,0,2,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-back32.png"
+                                Stretch="Uniform" Width="32" Height="32" />
+                            <TextBlock Text="Back" Margin="4,0,4,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Classes="xpToolbarButtonLarge"
+                            Command="{Binding GoForwardCommand}"
+                            IsEnabled="{Binding CanGoForward}"
+                            ToolTip.Tip="Forward (Alt+Right)"
+                            Margin="0,0,2,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-forward32.png"
+                                Stretch="Uniform" Width="32" Height="32" />
+                            <TextBlock Text="Forward" Margin="4,0,4,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Classes="xpToolbarButtonLarge"
+                            Command="{Binding GoUpCommand}"
+                            IsEnabled="{Binding CanGoUp}"
+                            ToolTip.Tip="Up (Alt+Up)"
+                            Margin="0,0,2,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-up32.png"
+                                Stretch="Uniform" Width="32" Height="32" />
+                            <TextBlock Text="Up" Margin="4,0,4,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Vertical Separator -->
+                    <Rectangle Width="1" Margin="4,4,6,4" Fill="{StaticResource BrushShadow}" />
+                </StackPanel>
+
+                <!--Stackpanel for middle buttons: new file, new folder, cut, copy,paste, delete, select all, rename, properties-->
+                <ScrollViewer Grid.Column="1" 
+                      HorizontalScrollBarVisibility="Auto" 
+                      VerticalScrollBarVisibility="Disabled">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding NewFileCommand}"
+                                IsEnabled="{Binding CanNewFile}"
+                                IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                                ToolTip.Tip="New file (Ctrl+N)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfile32.png" Width="32" Height="32" />
+                                <TextBlock Text="New File" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding NewFolderCommand}"
+                                IsEnabled="{Binding CanNewFolder}"
+                                IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                                ToolTip.Tip="New folder"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfolder32.png" Width="32" Height="32" />
+                                <TextBlock Text="New Folder" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Rectangle Width="1" Margin="4,4,6,4" Fill="{StaticResource BrushShadow}" />
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding CutCommand}"
+                                IsEnabled="{Binding CanCut}"
+                                ToolTip.Tip="Cut (Ctrl+X)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-cut32.png" Width="32" Height="32" />
+                                <TextBlock Text="Cut" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding CopyCommand}"
+                                IsEnabled="{Binding CanCopy}"
+                                ToolTip.Tip="Copy (Ctrl+C)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-copy32.png" Width="32" Height="32" />
+                                <TextBlock Text="Copy" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding PasteCommand}"
+                                IsEnabled="{Binding CanPaste}"
+                                ToolTip.Tip="Paste (Ctrl+V)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-paste32.png" Width="32" Height="32" />
+                                <TextBlock Text="Paste" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding DeleteCommand}"
+                                IsEnabled="{Binding CanDelete}"
+                                ToolTip.Tip="Delete (Del)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-delete32.png" Width="32" Height="32" />
+                                <TextBlock Text="Delete" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding SelectAllCommand}"
+                                IsEnabled="{Binding CanSelectAll}"
+                                ToolTip.Tip="Select All (Ctrl+A)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectall32.png" Width="32" Height="32" />
+                                <TextBlock Text="Select All" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding RenameCommand}"
+                                IsEnabled="{Binding CanRename}"
+                                IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                                ToolTip.Tip="Rename (F2)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-rename32.png" Width="32" Height="32" />
+                                <TextBlock Text="Rename" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding PropertiesCommand}"
+                                IsEnabled="{Binding CanProperties}"
+                                IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                                ToolTip.Tip="Properties (Alt+Return)"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-properties32.png" Width="32" Height="32" />
+                                <TextBlock Text="Properties" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+                </ScrollViewer>
 
 
-                <!-- Search box lives on the toolbar, exactly as in Windows Vista+ Explorer.
-                     xpFieldCompact keeps it at 16 px so it stays the same size as before
-                     the toolbar grew to fit the 32 px navigation buttons.
-
-                     The classes are space separated, not comma separated. Avalonia parses
-                     Classes="a,b" as one class literally named "a,b", which silently fails
-                     to match any selector; only whitespace separates them. -->
-                <TextBox DockPanel.Dock="Right" Classes="xpField xpFieldCompact"
+                <!-- Right StackPanel: Refresh, Separator, Tab Tools -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <!--Search bar for convenience-->
+                    <TextBox  Classes="xpField xpFieldCompact"
                          Width="150" Margin="4,0,6,0"
                          VerticalContentAlignment="Center"
                          Text="{Binding SelectedTab.SearchText, Mode=TwoWay}"
                          Watermark="Search" />
+                    <Button Classes="xpToolbarButton"
+                            Command="{Binding RefreshCommand}"
+                            ToolTip.Tip="Refresh (F5)"
+                            Margin="0,0,2,0">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-refresh16.png" Width="16" Height="16" />
+                    </Button>
 
-                <!-- Back / Forward / Up use the real Luna buttons at 32 px with their labels
-                     beside them. xpToolbarButtonLarge replaces xpToolbarButton here, whose
-                     fixed 23x22 box clips both the larger icon and the label. The icon column
-                     is Auto rather than * so the label sits immediately beside the artwork. -->
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding GoBackCommand}"
-                        IsEnabled="{Binding CanGoBack}"
-                        ToolTip.Tip="Back (Alt+Left)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-back32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Back" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding GoForwardCommand}"
-                        IsEnabled="{Binding CanGoForward}"
-                        ToolTip.Tip="Forward (Alt+Right)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-forward32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Forward" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding GoUpCommand}"
-                        IsEnabled="{Binding CanGoUp}"
-                        ToolTip.Tip="Up one level (Alt+Up)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-up32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Up" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <!--Separator between the navigation buttons and the edit actions. The separator is a 1 px rectangle with a Luna shadow brush, not a Border, so it does not add extra padding to the toolbar. -->
-                <Border DockPanel.Dock="Left" Width="1" Background="{StaticResource BrushLunaShadow}" />
-                <!--Show cut, copy, paste, delete and select all. These are available throughout the application -->
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding CutCommand}"
-                        IsEnabled="{Binding CanCut}"
-                        ToolTip.Tip="Cut (Ctrl+X)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-cut32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Cut" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding CopyCommand}"
-                        IsEnabled="{Binding CanCopy}"
-                        ToolTip.Tip="Copy (Ctrl+C)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-copy32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Copy" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding PasteCommand}"
-                        IsEnabled="{Binding CanPaste}"
-                        ToolTip.Tip="Paste (Ctrl+V)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-paste32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Paste" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding DeleteCommand}"
-                        IsEnabled="{Binding CanDelete}"
-                        ToolTip.Tip="Delete (Del)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-delete32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Delete" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding SelectAllCommand}"
-                        IsEnabled="{Binding CanSelectAll}"
-                        ToolTip.Tip="Select All (Ctrl+A)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectall32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Select All" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <!--Separator here-->
-                <Border DockPanel.Dock="Left" Width="1" Background="{StaticResource BrushLunaShadow}" />
-                <!--New file, new folder, properties and rename are available only in file browser tabs, so they are hidden on web and terminal tabs.-->
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding NewFileCommand}"
-                        IsEnabled="{Binding CanNewFile}"
-                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
-                        ToolTip.Tip="New file (Ctrl+N)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfile32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="New File" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding NewFolderCommand}"
-                        IsEnabled="{Binding CanNewFolder}"
-                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
-                        ToolTip.Tip="New folder">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfolder32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="New Folder" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding RenameCommand}"
-                        IsEnabled="{Binding CanRename}"
-                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
-                        ToolTip.Tip="Rename (F2)">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-rename32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Rename" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button DockPanel.Dock="Left" Classes="xpToolbarButtonLarge"
-                        Command="{Binding PropertiesCommand}"
-                        IsEnabled="{Binding CanProperties}"
-                        IsVisible="{Binding SelectedTab.IsFileBrowser}"
-                        ToolTip.Tip="Properties">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-properties32.png"
-                               Stretch="Uniform" Width="32" Height="32"
-                               VerticalAlignment="Center" />
-                        <TextBlock Text="Properties" Margin="5,0,0,0"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
+                    <Rectangle Width="1" Margin="4,4,6,4" Fill="{StaticResource BrushShadow}" />
 
-
-            </DockPanel>
+                    <Button Classes="xpToolbarButton" Command="{Binding AddFileTabCommand}" ToolTip.Tip="New file tab" Margin="0,0,2,0">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-explorer16.png" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="xpToolbarButton" Command="{Binding AddWebTabCommand}" ToolTip.Tip="New web tab (Ctrl+T)" Margin="0,0,2,0">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-connection16.png" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="xpToolbarButton" Command="{Binding AddTerminalTabCommand}" ToolTip.Tip="New terminal tab (Ctrl+`)">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-command-prompt16.png" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- ====================== Tab strip and address bar ==================== -->
@@ -416,7 +396,7 @@
                                          the click and does not bubble up to select the tab. -->
                                     <Button Grid.Column="2" Classes="xpToolbarButton"
                                             Width="16" Height="16" Padding="0"
-                                            Margin="0,0,2,0"
+                                            Margin="8,0,2,0"
                                             VerticalAlignment="Center"
                                             Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
                                             CommandParameter="{Binding}"

@@ -507,7 +507,7 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         IReadOnlyList<string> scripts;
         try
         {
-            scripts = _extensionService.GetEnabledContentScripts();
+            scripts = _extensionService.GetEnabledContentScripts(Address);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

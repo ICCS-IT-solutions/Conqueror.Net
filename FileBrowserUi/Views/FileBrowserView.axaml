@@ -122,18 +122,14 @@
                     </Border>
 
                     <!-- ============================ Folders tab ============================ -->
-                    <Grid IsVisible="{Binding IsFoldersTabVisible}">
-                    <DockPanel LastChildFill="True">
+                    <Grid IsVisible="{Binding IsFoldersTabVisible}"
+                    RowDefinitions="*,Auto">
+                    <DockPanel Grid.Row="0" LastChildFill="True">
                     <TextBlock DockPanel.Dock="Top"
                                Text="Folders"
                                Margin="8,7,6,5"
                                FontWeight="Bold"
                                Foreground="#0A246A" />
-                    <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="6,0" />
-
-                    <!-- The search box now lives on the Search tab. Both tabs share the same
-                         SearchText, so the toolbar search still drives the same filter. -->
-
                     <Border DockPanel.Dock="Top" Classes="xpGroove" Margin="6,0" />
 
                     <!-- The folder tree. Children are enumerated on expand, so opening the
@@ -172,10 +168,10 @@
                             </TreeDataTemplate>
                         </TreeView.ItemTemplate>
                     </TreeView>
-
-                    <!-- The collapsible sections from the task-pane screenshot, docked under
-                         the tree. "Other Places" repeats the shell folders as plain links. -->
-                    <StackPanel DockPanel.Dock="Bottom" Margin="0,3,0,0">
+                    </DockPanel>
+                    <!-- The collapsible sections from the task-pane screenshot, docked under the tree. "Other Places" repeats the shell folders as plain links. -->
+                    <!--Visual inconsistency noted: These appear to theright, not below and pinned/anchored-->
+                    <StackPanel Grid.Row="1" Margin="0,3,0,0">
                         <ItemsControl ItemsSource="{Binding TaskPaneSections}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="models:TaskPaneSection">
@@ -228,7 +224,7 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                    </DockPanel>
+
                     </Grid>
 
                     <!-- ============================= Search tab ============================= -->

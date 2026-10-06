@@ -20,7 +20,13 @@ public interface IExtensionService
     Task EnableExtensionAsync(string extensionId);
     Task DisableExtensionAsync(string extensionId);
     Task UnloadExtensionAsync(string extensionId);
-    IReadOnlyList<string> GetEnabledContentScripts();
+
+    /// <summary>
+    /// Returns content script file paths from enabled extensions.
+    /// If <paramref name="targetUrl"/> is specified, scripts are filtered against 
+    /// the match patterns (e.g. *://*.google.com/*) declared in manifest.json.
+    /// </summary>
+    IReadOnlyList<string> GetEnabledContentScripts(string? targetUrl = null);
 }
 
 public record ExtensionInfo(
