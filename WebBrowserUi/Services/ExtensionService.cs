@@ -1,17 +1,18 @@
 using System.IO;
 using System.Text.Json;
-using Conqueror.Net.WebBrowserUi.ViewModels;
 
 namespace Conqueror.Net.WebBrowserUi.Services;
 
 /// <summary>
 /// File-backed extension registry for the embedded Chromium tab.
-/// WebViewControl-Avalonia (CEF 120) exposes no extension-host API comparable to
-/// CefSharp's RequestContext.LoadExtension — the control offers Address / Title /
-/// ZoomPercentage / LoadUrl / EvaluateScript but no extension members (verified via
-/// tools/dump-webview-api.ps1). So this service owns discovery + enable/disable
-/// state on disk, while BrowserTabViewModel injects each manifest's content scripts
-/// after main-frame navigation.
+/// The service owns discovery + enable/disable state on disk; loading into the engine is
+/// CefExtensionHost's job — it feeds each enabled root directory to
+/// CefRequestContext.LoadExtension on the global request context (every WebViewControl tab
+/// is created with a null request-context factory, i.e. on that global context), which
+/// makes CEF itself the extension host: background pages run, extension APIs exist,
+/// declarative/webRequest permissions apply, and manifest content_scripts are injected at
+/// the times the manifest asks for. Manual content-script execution survives only as the
+/// fallback for roots CEF refused to load (see GetEnabledContentScriptGroups).
 /// </summary>
 public interface IExtensionService
 {
@@ -22,12 +23,25 @@ public interface IExtensionService
     Task UnloadExtensionAsync(string extensionId);
 
     /// <summary>
-    /// Returns content script file paths from enabled extensions.
-    /// If <paramref name="targetUrl"/> is specified, scripts are filtered against 
-    /// the match patterns (e.g. *://*.google.com/*) declared in manifest.json.
+    /// Absolute root directories (each containing a manifest.json) of every enabled
+    /// extension — exactly the inputs CefRequestContext.LoadExtension wants.
     /// </summary>
-    IReadOnlyList<string> GetEnabledContentScripts(string? targetUrl = null);
+    IReadOnlyList<string> GetEnabledExtensionRoots();
+
+    /// <summary>
+    /// Content-script groups (one per extension root) from enabled extensions, filtered
+    /// against <paramref name="targetUrl"/> when given. Only extensions CEF could not
+    /// load natively should be injected from here; a natively hosted extension runs its
+    /// own scripts at the manifest-declared times and must not run them twice.
+    /// </summary>
+    IReadOnlyList<ContentScriptGroup> GetEnabledContentScriptGroups(string? targetUrl = null);
+
+    /// <summary>Raised after any change to the enabled set (toggle, install, uninstall).</summary>
+    event Action? ExtensionsChanged;
 }
+
+/// <summary>Content scripts of a single extension root, in manifest execution order.</summary>
+public record ContentScriptGroup(string RootDirectory, IReadOnlyList<string> ScriptFiles);
 
 public record ExtensionInfo(
     string Id,

@@ -15,6 +15,9 @@ public sealed class FileBasedExtensionService : IExtensionService
     private readonly Dictionary<string, bool> _enabledOverride = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _gate = new();
 
+    /// <summary>Raised after any change to the enabled set; CefExtensionHost re-syncs on it.</summary>
+    public event Action? ExtensionsChanged;
+
     public FileBasedExtensionService(string? storeDir = null)
     {
         _storeDir = storeDir ?? Path.Combine(
@@ -73,6 +76,7 @@ public sealed class FileBasedExtensionService : IExtensionService
             SaveStateLocked();
         }
 
+        ExtensionsChanged?.Invoke();
         return Task.FromResult(info with { IsEnabled = true });
     }
 
@@ -102,16 +106,39 @@ public sealed class FileBasedExtensionService : IExtensionService
             Directory.Delete(dir, recursive: true);
         }
 
+        ExtensionsChanged?.Invoke();
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Evaluates active extensions against the current tab URL and returns 
-    /// matching content-script file paths in execution order.
+    /// Absolute root directories of enabled extensions that carry a manifest.json —
+    /// ready for CefRequestContext.LoadExtension.
     /// </summary>
-    public IReadOnlyList<string> GetEnabledContentScripts(string? targetUrl = null)
+    public IReadOnlyList<string> GetEnabledExtensionRoots()
     {
-        var scripts = new List<string>();
+        var roots = new List<string>();
+
+        foreach (var dir in Directory.GetDirectories(_storeDir))
+        {
+            if (!IsEnabled(Path.GetFileName(dir))) continue;
+            if (File.Exists(Path.Combine(dir, "manifest.json")))
+            {
+                roots.Add(dir);
+            }
+        }
+
+        return roots;
+    }
+
+    /// <summary>
+    /// Evaluates active extensions against the current tab URL and groups the matching
+    /// content-script file paths per extension root, in execution order. Only roots CEF
+    /// could not load natively should be injected from here — a natively hosted
+    /// extension injects its own scripts at the manifest-declared times.
+    /// </summary>
+    public IReadOnlyList<ContentScriptGroup> GetEnabledContentScriptGroups(string? targetUrl = null)
+    {
+        var groups = new List<ContentScriptGroup>();
 
         foreach (var dir in Directory.GetDirectories(_storeDir))
         {
@@ -121,6 +148,7 @@ public sealed class FileBasedExtensionService : IExtensionService
             var manifestPath = Path.Combine(dir, "manifest.json");
             if (!File.Exists(manifestPath)) continue;
 
+            var files = new List<string>();
             try
             {
                 using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath));
@@ -153,7 +181,7 @@ public sealed class FileBasedExtensionService : IExtensionService
                             var full = Path.Combine(dir, rel);
                             if (File.Exists(full))
                             {
-                                scripts.Add(full);
+                                files.Add(full);
                             }
                         }
                     }
@@ -163,29 +191,100 @@ public sealed class FileBasedExtensionService : IExtensionService
             {
                 // Ignore faulty extension files during active navigation
             }
+
+            if (files.Count > 0)
+            {
+                groups.Add(new ContentScriptGroup(dir, files));
+            }
         }
 
-        return scripts;
+        return groups;
     }
 
+    /// <summary>
+    /// Tests a URL against Chrome match patterns. Gates only the *fallback* injection
+    /// path; a natively loaded extension is pattern-matched by CEF itself, which knows
+    /// the real Chrome semantics.
+    /// </summary>
     private static bool IsUrlMatchingPatterns(string url, IEnumerable<string> matchPatterns)
     {
         foreach (var pattern in matchPatterns)
         {
-            if (pattern == "<all_urls>") return true;
-
-            // Translate Chrome Extension glob pattern into Regex
-            // e.g. "*://*.google.com/*" -> "^(http|https)://.*\.google\.com/.*$"
-            var regexPattern = "^" + Regex.Escape(pattern)
-                .Replace(@"\*", ".*")
-                .Replace(@"\:\/\/\.\*", @":\/\/(http|https|ftp):\/\/") + "$";
-
-            if (Regex.IsMatch(url, regexPattern, RegexOptions.IgnoreCase))
+            if (pattern == "<all_urls>")
             {
-                return true;
+                if (Regex.IsMatch(url, @"^(https?|ftp|file):", RegexOptions.IgnoreCase)) return true;
+                continue;
+            }
+
+            var regex = TryBuildMatchPatternRegex(pattern);
+            if (regex is null) continue;
+
+            try
+            {
+                if (Regex.IsMatch(url, regex, RegexOptions.IgnoreCase)) return true;
+            }
+            catch (ArgumentException)
+            {
+                // A pattern that cannot compile must not take navigation down.
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// Builds a regex for one Chrome match pattern: <c>scheme://host/path</c> where
+    /// <c>*</c> is the only wildcard (a leading <c>*</c> on a host widens to subdomains
+    /// as well as the apex, the port is ignored, and <c>*</c> in the path spans '/').
+    /// Returns null for malformed patterns. E.g. <c>*://*.google.com/*</c> becomes
+    /// <c>^(?:https?|ftp|file)://(?:[^/:]+\.)?google\.com(?::\d+)?/.*$</c>.
+    /// </summary>
+    private static string? TryBuildMatchPatternRegex(string pattern)
+    {
+        var schemeEnd = pattern.IndexOf("://", StringComparison.Ordinal);
+        if (schemeEnd <= 0) return null;
+
+        var rest = pattern[(schemeEnd + 3)..];
+        var pathStart = rest.IndexOf('/');
+        if (pathStart < 0) return null;
+
+        var schemePart = pattern[..schemeEnd];
+        var hostPart = rest[..pathStart];
+        var pathPart = rest[pathStart..];
+
+        // "*" covers the schemes match patterns allow.
+        var schemeRegex = schemePart == "*"
+            ? @"(?:https?|ftp|file)"
+            : Regex.Escape(schemePart);
+
+        string hostRegex;
+        if (hostPart == "*")
+        {
+            hostRegex = "[^/]*";
+        }
+        else if (hostPart.StartsWith("*.", StringComparison.Ordinal))
+        {
+            hostRegex = "(?:[^/:]+\\.)?" + Regex.Escape(hostPart[2..]);
+        }
+        else
+        {
+            hostRegex = Regex.Escape(hostPart);
+        }
+
+        // Match patterns ignore the port; the wildcard host already stops at '/'.
+        if (hostPart != "*")
+        {
+            hostRegex += @"(?::\d+)?";
+        }
+
+        // Path wildcards: * spans any characters (including /), ? exactly one.
+        var pathRegex = string.Concat(pathPart.Select(c => c switch
+        {
+            '*' => ".*",
+            '?' => ".",
+            _ => Regex.Escape(c.ToString()),
+        }));
+
+        return "^" + schemeRegex + "://" + hostRegex + pathRegex + "$";
     }
 
     private ExtensionInfo ReadManifest(string id, string manifestPath)
@@ -255,6 +354,8 @@ public sealed class FileBasedExtensionService : IExtensionService
             _enabledOverride[id] = enabled;
             SaveStateLocked();
         }
+
+        ExtensionsChanged?.Invoke();
     }
 
     private void LoadState()

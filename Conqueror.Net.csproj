@@ -16,8 +16,17 @@
       Linux and Apple-silicon macOS builds a cross-platform build has to include; the RID the
       SDK selects now decides the architecture.
     -->
-    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
+
+  <!--
+    NOTE 2026-10-06: the BuildAndCopyCustomBrowserProcess target has been
+    removed. The custom Xilium.CefGlue.BrowserProcess.dll (SimpleCefApp wrapper)
+    faulted inside libcef.execute_process at coreclr.dll+0x1d45dc on every
+    renderer spawn, leaving tabs blank with DevTools disconnected; the stock
+    CefGlue subprocess renders correctly. The CustomBrowserProcess/ sources are
+    retained for reference but are no longer built or copied.
+  -->
 
   <!-- SVG icon theme. Kept out of the default globs because Avalonia's XAML compiler
        would try to treat them as styles; they are plain assets consumed by
@@ -42,8 +51,9 @@
     project as well as Shell's own, producing duplicate assembly attributes (CS0579) whenever
     the solution is built. Excluding it here means the two projects can coexist in one tree.
   -->
-  <ItemGroup>
+    <ItemGroup>
     <Compile Remove="Shell/**" />
+    <Compile Remove="CustomBrowserProcess/**" />
     <!--
       Also remove the nested project's Avalonia XAML. The XAML compiler otherwise picks up
       Shell/Views/*.axaml and fails with AXN0001, since those classes belong to the other

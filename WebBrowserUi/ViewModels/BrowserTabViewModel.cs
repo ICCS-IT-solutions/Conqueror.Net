@@ -222,6 +222,10 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
             WireBrowserEvents(_browser);
             // Library takes a factor (1.0 = 100%), view-model keeps 100-based display units.
             _browser.ZoomPercentage = ZoomPercentage / 100.0;
+
+            // Chromium is up now: hand every enabled extension to CEF's own loader before
+            // the first navigation, so background pages and content scripts run natively.
+            CefExtensionHost.Sync(_extensionService);
         }
 
         // Re-parent our own engine instance into the visible host.
@@ -252,7 +256,7 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         // otherwise switching back to a tab would reload it.
         if (!string.Equals(_browser.Address?.TrimEnd('/'), toLoad.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
         {
-            LoadUrl(toLoad);
+            NavigateWhenExtensionsSettled(toLoad);
         }
         else
         {
@@ -260,6 +264,28 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
             UpdateNavigationState();
             OnPropertyChanged(nameof(Location));
         }
+    }
+
+    /// <summary>
+    /// First navigation waits (briefly, and only while a native extension load is still in
+    /// flight) so Chromium registers content scripts before the first document commits;
+    /// once the host is settled this continues synchronously, i.e. unchanged behaviour.
+    /// </summary>
+    private async void NavigateWhenExtensionsSettled(string address)
+    {
+        var settled = CefExtensionHost.WaitForSettledAsync();
+        if (!settled.IsCompleted)
+        {
+            // Bounded: a wedged load must never block navigation.
+            await Task.WhenAny(settled, Task.Delay(TimeSpan.FromSeconds(3)));
+        }
+
+        if (_browser is null)
+        {
+            return; // Tab disposed while waiting.
+        }
+
+        LoadUrl(address);
     }
 
     /// <summary>Removes our WebView from the shared host so the next tab can dock its own.</summary>
@@ -492,10 +518,10 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     }
 
     /// <summary>
-    /// Runs each enabled extension's content scripts in the page. This is the injection
-    /// half of the extension handler: WebViewControl exposes no extension host, so the
-    /// closest faithful behaviour is executing manifest content_scripts via EvaluateScript.
-    /// Failures are swallowed per-file — one broken script must not break the page.
+    /// Fallback injection for extension roots CEF refused to load (CefExtensionHost marks
+    /// them Failed). Roots CEF hosts natively inject their manifest content_scripts
+    /// themselves and must not run twice, so they are skipped here. Failures are swallowed
+    /// per-file — one broken script must not break the page.
     /// </summary>
     private async void InjectExtensionContentScripts()
     {
@@ -504,40 +530,49 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
             return;
         }
 
-        IReadOnlyList<string> scripts;
+        IReadOnlyList<ContentScriptGroup> groups;
         try
         {
-            scripts = _extensionService.GetEnabledContentScripts(Address);
+            groups = _extensionService.GetEnabledContentScriptGroups(Address);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             return;
         }
 
-        foreach (var path in scripts)
+        foreach (var group in groups)
         {
-            string js;
-            try
+            if (!CefExtensionHost.NeedsFallback(group.RootDirectory))
             {
-                js = await File.ReadAllTextAsync(path);
-            }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-            {
+                // CEF hosts it (or is still loading it) — its own scripts, its own timing.
                 continue;
             }
 
-            if (string.IsNullOrWhiteSpace(js))
+            foreach (var path in group.ScriptFiles)
             {
-                continue;
-            }
+                string js;
+                try
+                {
+                    js = await File.ReadAllTextAsync(path);
+                }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    continue;
+                }
 
-            try
-            {
-                _browser.ExecuteScript(js, null);
-            }
-            catch (Exception ex) when (ex is InvalidOperationException or WebView.JavascriptException)
-            {
-                // Engine busy or script error — keep the page alive.
+                if (string.IsNullOrWhiteSpace(js))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    _browser.ExecuteScript(js, null);
+                }
+                catch (Exception ex) when (ex is InvalidOperationException or WebView.JavascriptException)
+                {
+                    // Engine busy or script error — keep the page alive.
+                }
             }
         }
     }

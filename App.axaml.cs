@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Conqueror.Net.FileBrowserUi.Services;
+using Conqueror.Net.WebBrowserUi.Services;
 using Conqueror.Net.WindowRoot;
 using Conqueror.Net.WindowRoot.ViewModels;
 
@@ -58,8 +59,37 @@ public partial class App : Application
 
             WebViewControl.WebView.Settings.CachePath = cachePath;
 
+            // Evidence channel: CEF's own log (extension loads, content-script injection,
+            // errors). Truncate first so each run's log covers only that run; setting
+            // LogFile also flips severity to Verbose (EnableErrorLogOnly defaults false).
+            var cefLogPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Conqueror.Net",
+                "cef.log"
+            );
+            try
+            {
+                File.Delete(cefLogPath);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Locked by a previous run — that log keeps growing instead.
+            }
+
+            WebViewControl.WebView.Settings.LogFile = cefLogPath;
+
             // System.Drawing colour: the control predates Avalonia's colour type.
             WebViewControl.WebView.Settings.BackgroundColor = System.Drawing.Color.White;
+
+            // Enable experimental web-platform features before the engine spins up.
+            WebViewControl.WebView.Settings.AddCommandLineSwitch("enable-experimental-web-platform-features", null);
+
+            // Pre-initialise CEF with NoSandbox=true so that the --no-sandbox flag is propagated
+            // to ALL subprocesses (browser, renderer, GPU), not just the browser process.
+            // This must happen before any WebView is constructed — the first WebView's
+            // constructor calls CefRuntimeLoader.Load() which would otherwise run the
+            // default initialiser that leaves NoSandbox=false on Windows.
+            CefExtensionHost.PreInitialize();
 
             return true;
         }
@@ -95,6 +125,10 @@ public partial class App : Application
     {
         // Before AvaloniaXamlLoader runs, so no DataTemplate can build a WebView first.
         ChromiumAvailable = TryConfigureChromium();
+
+        // Extension toggles install/uninstall must re-sync the native CEF host. Before the
+        // first WebView exists this is a no-op; that WebView's Attach performs the sync.
+        Extensions.ExtensionsChanged += () => WebBrowserUi.Services.CefExtensionHost.Sync(Extensions);
 
         AvaloniaXamlLoader.Load(this);
     }

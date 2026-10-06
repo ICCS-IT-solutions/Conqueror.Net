@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Xilium.CefGlue.BrowserProcess</AssemblyName>
+    <RootNamespace>Xilium.CefGlue.BrowserProcess</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <NoWarn>IL2CPP</NoWarn>
+    <!--
+      Merge runtimeconfig.template.json (JIT workarounds) into the generated
+      Xilium.CefGlue.BrowserProcess.runtimeconfig.json. The stock templates use
+      bare DOTNET_ env-style keys that are ignored; the System.Runtime.* keys
+      below are what CoreCLR actually honours (see runtime-config/compilation).
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation" Value="false" />
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredCompilation.QuickJit" Value="false" />
+    <RuntimeHostConfigurationOption Include="System.Runtime.TieredPGO" Value="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CefGlue.Common" Version="120.6099.215" />
+  </ItemGroup>
+
+</Project>
