@@ -253,6 +253,24 @@
         <Setter Property="BorderBrush" Value="{StaticResource LunaHighlight}" />
     </Style>
 
+    <!--
+        Terminal input. Fluent repaints a TextBox's template border on :pointerover and
+        :focus through its own rules on Border#PART_BorderElement, which outrank the
+        control's Background flowing in by TemplateBinding — so the field turns white the
+        moment it is hovered or typed in, while the terminal's light Foreground (a local
+        value, which outranks styles) stays light and the text becomes invisible. These
+        restate the dark surface for the terminal field and give focus the same Luna
+        highlight the xpField address bar uses.
+    -->
+    <Style Selector="TextBox.xpTerminalField:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#1E1E1E" />
+    </Style>
+
+    <Style Selector="TextBox.xpTerminalField:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#1E1E1E" />
+        <Setter Property="BorderBrush" Value="{StaticResource LunaHighlight}" />
+    </Style>
+
     <!-- ====================================================================
          Menu bar: File / Edit / View / Favorites / Help.
          ==================================================================== -->

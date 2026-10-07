@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.Input;
+using Conqueror.Net.Core;
 using Conqueror.Net.FileBrowserUi.Models;
 using Conqueror.Net.FileBrowserUi.Services;
 
@@ -183,6 +184,17 @@ public sealed partial class FileBrowserViewModel
 
         try
         {
+            // The shell's own property sheet (SHObjectProperties) — what Explorer's
+            // Properties menu opens — works for any object: folders, extensionless files
+            // and types with no association. ShellExecute's "properties" verb instead
+            // looks the verb up through the file type's registry key first and fails with
+            // ERROR_ASSOCIATION ("No application is associated…") on unassociated types,
+            // so the verb is kept only as a fallback here.
+            if (ShellNative.ShowFileProperties(entry.FullPath))
+            {
+                return;
+            }
+
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(entry.FullPath)
             {
                 Verb = "properties",
@@ -203,6 +215,53 @@ public sealed partial class FileBrowserViewModel
 
     public event Action? SelectAllRequest;
 
+    /// <summary>
+    /// True when the selection is a single file the in-process editor can open. Drives the
+    /// Edit verb's grey state so the menu never offers itself on folders or unknown types.
+    /// </summary>
+    public bool CanEditSelected =>
+        SelectedItem is { IsDirectory: false } entry
+        && EditorFileTypes.Contains(entry.Extension);
+
+    /// <summary>
+    /// Explorer's Edit verb: opens the file in the in-process editor, skipping the
+    /// double-click routing that would send a shortcut to a browser tab or an unassociated
+    /// type to the OS. The window root answers the event.
+    /// </summary>
+    [RelayCommand]
+    private void EditSelected()
+    {
+        var entry = SelectedItem;
+        if (entry is null || entry.IsDirectory)
+        {
+            return;
+        }
+
+        if (!EditorFileTypes.Contains(entry.Extension))
+        {
+            StatusText = $"No editor is registered for '{entry.Name}'.";
+            return;
+        }
+
+        EditFileRequest?.Invoke(entry);
+    }
+
+    /// <summary>Raised when the user picks Edit; the window root opens the editor tab.</summary>
+    public event Action<FileSystemEntry>? EditFileRequest;
+
+    // The menu's IsEnabled binds CanEditSelected, and a binding only refreshes when the VM
+    // announces that property — [ObservableProperty] raises SelectedItem, not the derived one.
+    partial void OnSelectedItemChanged(FileSystemEntry? value) =>
+        OnPropertyChanged(nameof(CanEditSelected));
+
+    /// <summary>
+    /// Re-announces <see cref="CanEditSelected"/> after Tools ▸ Editor File Types changes
+    /// the shared extension set: the selection itself has not moved, so nothing else would
+    /// refresh the menu's grey state until the next click.
+    /// </summary>
+    public void NotifyEditorFileTypesChanged() =>
+        OnPropertyChanged(nameof(CanEditSelected));
+
     private void BeginRename(FileSystemEntry? entry)
     {
         if (entry is null)
@@ -218,7 +277,12 @@ public sealed partial class FileBrowserViewModel
     private FileSystemEntry? FindEntry(string name) =>
         Items.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
 
-    private List<string> SelectedPaths()
+    /// <summary>
+    /// The selection as absolute paths: the focused item first, then the multi-selection,
+    /// deduplicated. Shared with the dual-pane tab, which ships a selection straight to
+    /// the other pane.
+    /// </summary>
+    public List<string> SelectedPaths()
     {
         var paths = new List<string>();
         if (SelectedItem is not null)

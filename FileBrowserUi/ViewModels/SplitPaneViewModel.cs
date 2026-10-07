@@ -22,6 +22,7 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
 
     private readonly FileBrowserViewModel _left;
     private readonly FileBrowserViewModel _right;
+    private readonly IFileSystemService _fileSystem;
 
     //Capabilities:
     public bool CanNewFile => true;
@@ -46,6 +47,8 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
 
     public SplitPaneViewModel(IFileSystemService fileSystem, string? initialPath = null)
     {
+        _fileSystem = fileSystem;
+
         // The right pane opens on the parent of the left pane's start, which is the arrangement
         // a dual-pane manager wants: source on one side, destination on the other.
         _left = new FileBrowserViewModel(fileSystem, initialPath);
@@ -53,6 +56,9 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
 
         _left.OpenFileRequest += entry => OpenFileRequest?.Invoke(entry);
         _right.OpenFileRequest += entry => OpenFileRequest?.Invoke(entry);
+
+        _left.EditFileRequest += entry => EditFileRequest?.Invoke(entry);
+        _right.EditFileRequest += entry => EditFileRequest?.Invoke(entry);
 
         _left.PropertyChanged += OnPaneNavigated;
         _right.PropertyChanged += OnPaneNavigated;
@@ -66,6 +72,9 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
 
     /// <summary>Raised when either pane opens a non-folder; the window root handles it.</summary>
     public event Action<Models.FileSystemEntry>? OpenFileRequest;
+
+    /// <summary>Raised when either pane's Edit verb fires; the window root opens the editor.</summary>
+    public event Action<Models.FileSystemEntry>? EditFileRequest;
 
     public string Title =>
         ActivePane is null
@@ -127,6 +136,75 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
         {
             ActivePane = pane;
         }
+    }
+
+    /// <summary>
+    /// Re-announces both panes' Edit verb grey state after Tools ▸ Editor File Types
+    /// changes the shared extension set; the selections have not moved, so nothing else
+    /// would refresh the bindings.
+    /// </summary>
+    public void NotifyEditorFileTypesChanged()
+    {
+        _left.NotifyEditorFileTypesChanged();
+        _right.NotifyEditorFileTypesChanged();
+    }
+
+    // ---- Pane-to-pane transfers ---------------------------------------------
+    // The four directional verbs are the dual-pane manager's reason for existing: take the
+    // source pane's selection straight to the other side without a clipboard round-trip.
+    // Wording is relative to the split, not to which folder sits where, because SwapPanes
+    // exchanges the panes' content whenever the user reverses direction.
+
+    /// <summary>Copies the left pane's selection into the right pane's folder.</summary>
+    [RelayCommand]
+    private void CopyToRight() => Transfer(_left, _right, move: false);
+
+    /// <summary>Moves the left pane's selection into the right pane's folder.</summary>
+    [RelayCommand]
+    private void MoveToRight() => Transfer(_left, _right, move: true);
+
+    /// <summary>Copies the right pane's selection into the left pane's folder.</summary>
+    [RelayCommand]
+    private void CopyToLeft() => Transfer(_right, _left, move: false);
+
+    /// <summary>Moves the right pane's selection into the left pane's folder.</summary>
+    [RelayCommand]
+    private void MoveToLeft() => Transfer(_right, _left, move: true);
+
+    private void Transfer(FileBrowserViewModel source, FileBrowserViewModel target, bool move)
+    {
+        var paths = source.SelectedPaths();
+        if (paths.Count == 0)
+        {
+            return;
+        }
+
+        // Both panes on the same folder would copy a folder onto itself or silently succeed
+        // at nothing; say so instead of reporting a strange failure from the file service.
+        if (string.Equals(source.CurrentPath, target.CurrentPath, StringComparison.OrdinalIgnoreCase))
+        {
+            source.StatusText = "Both panes are showing the same folder.";
+            return;
+        }
+
+        var (ok, error) = move
+            ? _fileSystem.Move(paths, target.CurrentPath)
+            : _fileSystem.Copy(paths, target.CurrentPath);
+
+        if (!ok)
+        {
+            source.StatusText = error ?? (move ? "Move failed." : "Copy failed.");
+            return;
+        }
+
+        // A move changes both listings; a copy only the target's.
+        target.RefreshCommand.Execute(null);
+        if (move)
+        {
+            source.RefreshCommand.Execute(null);
+        }
+
+        source.StatusText = $"{(move ? "Moved" : "Copied")} {paths.Count:N0} item(s) to the other pane.";
     }
 
     private void OnPaneNavigated(object? sender, System.ComponentModel.PropertyChangedEventArgs e)

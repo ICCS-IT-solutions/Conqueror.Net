@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -6,6 +7,8 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Conqueror.Net.CodeEditorUi.ViewModels;
+using Conqueror.Net.CodeEditorUi.Views;
 using Conqueror.Net.Core.Tabs;
 using Conqueror.Net.FileBrowserUi.Models;
 using Conqueror.Net.FileBrowserUi.ViewModels;
@@ -36,6 +39,49 @@ public partial class MainWindow : Window
     {
         // Window inherits TopLevel, so Clipboard is directly available here.
         FileBrowserUi.Services.ClipboardProvider.Register(Clipboard);
+
+        // The dirty-editor close prompt lives here rather than in the editor view: the
+        // tab being closed may be a background one, whose view has not been created yet.
+        if (Vm is { } vm)
+        {
+            vm.ConfirmEditorClose = ConfirmEditorCloseAsync;
+        }
+    }
+
+    /// <summary>
+    /// Save / Don't save / Cancel for a dirty editor tab. "Save" runs the editor's save
+    /// (which may still open Save As and be cancelled) and only allows the close when the
+    /// buffer actually reached disk.
+    /// </summary>
+    private async Task<bool> ConfirmEditorCloseAsync(CodeEditorViewModel editor)
+    {
+        var dialog = CodeEditorView.BuildDialog(
+            this,
+            "Unsaved changes",
+            $"Save changes to '{editor.Location}' before closing?");
+
+        var saveButton = CodeEditorView.NewDialogButton("Save", isDefault: true, isCancel: false);
+        var discardButton = CodeEditorView.NewDialogButton("Don't save", isDefault: false, isCancel: false);
+        var cancelButton = CodeEditorView.NewDialogButton("Cancel", isDefault: false, isCancel: true);
+
+        saveButton.Click += async (_, _) =>
+        {
+            await editor.SaveCommand.ExecuteAsync(null);
+
+            // A cancelled Save As or a write error leaves the buffer dirty; refusing the
+            // close is the only way to keep the edits from being lost.
+            dialog.Close(!editor.IsDirty);
+        };
+        discardButton.Click += (_, _) => dialog.Close(true);
+        cancelButton.Click += (_, _) => dialog.Close(false);
+
+        if (dialog.Content is StackPanel panel)
+        {
+            dialog.Content = CodeEditorView.WithButtons(panel, saveButton, discardButton, cancelButton);
+        }
+
+        // Closing with the X returns default(bool) = false, i.e. cancel.
+        return await dialog.ShowDialog<bool>(this);
     }
 
     private MainWindowViewModel? Vm => DataContext as MainWindowViewModel;
@@ -70,6 +116,16 @@ public partial class MainWindow : Window
                 break;
             case Key.OemTilde when ctrl:
                 Vm.AddTerminalTabCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.E when ctrl:
+                Vm.AddEditorTabCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.S when ctrl:
+                // The editor view consumes Ctrl+S itself when focus is inside it; this
+                // covers the rest of the window (toolbar, address bar, tab strip).
+                Vm.SaveActiveEditorCommand.Execute(null);
                 e.Handled = true;
                 break;
             case Key.U when ctrl && Vm.IsSplitPaneActive:
@@ -133,6 +189,9 @@ public partial class MainWindow : Window
 
     private void OnNewTerminalTabClick(object? sender, RoutedEventArgs e) =>
         Vm?.AddTerminalTabCommand.Execute(null);
+
+    private void OnNewCodeEditorTabClick(object? sender, RoutedEventArgs e) =>
+        Vm?.AddEditorTabCommand.Execute(null);
 
     /// <summary>Reloads one pane of the dual-pane tab, named by the menu item's Tag.</summary>
     private void OnRefreshPaneClick(object? sender, RoutedEventArgs e)
@@ -198,6 +257,19 @@ public partial class MainWindow : Window
         // Focus the address bar so the user can type a path or URL straight into it.
         var addressBox = this.FindControl<TextBox>(AddressBoxName);
         addressBox?.Focus();
+    }
+
+    /// <summary>Tools ▸ Editor File Types… — the global picker for the editor's claims.</summary>
+    private async void OnEditorFileTypesClick(object? sender, RoutedEventArgs e)
+    {
+        // OK inside the dialog commits (and persists) the list; only then do the open
+        // panes need their Edit verb grey states refreshed, since the selection that
+        // drives them never changed. Cancel and the X return false and do nothing.
+        var applied = await new EditorFileTypesDialog().ShowDialog<bool>(this);
+        if (applied)
+        {
+            Vm?.NotifyEditorFileTypesChanged();
+        }
     }
 
     private void OnExitClick(object? sender, RoutedEventArgs e) => Close();

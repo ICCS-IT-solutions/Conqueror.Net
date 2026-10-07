@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Conqueror.Net.CodeEditorUi.ViewModels"
+             x:Class="Conqueror.Net.CodeEditorUi.Views.CodeEditorView"
+             x:DataType="vm:CodeEditorViewModel"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="520">
+
+    <Border Background="{StaticResource BrushFace}"
+            BorderBrush="{StaticResource BrushShadow}" BorderThickness="1">
+        <DockPanel LastChildFill="True">
+
+            <!-- Editor chrome: file name, dirty dot, Save / Save As / Revert / Wrap. -->
+            <Grid DockPanel.Dock="Top" Height="26" Background="#F0F0F0"
+                  ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,1">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="6,0,0,0"
+                            VerticalAlignment="Center" Spacing="4">
+                    <TextBlock FontSize="11" TextTrimming="CharacterEllipsis"
+                               Text="{Binding Location}" />
+                    <!-- Dirty marker sits in the star column too, so the pair truncates
+                         together instead of the star being pushed off-screen. -->
+                    <TextBlock FontSize="11" Text="*" IsVisible="{Binding IsDirty}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" Margin="0,0,3,0"
+                            VerticalAlignment="Center">
+                    <Button Classes="xpButton" Padding="8,0" MinHeight="20" FontSize="11"
+                            Command="{Binding SaveCommand}" Content="Save" />
+                    <Button Classes="xpButton" Padding="8,0" MinHeight="20" FontSize="11"
+                            Command="{Binding SaveAsCommand}" Content="Save As..." />
+                    <Button Classes="xpButton" Padding="8,0" MinHeight="20" FontSize="11"
+                            Command="{Binding RevertCommand}" Content="Revert" />
+                    <CheckBox IsChecked="{Binding WordWrap}" Content="Wrap"
+                              FontSize="11" VerticalAlignment="Center" Margin="4,0,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <!-- The buffer. AcceptsTab keeps Tab as indentation (no focus trap: Ctrl+Tab still switches tabs). -->
+            <TextBox Name="EditorBox"
+                     Text="{Binding Text, Mode=TwoWay}"
+                     AcceptsReturn="True" AcceptsTab="True"
+                     TextWrapping="{Binding WordWrap, Converter={x:Static vm:BoolToWrapConverter.Instance}}"
+                     Background="White" Foreground="#1A1A1A"
+                     BorderThickness="0" CaretBrush="#1A1A1A"
+                     FontFamily="Consolas,Menlo,Monospace"
+                     FontSize="13" Padding="8,6"
+                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                <!-- Right-click menu. Headers and gestures mirror the shell's Edit menu so
+                     the two stay in sync; Save/Revert disable themselves through their
+                     CanExecute. The ContextMenu inherits this control's DataContext, so the
+                     bindings resolve against the editor view-model. -->
+                <TextBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="_Cut" Classes="xpMenuItem"
+                                  Command="{Binding CutCommand}" InputGesture="Ctrl+X" />
+                        <MenuItem Header="_Copy" Classes="xpMenuItem"
+                                  Command="{Binding CopyCommand}" InputGesture="Ctrl+C" />
+                        <MenuItem Header="_Paste" Classes="xpMenuItem"
+                                  Command="{Binding PasteCommand}" InputGesture="Ctrl+V" />
+                        <MenuItem Header="_Delete" Classes="xpMenuItem"
+                                  Command="{Binding DeleteCommand}" InputGesture="Delete" />
+                        <Separator />
+                        <MenuItem Header="Select _All" Classes="xpMenuItem"
+                                  Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A" />
+                        <Separator />
+                        <MenuItem Header="_Save" Classes="xpMenuItem"
+                                  Command="{Binding SaveCommand}" InputGesture="Ctrl+S" />
+                        <MenuItem Header="Save _As..." Classes="xpMenuItem"
+                                  Command="{Binding SaveAsCommand}" />
+                        <MenuItem Header="_Revert" Classes="xpMenuItem"
+                                  Command="{Binding RevertCommand}" />
+                    </ContextMenu>
+                </TextBox.ContextMenu>
+            </TextBox>
+        </DockPanel>
+    </Border>
+</UserControl>

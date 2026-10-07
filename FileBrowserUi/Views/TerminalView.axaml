@@ -33,13 +33,22 @@
                            Margin="0,0,6,0" VerticalAlignment="Center"
                            Foreground="#C8C8C8" FontFamily="Consolas,Menlo,Monospace"
                            FontSize="12" IsVisible="False" />
+                <!--
+                    xpTerminalField (Luna.Controls.axaml) keeps the template border dark on
+                    hover and focus: Fluent would otherwise repaint it white while the light
+                    Foreground below stays put, and typed text would be invisible. The
+                    colours themselves stay as local values because those beat any style.
+                    The box is deliberately taller than a standard XP field — it is where
+                    every command is typed.
+                -->
                 <TextBox Grid.Column="1" Name="InputBox"
+                         Classes="xpTerminalField"
                          Text="{Binding Input, Mode=TwoWay}"
                          Watermark="Type a command and press Enter"
                          Background="#1E1E1E" Foreground="#E6E6E6"
                          BorderBrush="#5A5A5A" CaretBrush="#E6E6E6"
                          FontFamily="Consolas,Menlo,Monospace"
-                         FontSize="12" MinHeight="22" Padding="4,2"
+                         FontSize="13" MinHeight="30" Padding="6,4"
                          KeyDown="OnInputKeyDown" />
                 <Button Grid.Column="2" Classes="xpButton" Margin="4,0,0,0"
                         Padding="8,1" MinHeight="22"

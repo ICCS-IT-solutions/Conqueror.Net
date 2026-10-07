@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Conqueror.Net.CodeEditorUi.ViewModels;
+using Conqueror.Net.Core;
 using Conqueror.Net.Core.Tabs;
 using Conqueror.Net.FileBrowserUi.Models;
 using Conqueror.Net.FileBrowserUi.Services;
@@ -130,6 +132,19 @@ public sealed partial class MainWindowViewModel : ObservableObject
         public void SelectAll() => vm.SelectAllInputCommand.Execute(null);
     }
 
+    private sealed class EditorEditTarget(CodeEditorViewModel vm) : IEditTarget
+    {
+        public void Cut() => vm.CutCommand.Execute(null);
+
+        public void Copy() => vm.CopyCommand.Execute(null);
+
+        public void Paste() => vm.PasteCommand.Execute(null);
+
+        public void Delete() => vm.DeleteCommand.Execute(null);
+
+        public void SelectAll() => vm.SelectAllCommand.Execute(null);
+    }
+
     /// <summary>
     /// The file tab the creation verbs act on: a plain file tab directly, or a dual-pane
     /// tab's active pane. Null everywhere else, which disables the menu items.
@@ -147,6 +162,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         SplitPaneViewModel split when split.ActivePane is not null => new FileEditTarget(split.ActivePane),
         BrowserTabViewModel browser => new BrowserEditTarget(browser),
         TerminalViewModel terminal => new TerminalEditTarget(terminal),
+        CodeEditorViewModel editor => new EditorEditTarget(editor),
         _ => null,
     };
 
@@ -211,6 +227,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         var vm = new FileBrowserViewModel(_fileSystem);
         vm.OpenFileRequest += OnFileBrowserOpenFileRequest;
+        vm.EditFileRequest += OnFileBrowserEditFileRequest;
         AttachTab(vm);
     }
 
@@ -244,6 +261,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     {
         var vm = new SplitPaneViewModel(_fileSystem, initialPath);
         vm.OpenFileRequest += OnFileBrowserOpenFileRequest;
+        vm.EditFileRequest += OnFileBrowserEditFileRequest;
         AttachTab(vm);
     }
 
@@ -257,6 +275,47 @@ public sealed partial class MainWindowViewModel : ObservableObject
         AttachTab(vm);
     }
 
+    /// <summary>Opens a code/config editor tab, optionally on an existing file.</summary>
+    [RelayCommand]
+    private void AddEditorTab(string? path = null)
+    {
+        var fullPath = NormalizePath(path);
+
+        // Reuse an editor that already has the file open rather than stacking a second
+        // buffer over it: two dirty tabs on one path would let the last save win silently.
+        if (fullPath is not null)
+        {
+            var existing = Tabs.OfType<CodeEditorViewModel>().FirstOrDefault(t =>
+                string.Equals(NormalizePath(t.FilePath), fullPath, StringComparison.OrdinalIgnoreCase));
+
+            if (existing is not null)
+            {
+                SelectedTab = existing;
+                return;
+            }
+        }
+
+        AttachTab(new CodeEditorViewModel(fullPath));
+    }
+
+    /// <summary>Absolute form of a path for comparisons, or null when it cannot be parsed.</summary>
+    private static string? NormalizePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            return Path.GetFullPath(path.Trim().Trim('"'));
+        }
+        catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            return null;
+        }
+    }
+
     private void AttachTab(ITabViewModel tab)
     {
         Tabs.Add(tab);
@@ -265,10 +324,16 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void CloseTab(ITabViewModel? tab)
+    private async Task CloseTabAsync(ITabViewModel? tab)
     {
         var target = tab ?? SelectedTab;
         if (target is null)
+        {
+            return;
+        }
+
+        // The editor prompts on dirty buffers; cancelling leaves the tab in place.
+        if (target is CodeEditorViewModel editor && !await ConfirmEditorCloseAsync(editor))
         {
             return;
         }
@@ -296,7 +361,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void CloseOtherTabs()
+    private async Task CloseOtherTabsAsync()
     {
         if (SelectedTab is null)
         {
@@ -305,6 +370,13 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         foreach (var tab in Tabs.Where(t => !ReferenceEquals(t, SelectedTab)).ToList())
         {
+            // Same guard as CloseTab: a dirty editor buffer prompts, and declining keeps
+            // that tab open rather than throwing the edits away.
+            if (tab is CodeEditorViewModel editor && !await ConfirmEditorCloseAsync(editor))
+            {
+                continue;
+            }
+
             Tabs.Remove(tab);
 
             // Same as CloseTab: a WebView owns a CEF browser + HWND and must be torn
@@ -554,6 +626,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(IsSplitPaneActive));
         OnPropertyChanged(nameof(IsWebBrowserActive));
         OnPropertyChanged(nameof(IsTerminalActive));
+        OnPropertyChanged(nameof(IsEditorActive));
         OnPropertyChanged(nameof(ActiveSplitPane));
 
         // The address label is only a toggle for a folder tab, and the breadcrumb row is
@@ -640,6 +713,42 @@ public sealed partial class MainWindowViewModel : ObservableObject
     /// <summary>True when the active tab is a terminal, which hides the file-only menus.</summary>
     public bool IsTerminalActive => SelectedTab is TerminalViewModel;
 
+    /// <summary>True when the active tab is the in-process code/config editor.</summary>
+    public bool IsEditorActive => SelectedTab is CodeEditorViewModel;
+
+    /// <summary>Saves the active editor tab; the File menu's Save and Ctrl+S route here.</summary>
+    [RelayCommand]
+    private void SaveActiveEditor()
+    {
+        if (SelectedTab is CodeEditorViewModel editor)
+        {
+            editor.SaveCommand.Execute(null);
+        }
+    }
+
+    /// <summary>
+    /// Window-supplied "Save / Don't save / Cancel" prompt for closing a dirty editor tab.
+    /// Set by the shell window on load; null headless, where closes proceed (tests).
+    /// </summary>
+    public Func<CodeEditorViewModel, Task<bool>>? ConfirmEditorClose { get; set; }
+
+    private async Task<bool> ConfirmEditorCloseAsync(CodeEditorViewModel editor)
+    {
+        if (!editor.IsDirty)
+        {
+            return true;
+        }
+
+        if (ConfirmEditorClose is { } prompt)
+        {
+            return await prompt(editor);
+        }
+
+        // No view hook (headless): fall back to the editor's own guard, which proceeds
+        // when it has nowhere to show a dialog.
+        return await editor.ConfirmCloseAsync();
+    }
+
     /// <summary>Swaps the two panes of the active dual-pane tab.</summary>
     [RelayCommand]
     private void SwapPanes()
@@ -664,11 +773,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void OnFileBrowserOpenFileRequest(FileSystemEntry entry)
     {
-        // A web shortcut or a local .html file belongs in a browser tab; everything else is
-        // handed to whatever the user has associated with it.
+        // A web shortcut or a local .html file belongs in a browser tab; text and config
+        // files go to the in-process editor, and everything else is handed to whatever
+        // the user has associated with it.
         if (TryGetWebAddress(entry, out var url))
         {
             AddWebTab(url);
+            return;
+        }
+
+        if (!entry.IsDirectory && EditorFileTypes.Contains(entry.Extension))
+        {
+            AddEditorTab(entry.FullPath);
             return;
         }
 
@@ -680,6 +796,40 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             // Nothing is registered for this type, or the OS refused to launch it.
             App.Log?.Invoke($"Could not open '{entry.Name}': {ex.Message}");
+        }
+    }
+
+    private void OnFileBrowserEditFileRequest(FileSystemEntry entry)
+    {
+        // The Edit verb answers with the in-process editor directly: the pane has already
+        // checked the extension, and the user asked for the editor explicitly, so the
+        // web-tab and shell routing above does not apply.
+        if (!entry.IsDirectory && EditorFileTypes.Contains(entry.Extension))
+        {
+            AddEditorTab(entry.FullPath);
+        }
+    }
+
+    /// <summary>
+    /// After Tools ▸ Editor File Types changes the shared extension set, ask every live
+    /// file pane to re-announce its Edit verb's grey state — the selection that drives it
+    /// has not changed, so the binding would otherwise keep the old answer until the next
+    /// click. Reading the set itself (double-click routing, EditSelected) needs no nudge:
+    /// those consult <see cref="EditorFileTypes.Contains"/> at fire time.
+    /// </summary>
+    public void NotifyEditorFileTypesChanged()
+    {
+        foreach (var tab in Tabs)
+        {
+            switch (tab)
+            {
+                case FileBrowserViewModel pane:
+                    pane.NotifyEditorFileTypesChanged();
+                    break;
+                case SplitPaneViewModel split:
+                    split.NotifyEditorFileTypesChanged();
+                    break;
+            }
         }
     }
 

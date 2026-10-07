@@ -49,6 +49,10 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
         ["Icon.Xp.FileShortcut"] = "xp-fileshortcut",
         ["Icon.Xp.BatFile"] = "xp-batfile",
         ["Icon.Xp.Program"] = "xp-program",
+
+        // The editor tab. xp-configfile is the XP notepad-with-gear artwork from the pack,
+        // which reads as "text/config file" the way a plain document glyph would not.
+        ["Icon.Xp.ConfigFile"] = "xp-configfile",
     };
 
     /// <summary>

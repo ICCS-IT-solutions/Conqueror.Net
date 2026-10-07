@@ -154,6 +154,52 @@ public partial class FileBrowserView : UserControl
         Vm?.OpenSelectedCommand.Execute(null);
     }
 
+    /// <summary>
+    /// Right-clicking a row that is not part of the current selection collapses the
+    /// selection to that row, the way Explorer does, so the context menu acts on the item
+    /// under the pointer. A row already inside a multi-selection leaves it alone, keeping
+    /// Cut/Copy/Delete working on every highlighted item; right-clicking empty space
+    /// changes nothing.
+    /// </summary>
+    private void OnEntryPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not ListBox list
+            || !e.GetCurrentPoint(list).Properties.IsRightButtonPressed)
+        {
+            return;
+        }
+
+        // Walk the logical tree up from the hit element to the row's container; the
+        // ancestor check keeps an empty-area click (whose source chain reaches the list
+        // itself) from matching a container belonging to some other control.
+        ListBoxItem? container = null;
+        for (var current = e.Source as StyledElement;
+             current is not null;
+             current = current.Parent)
+        {
+            if (current is ListBoxItem item)
+            {
+                container = item;
+                break;
+            }
+
+            if (ReferenceEquals(current, list))
+            {
+                break;
+            }
+        }
+
+        if (container is null || container.IsSelected)
+        {
+            return;
+        }
+
+        // Cleared first: with SelectionMode.Multiple a bare set is not guaranteed to
+        // replace the existing selection rather than add to it.
+        list.SelectedItem = null;
+        list.SelectedItem = container.DataContext;
+    }
+
     private void OnEntryKeyDown(object? sender, KeyEventArgs e)
     {
         if (Vm is null)

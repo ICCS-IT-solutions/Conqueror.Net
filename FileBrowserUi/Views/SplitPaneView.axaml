@@ -18,6 +18,48 @@
     -->
     <Grid Name="PaneGrid" ColumnDefinitions="*,Auto,*" Background="{StaticResource BrushFace}">
 
+        <!--
+            The splitter's own right-click menu: the dual-pane verbs that belong to the
+            tab rather than to either pane. Pane content is covered by FileBrowserView's
+            context menu, so this is what surfaces when the divider strip is clicked.
+            InputGesture strings match the window's key handlers and are display hints,
+            the same convention as the main menu.
+
+            The transfer verbs grey themselves against the pane that sources them — a
+            copy to the right can only be as good as the left pane's selection — and the
+            focus verbs exist because the shared address bar follows ActivePane, not the
+            pointer.
+        -->
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="_Swap Panes" Classes="xpMenuItem"
+                          Command="{Binding SwapPanesCommand}" InputGesture="Ctrl+U" />
+                <Separator />
+                <MenuItem Header="Focus _Left Pane" Classes="xpMenuItem"
+                          Command="{Binding FocusPaneCommand}"
+                          CommandParameter="{Binding LeftPane}" />
+                <MenuItem Header="Focus _Right Pane" Classes="xpMenuItem"
+                          Command="{Binding FocusPaneCommand}"
+                          CommandParameter="{Binding RightPane}" />
+                <Separator />
+                <MenuItem Header="Copy to Right ►" Classes="xpMenuItem"
+                          Command="{Binding CopyToRightCommand}"
+                          IsEnabled="{Binding LeftPane.SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="Move to Right ►" Classes="xpMenuItem"
+                          Command="{Binding MoveToRightCommand}"
+                          IsEnabled="{Binding LeftPane.SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="◄ Copy to Left" Classes="xpMenuItem"
+                          Command="{Binding CopyToLeftCommand}"
+                          IsEnabled="{Binding RightPane.SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="◄ Move to Left" Classes="xpMenuItem"
+                          Command="{Binding MoveToLeftCommand}"
+                          IsEnabled="{Binding RightPane.SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Separator />
+                <MenuItem Header="Refresh _Pane" Classes="xpMenuItem"
+                          Command="{Binding RefreshActiveCommand}" InputGesture="F5" />
+            </ContextMenu>
+        </Grid.ContextMenu>
+
         <views:FileBrowserView Grid.Column="0"
                               DataContext="{Binding LeftPane}" />
 

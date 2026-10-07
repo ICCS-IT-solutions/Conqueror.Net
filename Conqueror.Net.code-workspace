@@ -4,5 +4,8 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"axaml.selectedSolution": "c:\\Users\\Iain\\vscode\\cs\\Conqueror.Net\\Conqueror.Net.sln",
+		"dotnet.defaultSolution": "Conqueror.Net.sln"
+	}
 }

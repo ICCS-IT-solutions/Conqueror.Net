@@ -4,6 +4,8 @@
              xmlns:fileViews="clr-namespace:Conqueror.Net.FileBrowserUi.Views"
              xmlns:webVm="clr-namespace:Conqueror.Net.WebBrowserUi.ViewModels"
              xmlns:webViews="clr-namespace:Conqueror.Net.WebBrowserUi.Views"
+             xmlns:codeVm="clr-namespace:Conqueror.Net.CodeEditorUi.ViewModels"
+             xmlns:codeViews="clr-namespace:Conqueror.Net.CodeEditorUi.Views"
              x:Class="Conqueror.Net.App"
              RequestedThemeVariant="Light">
 
@@ -38,6 +40,9 @@
         </DataTemplate>
         <DataTemplate DataType="fileVm:TerminalViewModel">
             <fileViews:TerminalView />
+        </DataTemplate>
+        <DataTemplate DataType="codeVm:CodeEditorViewModel">
+            <codeViews:CodeEditorView />
         </DataTemplate>
     </Application.DataTemplates>
 </Application>

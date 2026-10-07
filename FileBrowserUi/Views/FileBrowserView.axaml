@@ -85,6 +85,58 @@
     </UserControl.Resources>
 
     <Border Background="{StaticResource BrushFace}">
+        <!--
+            Right-click menu for the pane. It hangs off the root border rather than the
+            list so the folder tree and the empty margins are covered too; the DataContext
+            it inherits is this pane's view-model, which is what makes the same markup work
+            unchanged for a single-pane tab and for either side of a dual-pane (split) tab.
+            Selection-dependent verbs grey out through SelectedItem, since commands act on
+            SelectedItem plus the multi-selection.
+        -->
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="_Open" Classes="xpMenuItem"
+                          Command="{Binding OpenSelectedCommand}"
+                          IsEnabled="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <!--
+                    XP shows Edit alongside Open for anything Notepad-ish; here it means
+                    "in-process editor", greyed unless the selection is one file the
+                    editor's extension set covers (folders and binaries excluded).
+                -->
+                <MenuItem Header="_Edit" Classes="xpMenuItem"
+                          Command="{Binding EditSelectedCommand}"
+                          IsEnabled="{Binding CanEditSelected}" />
+                <Separator />
+                <MenuItem Header="New _File" Classes="xpMenuItem"
+                          Command="{Binding NewFileCommand}" />
+                <MenuItem Header="New F_older" Classes="xpMenuItem"
+                          Command="{Binding NewFolderCommand}" />
+                <Separator />
+                <MenuItem Header="_Cut" Classes="xpMenuItem"
+                          Command="{Binding CutCommand}" InputGesture="Ctrl+X"
+                          IsEnabled="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="_Copy" Classes="xpMenuItem"
+                          Command="{Binding CopyCommand}" InputGesture="Ctrl+C"
+                          IsEnabled="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="_Paste" Classes="xpMenuItem"
+                          Command="{Binding PasteCommand}" InputGesture="Ctrl+V" />
+                <Separator />
+                <MenuItem Header="_Delete" Classes="xpMenuItem"
+                          Command="{Binding DeleteCommand}" InputGesture="Delete"
+                          IsEnabled="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="_Rename" Classes="xpMenuItem"
+                          Command="{Binding RenameCommand}" InputGesture="F2"
+                          IsEnabled="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <MenuItem Header="_Properties" Classes="xpMenuItem"
+                          Command="{Binding ShowPropertiesCommand}" InputGesture="Alt+Return"
+                          IsEnabled="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Separator />
+                <MenuItem Header="Select _All" Classes="xpMenuItem"
+                          Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A" />
+                <MenuItem Header="_Refresh" Classes="xpMenuItem"
+                          Command="{Binding RefreshCommand}" InputGesture="F5" />
+            </ContextMenu>
+        </Border.ContextMenu>
         <DockPanel LastChildFill="True">
 
             <!-- ============ Task pane: folders and drives (XP's left sidebar) ==== -->
@@ -359,6 +411,7 @@
                          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
                          SelectionMode="Multiple"
                          DoubleTapped="OnEntryDoubleTapped"
+                         PointerPressed="OnEntryPointerPressed"
                          KeyDown="OnEntryKeyDown"
                          Background="{StaticResource BrushWindow}">
                     <ListBox.ItemsPanel>

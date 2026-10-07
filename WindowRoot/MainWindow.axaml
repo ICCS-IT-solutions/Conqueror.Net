@@ -27,6 +27,8 @@
                 <MenuItem Header="New _Folder" Click="OnNewFolderClick" />
                 <MenuItem Header="New _Dual-Pane Tab" Click="OnNewSplitPaneTabClick"
                           InputGesture="Ctrl+P" />
+                <MenuItem Header="New _Editor Tab" Click="OnNewCodeEditorTabClick"
+                          InputGesture="Ctrl+E" />
                 <Separator />
                 <MenuItem Header="_Open..." Click="OnOpenLocationClick" InputGesture="Ctrl+O" />
                 <MenuItem Header="Close _Tab" Command="{Binding CloseTabCommand}" InputGesture="Ctrl+W" />
@@ -76,6 +78,14 @@
             </MenuItem>
             <MenuItem Header="Fa_vorites" Classes="xpMenuItem">
                 <MenuItem Header="Open _Location..." Click="OnOpenLocationClick" />
+            </MenuItem>
+            <!--
+                Global tools: they belong to the shell itself rather than to any one pane,
+                so the menu stays put whatever tab kind is active (XP Explorer order puts
+                Tools between Favorites and the contextual menus).
+            -->
+            <MenuItem Header="_Tools" Classes="xpMenuItem">
+                <MenuItem Header="_Editor File Types..." Click="OnEditorFileTypesClick" />
             </MenuItem>
             <!--
                 Contextual menus. These appear only when the active tab is an orthodox
@@ -313,6 +323,9 @@
                     <Button Classes="xpToolbarButton" Command="{Binding AddTerminalTabCommand}" ToolTip.Tip="New terminal tab (Ctrl+`)">
                         <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-command-prompt16.png" Width="16" Height="16" />
                     </Button>
+                    <Button Classes="xpToolbarButton" Command="{Binding AddEditorTabCommand}" ToolTip.Tip="New editor tab">
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-configfile16.png" Width="16" Height="16" />
+                    </Button>                    
                 </StackPanel>
             </Grid>
         </Border>
