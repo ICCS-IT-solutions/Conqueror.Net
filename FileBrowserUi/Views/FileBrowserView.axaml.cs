@@ -55,6 +55,8 @@ public partial class FileBrowserView : UserControl
         {
             _subscribedVm.PropertyChanged -= OnVmPropertyChanged;
             _subscribedVm.SelectAllRequest -= OnSelectAllRequest;
+            _subscribedVm.SelectNoneRequest -= OnSelectNoneRequest;
+            _subscribedVm.InvertSelectRequest -= OnInvertSelectRequest;
             _subscribedVm.OpenFileRequest -= OnOpenFileRequest;
             _subscribedVm = null;
         }
@@ -67,6 +69,8 @@ public partial class FileBrowserView : UserControl
         _subscribedVm = Vm;
         Vm.PropertyChanged += OnVmPropertyChanged;
         Vm.SelectAllRequest += OnSelectAllRequest;
+        Vm.SelectNoneRequest += OnSelectNoneRequest;
+        Vm.InvertSelectRequest += OnInvertSelectRequest;
         Vm.OpenFileRequest += OnOpenFileRequest;
 
         // Destructive verbs (delete) ask through this hook; the view answers with an
@@ -274,6 +278,42 @@ public partial class FileBrowserView : UserControl
         if (this.FindControl<ListBox>("EntryList") is { } list)
         {
             list.SelectAll();
+        }
+    }
+
+    /// <summary>The Edit menu's Select None asks through the view; clears the ListBox selection.</summary>
+    private void OnSelectNoneRequest()
+    {
+        if (this.FindControl<ListBox>("EntryList") is { } list)
+        {
+            list.SelectedItem = null;
+        }
+    }
+
+    /// <summary>The Edit menu's Invert Selection asks through the view; inverts the ListBox selection.</summary>
+    private void OnInvertSelectRequest()
+    {
+        if (this.FindControl<ListBox>("EntryList") is { } list
+            && list.ItemsSource is System.Collections.IEnumerable items
+            && list.SelectedItems is not null)
+        {
+            var currentlySelected = new HashSet<object>(list.SelectedItems.OfType<object>());
+            var toSelect = new List<object>();
+
+            foreach (var item in items)
+            {
+                if (!currentlySelected.Contains(item))
+                {
+                    toSelect.Add(item);
+                }
+            }
+
+            // Clear and rebuild selection
+            list.SelectedItem = null;
+            foreach (var item in toSelect)
+            {
+                list.SelectedItems.Add(item);
+            }
         }
     }
 

@@ -32,6 +32,8 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     public bool CanRename => false;
     public bool CanProperties => false;
     public bool CanSelectAll => true;
+    public bool CanSelectNone => true;
+    public bool CanInvertSelect => true;
 
     private readonly IExtensionService _extensionService;
     private IRelayCommand? _extensionsCommand;

@@ -90,9 +90,10 @@ public sealed class FileSystemEntry
     /// the converter returning null is the normal path rather than a failure.
     /// </para>
     /// <para>
-    /// A shortcut is classified by its target, which costs a COM round trip, so the answer is
-    /// cached here for the life of the entry. Enumeration does not call this: it runs when the
-    /// view asks for an icon, so a folder that is listed but never drawn never pays for it.
+    /// A shortcut is classified by its target and a program link then carries its path for icon
+    /// extraction, both of which cost COM/shell round trips, so the answers are cached here for
+    /// the life of the entry. Enumeration does not call this: it runs when the view asks for an
+    /// icon, so a folder that is listed but never drawn never pays for it.
     /// </para>
     /// </remarks>
     public string? XpIconKey
@@ -126,10 +127,12 @@ public sealed class FileSystemEntry
 
         if (string.Equals(Extension, ".lnk", StringComparison.OrdinalIgnoreCase))
         {
-            // An unreadable or broken link still looks like a shortcut to the user, so it falls
-            // back to the plain document-arrow artwork rather than losing the overlay entirely.
+            // A program link carries its own path so the converter can try the target's real
+            // icon first and fall back to the XP program artwork when the shell has none. An
+            // unreadable or broken link cannot be classified at all, and keeps the plain
+            // document-arrow artwork rather than losing the overlay entirely.
             return Services.ShortcutTarget.IsProgramShortcut(FullPath)
-                ? "Icon.Xp.ProgramShortcut"
+                ? "Icon.Xp.ProgramShortcut@" + FullPath
                 : "Icon.Xp.FileShortcut";
         }
 

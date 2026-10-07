@@ -133,6 +133,10 @@
                 <Separator />
                 <MenuItem Header="Select _All" Classes="xpMenuItem"
                           Command="{Binding SelectAllCommand}" InputGesture="Ctrl+A" />
+                <MenuItem Header="Select _None" Classes="xpMenuItem"
+                          Command="{Binding SelectNoneCommand}" />
+                <MenuItem Header="_Invert Selection" Classes="xpMenuItem"
+                          Command="{Binding InvertSelectCommand}" />
                 <MenuItem Header="_Refresh" Classes="xpMenuItem"
                           Command="{Binding RefreshCommand}" InputGesture="F5" />
             </ContextMenu>

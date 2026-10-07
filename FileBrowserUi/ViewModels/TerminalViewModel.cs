@@ -55,6 +55,14 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
     public bool CanRename => false;
     public bool CanProperties => false;
     public bool CanSelectAll => true;
+    /// <summary>
+    /// The terminal input box does not support clearing or inverting its selection as
+    /// discrete commands; these stay false so the shell's Edit menu greys them out when
+    /// a terminal tab is active.
+    /// </summary>
+    public bool CanSelectNone => false;
+
+    public bool CanInvertSelect => false;
 
     /// <summary>Rendered output, oldest first.</summary>
     public ObservableCollection<string> Lines { get; } = [];

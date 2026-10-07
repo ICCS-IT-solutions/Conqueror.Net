@@ -34,6 +34,8 @@ public interface ITabViewModel : INotifyPropertyChanged
     public bool CanRename { get; }
     public bool CanProperties { get; }
     public bool CanSelectAll { get; }
+    public bool CanSelectNone { get; }
+    public bool CanInvertSelect { get; }
 
     /// <summary>True while the tab is busy loading, so the shell can show a stop button.</summary>
     bool IsBusy { get; }

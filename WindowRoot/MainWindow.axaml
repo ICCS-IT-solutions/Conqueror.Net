@@ -57,6 +57,10 @@
                           IsEnabled="{Binding CanProperties}" InputGesture="Alt+Return" />
                 <MenuItem Header="Select _All" Command="{Binding SelectAllCommand}"
                           IsEnabled="{Binding CanSelectAll}" InputGesture="Ctrl+A" />
+                <MenuItem Header="Select _None" Command="{Binding SelectNoneCommand}"                          
+                          IsEnabled="{Binding CanSelectNone}" />
+                <MenuItem Header="_Invert Selection" Command="{Binding InvertSelectCommand}"
+                          IsEnabled="{Binding CanInvertSelect}" />
             </MenuItem>
             <MenuItem Header="_View" Classes="xpMenuItem">
                 <MenuItem Header="_Folder Pane" Name="FolderPaneMenuItem"
@@ -266,6 +270,30 @@
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectall32.png" Width="32" Height="32" />
                                 <TextBlock Text="Select All" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"                                
+                                Command="{Binding SelectNoneCommand}"
+                                IsEnabled="{Binding CanSelectNone}"
+                                IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                                ToolTip.Tip="Select None"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectnone32.png" Width="32" Height="32" />
+                                <TextBlock Text="Select None" Margin="4,0,4,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Classes="xpToolbarButtonLarge"
+                                Command="{Binding InvertSelectCommand}"
+                                IsEnabled="{Binding CanInvertSelect}"
+                                IsVisible="{Binding SelectedTab.IsFileBrowser}"
+                                ToolTip.Tip="Invert Selection"
+                                Margin="0,0,2,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-invertselect32.png" Width="32" Height="32" />
+                                <TextBlock Text="Invert Selection" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 

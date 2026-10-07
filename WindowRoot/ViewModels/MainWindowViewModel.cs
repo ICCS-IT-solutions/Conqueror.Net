@@ -74,6 +74,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
         () => DispatchEdit(t => t.SelectAll()),
         () => CanDispatchEdit(t => t.CanSelectAll));
 
+    public RelayCommand SelectNoneCommand => new(
+        () => DispatchEdit(t => (t as FileEditTarget)?.SelectNone()),
+        () => CanDispatchEdit(t => t.CanSelectNone));
+
+    public RelayCommand InvertSelectCommand => new(
+        () => DispatchEdit(t => (t as FileEditTarget)?.InvertSelect()),
+        () => CanDispatchEdit(t => t.CanInvertSelect));
+
     /// <summary>
     /// Minimal edit-command surface every tab kind supports. Implemented as a private
     /// interface over the four tab VMs so the shell dispatches without a type-switch per
@@ -104,6 +112,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
         public void Delete() => vm.DeleteCommand.Execute(null);
 
         public void SelectAll() => vm.SelectAllCommand.Execute(null);
+        public void SelectNone() => vm.SelectNoneCommand.Execute(null);
+        public void InvertSelect() => vm.InvertSelectCommand.Execute(null);
     }
 
     private sealed class BrowserEditTarget(BrowserTabViewModel vm) : IEditTarget
@@ -694,6 +704,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public bool CanRename => SelectedTab?.CanRename ?? false;
     public bool CanProperties => SelectedTab?.CanProperties ?? false;
     public bool CanSelectAll => SelectedTab?.CanSelectAll ?? false;
+    public bool CanSelectNone => SelectedTab?.CanSelectNone ?? false;
+    public bool CanInvertSelect => SelectedTab?.CanInvertSelect ?? false;
 
     public bool CanGoUp => SelectedTab is FileBrowserViewModel { CanGoUp: true }
         || SelectedTab is SplitPaneViewModel { CanGoUp: true };

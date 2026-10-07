@@ -35,6 +35,19 @@ public sealed partial class SplitPaneViewModel : ObservableObject, ITabViewModel
     public bool CanProperties => true;
     public bool CanSelectAll => true;
 
+    /// <summary>
+    /// True when the active pane has a selection to clear. The split pane itself does not
+    /// own a list; this delegates to whichever pane is active so the shell's Edit menu
+    /// greys correctly when the user has nothing selected.
+    /// </summary>
+    public bool CanSelectNone => ActivePane?.CanSelectNone ?? false;
+
+    /// <summary>
+    /// True when the active pane can invert its selection. Same delegation rule as
+    /// <see cref="CanSelectNone"/>: the split pane is a container, not a list owner.
+    /// </summary>
+    public bool CanInvertSelect => ActivePane?.CanInvertSelect ?? false;
+
     [ObservableProperty]
     private FileBrowserViewModel _activePane;
 

@@ -213,7 +213,23 @@ public sealed partial class FileBrowserViewModel
         SelectAllRequest?.Invoke();
     }
 
+    [RelayCommand]
+    private void SelectNone()
+    {
+        SelectNoneRequest?.Invoke();
+    }
+
+    [RelayCommand]
+    private void InvertSelect()
+    {
+        InvertSelectRequest?.Invoke();
+    }
+
     public event Action? SelectAllRequest;
+
+    public event Action? SelectNoneRequest;
+
+    public event Action? InvertSelectRequest;
 
     /// <summary>
     /// True when the selection is a single file the in-process editor can open. Drives the

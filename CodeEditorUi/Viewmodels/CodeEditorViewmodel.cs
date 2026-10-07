@@ -75,6 +75,8 @@ public sealed partial class CodeEditorViewModel : ObservableObject, ITabViewMode
     public bool CanRename => false;
     public bool CanProperties => false;
     public bool CanSelectAll => true;
+    public bool CanSelectNone => true;
+    public bool CanInvertSelect => true;
 
     public double? LoadProgress => null;
     public bool IsFileBrowser => false;

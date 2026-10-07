@@ -41,6 +41,13 @@ public sealed class EditorFileTypesDialog : Window
             _types.Add(extension);
         }
 
+        // Created before the list: its enable state is driven from the SelectionChanged
+        // lambda below, and a field dereferenced before it is assigned in the constructor
+        // is a nullable warning even though the handler cannot fire that early.
+        _removeButton = MakeButton("Remove");
+        _removeButton.IsEnabled = false;
+        _removeButton.Click += OnRemoveClick;
+
         _list = new ListBox
         {
             ItemsSource = _types,
@@ -62,10 +69,6 @@ public sealed class EditorFileTypesDialog : Window
                 args.Handled = true;
             }
         };
-
-        _removeButton = MakeButton("Remove");
-        _removeButton.IsEnabled = false;
-        _removeButton.Click += OnRemoveClick;
 
         var addButton = MakeButton("Add");
         addButton.Click += OnAddClick;

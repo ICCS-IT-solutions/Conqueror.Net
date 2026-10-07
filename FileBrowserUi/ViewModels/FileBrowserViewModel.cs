@@ -31,6 +31,19 @@ public sealed partial class FileBrowserViewModel : ObservableObject, ITabViewMod
     public bool CanSelectAll => true;
 
     /// <summary>
+    /// True when the pane has a selection to clear. Used to grey the Edit ▸ Select None menu
+    /// item when nothing is selected; the toolbar button is always enabled because clearing
+    /// an empty selection is a no-op rather than an error.
+    /// </summary>
+    public bool CanSelectNone => true;
+
+    /// <summary>
+    /// True when the pane can invert its selection. Always enabled for the file browser;
+    /// inverting an empty selection selects everything, which is the expected behaviour.
+    /// </summary>
+    public bool CanInvertSelect => true;
+
+    /// <summary>
     /// Pending rename target. Set by <see cref="Rename"/>; the view shows its rename box
     /// when this is non-null, then calls <see cref="ConfirmRenameCommand"/> or
     /// <see cref="CancelRenameCommand"/>.
