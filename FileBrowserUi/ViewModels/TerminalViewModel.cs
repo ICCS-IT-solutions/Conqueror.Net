@@ -42,6 +42,12 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         _backend.OutputReceived += OnOutputReceived;
         _backend.Exited += OnExited;
 
+        // Subscribe to working directory changes to update the prompt
+        if (_backend is PipedProcessBackend pipedBackend)
+        {
+            pipedBackend.WorkingDirectoryChanged += OnWorkingDirectoryChanged;
+        }
+
         Title = _backend.ShellName;
     }
 
@@ -190,8 +196,12 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         Input = string.Empty;
 
         // Echo locally: a piped shell does not echo what it is fed, so without this the
-        // transcript would not show what the user typed.
-        Append($"{_backend.ShellName}> {line}");
+        // transcript would not show what the user typed. Use the backend's prompt format
+        // (e.g., "C:\Users\Iain> ") if available, otherwise fall back to shell name.
+        var prompt = _backend is PipedProcessBackend pipedBackend && !string.IsNullOrEmpty(pipedBackend.PromptFormat)
+            ? pipedBackend.FormatPrompt(pipedBackend.CurrentWorkingDirectory ?? "")
+            : $"{_backend.ShellName}> ";
+        Append($"{prompt}{line}");
 
         if (!IsRunning)
         {
@@ -385,6 +395,19 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         });
     }
 
+    /// <summary>Updates the current working directory when the backend reports a change.</summary>
+    private void OnWorkingDirectoryChanged(string newDirectory)
+    {
+        PostTo(() =>
+        {
+            // The working directory changed (e.g., via cd command).
+            // We don't need to add anything to the transcript here since the prompt
+            // will reflect the new directory on the next command.
+            OnPropertyChanged(nameof(Location));
+            OnPropertyChanged(nameof(StatusText));
+        });
+    }
+
     /// <summary>Appends text, splitting on newlines because the view renders whole lines.</summary>
     private void Append(string text)
     {
@@ -429,6 +452,10 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
     {
         _backend.OutputReceived -= OnOutputReceived;
         _backend.Exited -= OnExited;
+        if (_backend is PipedProcessBackend pipedBackend)
+        {
+            pipedBackend.WorkingDirectoryChanged -= OnWorkingDirectoryChanged;
+        }
         _cts?.Dispose();
         _backend.Dispose();
     }

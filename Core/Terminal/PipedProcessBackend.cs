@@ -14,28 +14,27 @@ namespace Conqueror.Net.Core.Terminal;
 /// </summary>
 public sealed class PipedProcessBackend : ITerminalBackend
 {
-    /// <summary>Shell candidates in preference order for the running OS.</summary>
-    private static readonly string[] WindowsShells = ["powershell.exe", "cmd.exe"];
-
-    private static readonly string[] UnixShells = ["/bin/sh", "/bin/bash", "/usr/bin/sh"];
-
-    private readonly string? _workingDirectory;
-    private readonly string? _shellOverride;
+    private readonly string? _initialWorkingDirectory;
+    private string? _shellOverride;
 
     private Process? _process;
+    private string? _currentWorkingDirectory;
 
     /// <summary>Shell actually launched, so the label reflects reality rather than intent.</summary>
     private string? _resolvedShell;
+    private string? _resolvedArgs;
 
     public PipedProcessBackend(string? workingDirectory = null, string? shell = null)
     {
-        _workingDirectory = workingDirectory;
+        _initialWorkingDirectory = workingDirectory;
+        _currentWorkingDirectory = workingDirectory;
         _shellOverride = shell;
     }
-
     public event Action<string>? OutputReceived;
-
     public event Action<int>? Exited;
+
+    /// <summary>Raised when the working directory changes (e.g., via cd command).</summary>
+    public event Action<string>? WorkingDirectoryChanged;
 
     public bool IsRunning => _process is { HasExited: false };
 
@@ -43,14 +42,20 @@ public sealed class PipedProcessBackend : ITerminalBackend
     /// The shell in use. Until the process starts this is the preference-order default, which
     /// is what the tab label shows; <see cref="StartAsync"/> refines it to whatever was found.
     /// </summary>
-    public string ShellName => _resolvedShell ?? DescribeDefaultShell();
+    public string ShellName => _resolvedShell ?? TerminalShellRegistry.GetSelectedShell().DisplayName;
 
-    /// <summary>
-    /// The volume label this backend would try first. Public so the view-model can show the user
-    /// which one they got, which matters when it is not the one they expected.
-    /// </summary>
-    public static string DescribeDefaultShell() =>
-        RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? WindowsShells[0] : UnixShells[0];
+    /// <summary>Current working directory of the shell process.</summary>
+    public string? CurrentWorkingDirectory => _currentWorkingDirectory;
+
+    /// <summary>The prompt format string for the selected shell (with {0} = working directory).</summary>
+    public string? PromptFormat => TerminalShellRegistry.GetSelectedShell().PromptFormat;
+
+    /// <summary>Formats the prompt string for the given working directory.</summary>
+    public string FormatPrompt(string workingDirectory)
+    {
+        var format = TerminalShellRegistry.GetSelectedShell().PromptFormat;
+        return string.IsNullOrEmpty(format) ? string.Empty : string.Format(format, workingDirectory);
+    }
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
@@ -59,13 +64,12 @@ public sealed class PipedProcessBackend : ITerminalBackend
             throw new InvalidOperationException("The terminal process has already been started.");
         }
 
-        var (fileName, arguments) = ResolveShell();
-        _resolvedShell = fileName;
+        (_resolvedShell, _resolvedArgs) = TerminalShellRegistry.ResolveShell(_shellOverride);
 
         var info = new ProcessStartInfo
         {
-            FileName = fileName,
-            Arguments = arguments,
+            FileName = _resolvedShell,
+            Arguments = _resolvedArgs,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -77,9 +81,10 @@ public sealed class PipedProcessBackend : ITerminalBackend
 
         // Start in the folder the user is looking at, so relative paths behave as they would
         // in a terminal opened there. Guarded because the folder may have been deleted.
-        if (!string.IsNullOrWhiteSpace(_workingDirectory) && Directory.Exists(_workingDirectory))
+        if (!string.IsNullOrWhiteSpace(_initialWorkingDirectory) && Directory.Exists(_initialWorkingDirectory))
         {
-            info.WorkingDirectory = _workingDirectory;
+            info.WorkingDirectory = _initialWorkingDirectory;
+            _currentWorkingDirectory = _initialWorkingDirectory;
         }
 
         _process = new Process { StartInfo = info, EnableRaisingEvents = true };
@@ -95,102 +100,80 @@ public sealed class PipedProcessBackend : ITerminalBackend
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Picks the shell. An explicit override wins; otherwise the first candidate that actually
-    /// exists, so a machine without PowerShell falls back to cmd rather than failing.
-    /// </summary>
-    private (string FileName, string Arguments) ResolveShell()
+    private bool TryExtractDirectoryChange(string line, out string newDir)
     {
-        if (!string.IsNullOrWhiteSpace(_shellOverride))
-        {
-            return (_shellOverride, string.Empty);
-        }
+        newDir = string.Empty;
+        var trimmed = line.Trim();
 
-        var candidates = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? WindowsShells
-            : UnixShells;
-
-        foreach (var candidate in candidates)
+        // Windows: cd, chdir
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (ExistsOnPath(candidate))
+            if (trimmed.StartsWith("cd ", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("chdir ", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("pushd ", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("cd", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.Equals("chdir", StringComparison.OrdinalIgnoreCase))
             {
-                // Interactive flag: without it the shell reads a script and exits immediately.
-                var arguments = candidate.EndsWith("powershell.exe", StringComparison.OrdinalIgnoreCase)
-                    ? "-NoLogo -NoProfile -Command -"
-                    : string.Empty;
-
-                return (candidate, arguments);
-            }
-        }
-
-        // Nothing found: let Process.Start report the failure with its own message.
-        return (candidates[0], string.Empty);
-    }
-
-    private static bool ExistsOnPath(string fileName)
-    {
-        // An absolute or rooted path is used as given.
-        if (Path.IsPathRooted(fileName))
-        {
-            return File.Exists(fileName);
-        }
-
-        var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-        var separator = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ';' : ':';
-
-        foreach (var directory in path.Split(separator, StringSplitOptions.RemoveEmptyEntries))
-        {
-            try
-            {
-                if (File.Exists(Path.Combine(directory.Trim(), fileName)))
+                var parts = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length > 1)
                 {
+                    newDir = parts[1].Trim('"');
                     return true;
                 }
             }
-            catch (ArgumentException)
+            if (trimmed.StartsWith("popd", StringComparison.OrdinalIgnoreCase))
             {
-                // A malformed PATH entry is not this method's problem to report.
+                return false;
+            }
+        }
+        else
+        {
+            // Unix: cd, pushd, popd
+            if (trimmed.StartsWith("cd ", StringComparison.Ordinal) ||
+                trimmed.StartsWith("pushd ", StringComparison.Ordinal) ||
+                trimmed.Equals("cd", StringComparison.Ordinal) ||
+                trimmed.Equals("pushd", StringComparison.Ordinal))
+            {
+                var parts = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length > 1)
+                {
+                    newDir = parts[1].Trim('\'', '"');
+                    return true;
+                }
+            }
+            if (trimmed.StartsWith("popd", StringComparison.Ordinal))
+            {
+                return false;
             }
         }
 
         return false;
     }
-private void OnDataReceived(object sender, DataReceivedEventArgs e)
+
+    private void UpdateWorkingDirectory(string relativeOrAbsolutePath)
     {
-        if (e.Data is null)
+        if (string.IsNullOrWhiteSpace(_currentWorkingDirectory))
         {
             return;
         }
 
-        OutputReceived?.Invoke(e.Data + Environment.NewLine);
-    }
-
-    private void OnProcessExited(object? sender, EventArgs e)
-    {
-        // The exit code is unreadable until the process has actually exited, and EnableRaising
-        // events can fire a shade early, so it is read defensively.
-        var code = 0;
         try
         {
-            code = _process?.ExitCode ?? 0;
+            var newPath = Path.IsPathRooted(relativeOrAbsolutePath)
+                ? relativeOrAbsolutePath
+                : Path.GetFullPath(Path.Combine(_currentWorkingDirectory, relativeOrAbsolutePath));
+
+            if (Directory.Exists(newPath) &&
+                !string.Equals(newPath, _currentWorkingDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                _currentWorkingDirectory = newPath;
+                WorkingDirectoryChanged?.Invoke(newPath);
+            }
         }
-        catch (InvalidOperationException)
+        catch (Exception)
         {
-            // Still shutting down; zero is a reasonable "did not exit cleanly" signal.
+            // Ignore path resolution errors
         }
-
-        Exited?.Invoke(code);
-    }
-
-    public async Task SendLineAsync(string line, CancellationToken cancellationToken = default)
-    {
-        if (_process is not { HasExited: false })
-        {
-            throw new InvalidOperationException("The terminal process is not running.");
-        }
-
-        await _process.StandardInput.WriteLineAsync(line.AsMemory(), cancellationToken);
-        await _process.StandardInput.FlushAsync(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -221,6 +204,47 @@ private void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
             Kill();
         }
+    }
+
+    public async Task SendLineAsync(string line, CancellationToken cancellationToken = default)
+    {
+        if (_process is not { HasExited: false })
+        {
+            throw new InvalidOperationException("The terminal process is not running.");
+        }
+
+        // Track directory changes from cd/chdir/pushd/popd commands
+        if (TryExtractDirectoryChange(line, out var newDir))
+        {
+            UpdateWorkingDirectory(newDir);
+        }
+
+        await _process.StandardInput.WriteLineAsync(line.AsMemory(), cancellationToken);
+        await _process.StandardInput.FlushAsync(cancellationToken);
+    }
+
+    private void OnDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (e.Data is null)
+        {
+            return;
+        }
+
+        OutputReceived?.Invoke(e.Data + Environment.NewLine);
+    }
+
+    private void OnProcessExited(object? sender, EventArgs e)
+    {
+        var code = 0;
+        try
+        {
+            code = _process?.ExitCode ?? 0;
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        Exited?.Invoke(code);
     }
 
     private void Kill()
@@ -258,3 +282,5 @@ private void OnDataReceived(object sender, DataReceivedEventArgs e)
         _process = null;
     }
 }
+
+
