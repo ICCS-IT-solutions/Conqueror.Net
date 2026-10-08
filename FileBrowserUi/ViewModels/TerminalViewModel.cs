@@ -67,12 +67,7 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
 
         _backend.OutputReceived += OnOutputReceived;
         _backend.Exited += OnExited;
-
-        // Subscribe to working directory changes to update the prompt
-        if (_backend is PipedProcessBackend pipedBackend)
-        {
-            pipedBackend.WorkingDirectoryChanged += OnWorkingDirectoryChanged;
-        }
+        _backend.WorkingDirectoryChanged += OnWorkingDirectoryChanged;
 
         Title = _backend.ShellName;
     }

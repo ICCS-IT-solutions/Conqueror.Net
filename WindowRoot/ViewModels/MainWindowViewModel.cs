@@ -292,9 +292,15 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void AddTerminalTabWithShell(string shellId)
     {
         var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
-        
-        // Create a backend that uses the specified shell
-        ITerminalBackend backend = new PipedProcessBackend(start, shellId);
+        ITerminalBackend backend;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            backend = new PtyProcessBackend(start, shellId);
+        }
+        else
+        {
+            backend = new PipedProcessBackend(start, shellId);
+        }
         var vm = new TerminalViewModel(start, backend);
         AttachTab(vm);
     }
@@ -304,11 +310,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void AddTerminalTabWithBash()
     {
         var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
-        
         // Only add if bash is available
         if (TerminalShellRegistry.AvailableShells.Any(s => s.Id == "bash"))
         {
-            var backend = new PipedProcessBackend(start, "bash");
+            ITerminalBackend backend;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                backend = new PtyProcessBackend(start, "bash");
+            }
+            else
+            {
+                backend = new PipedProcessBackend(start, "bash");
+            }
             var vm = new TerminalViewModel(start, backend);
             AttachTab(vm);
         }
@@ -325,11 +338,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void AddTerminalTabWithZsh()
     {
         var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
-        
         // Only add if zsh is available
         if (TerminalShellRegistry.AvailableShells.Any(s => s.Id == "zsh"))
         {
-            var backend = new PipedProcessBackend(start, "zsh");
+            ITerminalBackend backend;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                backend = new PtyProcessBackend(start, "zsh");
+            }
+            else
+            {
+                backend = new PipedProcessBackend(start, "zsh");
+            }
             var vm = new TerminalViewModel(start, backend);
             AttachTab(vm);
         }
@@ -346,11 +366,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void AddTerminalTabWithFish()
     {
         var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
-        
         // Only add if fish is available
         if (TerminalShellRegistry.AvailableShells.Any(s => s.Id == "fish"))
         {
-            var backend = new PipedProcessBackend(start, "fish");
+            ITerminalBackend backend;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                backend = new PtyProcessBackend(start, "fish");
+            }
+            else
+            {
+                backend = new PipedProcessBackend(start, "fish");
+            }
             var vm = new TerminalViewModel(start, backend);
             AttachTab(vm);
         }
@@ -367,7 +394,6 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private async Task AddTerminalTabWithShellChoice()
     {
         var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
-        
         // Get available shells for the current platform
         var availableShells = TerminalShellRegistry.AvailableShells;
         
@@ -376,7 +402,15 @@ public sealed partial class MainWindowViewModel : ObservableObject
         if (availableShells.Count > 0)
         {
             var selectedShell = availableShells[0]; // Just use first one for demo
-            var backend = new PipedProcessBackend(start, selectedShell.Id);
+            ITerminalBackend backend;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                backend = new PtyProcessBackend(start, selectedShell.Id);
+            }
+            else
+            {
+                backend = new PipedProcessBackend(start, selectedShell.Id);
+            }
             var vm = new TerminalViewModel(start, backend);
             AttachTab(vm);
         }

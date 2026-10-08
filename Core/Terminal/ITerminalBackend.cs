@@ -25,6 +25,8 @@ public interface ITerminalBackend : IDisposable
 
     /// <summary>Raised when the process exits, carrying its exit code.</summary>
     event Action<int>? Exited;
+    /// <summary>Raised when the process's working directory changes.</summary>
+    event Action<string>? WorkingDirectoryChanged;
 
     /// <summary>True while the process is running.</summary>
     bool IsRunning { get; }
