@@ -314,6 +314,42 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>Terminal ▸ Clear — clears the terminal output buffer.</summary>
+    private void OnTerminalClearClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is TerminalViewModel terminal)
+        {
+            terminal.Lines.Clear();
+        }
+    }
+
+    /// <summary>Terminal ▸ Copy Output — copies all terminal output to clipboard.</summary>
+    private async void OnTerminalCopyOutputClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is TerminalViewModel terminal)
+        {
+            var text = string.Join(Environment.NewLine, terminal.Lines);
+            if (!string.IsNullOrEmpty(text))
+            {
+                var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+                if (clipboard is not null)
+                {
+                    await clipboard.SetTextAsync(text);
+                }
+            }
+        }
+    }
+
+    /// <summary>Terminal ▸ Select All Output — selects all text in the output transcript.</summary>
+    private void OnTerminalSelectAllOutputClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is TerminalViewModel terminal
+            && terminal.InputBoxProvider?.Invoke() is { } box)
+        {
+            box.SelectAll();
+        }
+    }
+
     /// <summary>
     /// <summary>
     /// Lightweight Find (or Find+Replace) dialog. Reuses the XP-style dialog helpers

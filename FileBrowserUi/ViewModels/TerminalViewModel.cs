@@ -105,7 +105,27 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
 
     public bool IsFileBrowser => false;
 
-    public string Location => IsRunning ? _backend.ShellName : $"exited ({_exitCode})";
+    public string Location
+    {
+        get
+        {
+            if (!IsRunning)
+            {
+                return $"exited ({_exitCode})";
+            }
+
+            var cwd = _backend is PipedProcessBackend pipedBackend
+                ? pipedBackend.CurrentWorkingDirectory
+                : null;
+
+            if (!string.IsNullOrEmpty(cwd))
+            {
+                return cwd;
+            }
+
+            return _backend.ShellName;
+        }
+    }
 
     public bool CanGoBack => false;
 

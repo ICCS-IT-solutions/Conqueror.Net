@@ -128,14 +128,21 @@
                 <MenuItem Header="_Extensions" Command="{Binding ExtensionsCommand}" />
             </MenuItem>
 
-            <MenuItem Header="_Terminal" Classes="xpMenuItem">
+            <!-- Terminal contextual menu: only visible when a terminal tab is active. -->
+            <MenuItem Header="_Terminal" Classes="xpMenuItem"
+                      IsVisible="{Binding IsTerminalActive}">
                 <MenuItem Header="_New Terminal Tab" Click="OnNewTerminalTabClick"
                           InputGesture="Ctrl+OemTilde" />
                 <Separator />
-                <!-- Shell actions are meaningless on a page, so they follow the active tab. -->
-                <MenuItem Header="_Restart Shell" Command="{Binding SelectedTab.Reload}"
-                          IsVisible="{Binding IsTerminalActive}" />
-                        </MenuItem>
+                <MenuItem Header="_Restart Shell" Command="{Binding SelectedTab.Reload}" />
+                <MenuItem Header="_Clear" Click="OnTerminalClearClick"
+                          InputGesture="Ctrl+K" />
+                <Separator />
+                <MenuItem Header="Copy _Output" Click="OnTerminalCopyOutputClick"
+                          InputGesture="Ctrl+Shift+C" />
+                <MenuItem Header="Select _All Output" Click="OnTerminalSelectAllOutputClick"
+                          InputGesture="Ctrl+Shift+A" />
+            </MenuItem>
             <!-- Code Editor contextual menu: only visible when a code/config editor tab
                  is active. Mirrors the pattern used by the Web Browser and Terminal
                  contextual menus. -->
