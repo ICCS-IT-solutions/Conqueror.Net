@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!--
       app.manifest carries the Windows version-compatibility GUIDs and means nothing elsewhere,
       so it is applied on Windows only rather than unconditionally.
@@ -82,6 +83,7 @@
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.22" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.116.1" />
     <!-- Embedded Chromium (CEF 120) browser control for Avalonia. -->
     <PackageReference Include="WebViewControl-Avalonia" Version="3.120.13" />
     <!-- Renders the SVG icon theme. MIT; targets net8.0 / Avalonia 11.3. -->

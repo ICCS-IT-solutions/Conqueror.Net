@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Conqueror.Net.CodeEditorUi.ViewModels;
 using Conqueror.Net.Core;
 using Conqueror.Net.Core.Tabs;
+using Conqueror.Net.Core.Terminal;
 using Conqueror.Net.FileBrowserUi.Models;
 using Conqueror.Net.FileBrowserUi.Services;
 using Conqueror.Net.FileBrowserUi.ViewModels;
@@ -283,6 +285,107 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         var vm = new TerminalViewModel(start);
         AttachTab(vm);
+    }
+
+    /// <summary>Opens a terminal tab with the specified shell.</summary>
+    [RelayCommand]
+    private void AddTerminalTabWithShell(string shellId)
+    {
+        var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
+        
+        // Create a backend that uses the specified shell
+        ITerminalBackend backend = new PipedProcessBackend(start, shellId);
+        var vm = new TerminalViewModel(start, backend);
+        AttachTab(vm);
+    }
+
+    /// <summary>Opens a terminal tab with bash.</summary>
+    [RelayCommand]
+    private void AddTerminalTabWithBash()
+    {
+        var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
+        
+        // Only add if bash is available
+        if (TerminalShellRegistry.AvailableShells.Any(s => s.Id == "bash"))
+        {
+            var backend = new PipedProcessBackend(start, "bash");
+            var vm = new TerminalViewModel(start, backend);
+            AttachTab(vm);
+        }
+        else
+        {
+            // Fallback to regular terminal
+            var vm = new TerminalViewModel(start);
+            AttachTab(vm);
+        }
+    }
+
+    /// <summary>Opens a terminal tab with zsh.</summary>
+    [RelayCommand]
+    private void AddTerminalTabWithZsh()
+    {
+        var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
+        
+        // Only add if zsh is available
+        if (TerminalShellRegistry.AvailableShells.Any(s => s.Id == "zsh"))
+        {
+            var backend = new PipedProcessBackend(start, "zsh");
+            var vm = new TerminalViewModel(start, backend);
+            AttachTab(vm);
+        }
+        else
+        {
+            // Fallback to regular terminal
+            var vm = new TerminalViewModel(start);
+            AttachTab(vm);
+        }
+    }
+
+    /// <summary>Opens a terminal tab with fish.</summary>
+    [RelayCommand]
+    private void AddTerminalTabWithFish()
+    {
+        var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
+        
+        // Only add if fish is available
+        if (TerminalShellRegistry.AvailableShells.Any(s => s.Id == "fish"))
+        {
+            var backend = new PipedProcessBackend(start, "fish");
+            var vm = new TerminalViewModel(start, backend);
+            AttachTab(vm);
+        }
+        else
+        {
+            // Fallback to regular terminal
+            var vm = new TerminalViewModel(start);
+            AttachTab(vm);
+        }
+    }
+
+    /// <summary>Opens a terminal tab with a choice of shell.</summary>
+    [RelayCommand]
+    private async Task AddTerminalTabWithShellChoice()
+    {
+        var start = Tabs.OfType<FileBrowserViewModel>().FirstOrDefault()?.CurrentPath;
+        
+        // Get available shells for the current platform
+        var availableShells = TerminalShellRegistry.AvailableShells;
+        
+        // For now, we'll just use the first available shell as an example
+        // In a real implementation, this would show a dialog for the user to choose
+        if (availableShells.Count > 0)
+        {
+            var selectedShell = availableShells[0]; // Just use first one for demo
+            var backend = new PipedProcessBackend(start, selectedShell.Id);
+            var vm = new TerminalViewModel(start, backend);
+            AttachTab(vm);
+        }
+        else
+        {
+            // Fallback to default
+            var vm = new TerminalViewModel(start);
+            AttachTab(vm);
+        }
     }
 
     /// <summary>Opens a code/config editor tab, optionally on an existing file.</summary>

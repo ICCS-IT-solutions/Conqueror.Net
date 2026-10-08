@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -37,7 +38,32 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
     {
         // Defaulting here rather than in the view keeps the backend swappable: a future PTY
         // implementation is chosen by passing one in, with no change to this class.
-        _backend = backend ?? new PipedProcessBackend(workingDirectory);
+        if (backend != null)
+        {
+            _backend = backend;
+        }
+        else
+        {
+            // Auto-select PTY backend on Linux, piped on Windows
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // Try to use PTY backend on Linux for proper TTY behavior
+                try
+                {
+                    _backend = new PtyProcessBackend(workingDirectory);
+                }
+                catch
+                {
+                    // Fall back to piped if PTY fails (missing dependencies, etc.)
+                    _backend = new PipedProcessBackend(workingDirectory);
+                }
+            }
+            else
+            {
+                // Windows uses piped (no PTY needed/available in same way)
+                _backend = new PipedProcessBackend(workingDirectory);
+            }
+        }
 
         _backend.OutputReceived += OnOutputReceived;
         _backend.Exited += OnExited;
