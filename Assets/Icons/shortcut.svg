@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- A document with the XP shortcut arrow overlay, used for .lnk files in the file list. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" version="1.1">
+  <defs>
+    <linearGradient id="pageGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f4f4f4;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#c8c8c8;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a6f97;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0d3d5e;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Document page -->
+  <rect x="40" y="24" width="176" height="208" rx="8" ry="8" fill="url(#pageGradient)" stroke="#888" stroke-width="2"/>
+  <rect x="40" y="24" width="176" height="56" rx="8" ry="8" fill="#d4d4d4"/>
+  <rect x="40" y="72" width="176" height="8" fill="#d4d4d4"/>
+  <line x1="56" y1="96" x2="184" y2="96" stroke="#888" stroke-width="2"/>
+  <line x1="56" y1="112" x2="184" y2="112" stroke="#888" stroke-width="2"/>
+  <line x1="56" y1="128" x2="140" y2="128" stroke="#888" stroke-width="2"/>
+
+  <!-- Shortcut arrow overlay -->
+  <g transform="translate(168,168)">
+    <circle cx="24" cy="24" r="22" fill="#ffffff" stroke="#0d3d5e" stroke-width="2"/>
+    <path d="M14,24 L34,24 L34,18 L44,30 L34,42 L34,36 L14,36 Z" fill="url(#arrowGradient)"/>
+  </g>
+</svg>

@@ -68,6 +68,13 @@ public sealed class FileSystemEntry
                 return _iconKey = Icons.FileIconResolver.ForFolder(FullPath);
             }
 
+            // Shortcuts always use the shortcut SVG icon — MIME sniffing a binary .lnk
+            // returns text/plain, which would draw a text page behind the XP overlay.
+            if (string.Equals(Extension, ".lnk", StringComparison.OrdinalIgnoreCase))
+            {
+                return _iconKey = Icons.FileIconResolver.Shortcut;
+            }
+
             var mime = Services.MimeTypeResolver.Shared.Resolve(FullPath);
 
             _iconKey = mime switch
@@ -86,8 +93,9 @@ public sealed class FileSystemEntry
     /// <remarks>
     /// <para>
     /// Only four cases are rasterised: shortcuts, which need the arrow overlay the flat theme has
-    /// no artwork for; batch files; and executables. Everything else keeps its vector icon, so
-    /// the converter returning null is the normal path rather than a failure.
+    /// no artwork for; batch files; and executables. DLL/SYS files get the library artwork,
+    /// and audio/video files get the XP speaker/filmstrip overlays. Everything else keeps
+    /// its vector icon, so the converter returning null is the normal path rather than a failure.
     /// </para>
     /// <para>
     /// A shortcut is classified by its target and a program link then carries its path for icon
@@ -131,6 +139,18 @@ public sealed class FileSystemEntry
             // icon first and fall back to the XP program artwork when the shell has none. An
             // unreadable or broken link cannot be classified at all, and keeps the plain
             // document-arrow artwork rather than losing the overlay entirely.
+            // Batch file shortcuts get the bat-file icon with the arrow overlay — extracting
+            // the target's icon from a .bat would show the default text icon behind it.
+            if (Services.ShortcutTarget.TryGetTarget(FullPath, out var target))
+            {
+                var targetExt = Path.GetExtension(target);
+                if (string.Equals(targetExt, ".bat", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(targetExt, ".cmd", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "Icon.Xp.BatFileShortcut@" + FullPath;
+                }
+            }
+
             return Services.ShortcutTarget.IsProgramShortcut(FullPath)
                 ? "Icon.Xp.ProgramShortcut@" + FullPath
                 : "Icon.Xp.FileShortcut";
@@ -138,15 +158,42 @@ public sealed class FileSystemEntry
 
         if (Services.ShortcutTarget.ProgramExtensions.Contains(Extension))
         {
-            // .exe and .com are programs; .bat is a script and has its own artwork.
+            // .exe and .com are programs; .bat and .cmd are scripts and have their own artwork.
             return string.Equals(Extension, ".bat", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(Extension, ".cmd", StringComparison.OrdinalIgnoreCase)
                 ? "Icon.Xp.BatFile"
                 : "Icon.Xp.Program";
         }
 
-        return string.Equals(Extension, ".cmd", StringComparison.OrdinalIgnoreCase)
-            ? "Icon.Xp.BatFile"
-            : null;
+        // DLL and SYS files get the library artwork, distinct from the program icon.
+        if (string.Equals(Extension, ".dll", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(Extension, ".sys", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Icon.Xp.LibFile";
+        }
+
+        // INI, CFG, CONF, and XML config files get the XP notepad-with-gear icon.
+        if (string.Equals(Extension, ".ini", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(Extension, ".cfg", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(Extension, ".conf", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(Extension, ".xml", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Icon.Xp.ConfigFile";
+        }
+
+        // Audio files (mp3, wav, flic, etc.) get the XP speaker overlay.
+        if (Icons.FileIconResolver.IsAudioExtension(Extension))
+        {
+            return "Icon.Xp.Audio";
+        }
+
+        // Video files (mp4, avi, mkv, etc.) get the XP film-strip overlay.
+        if (Icons.FileIconResolver.IsVideoExtension(Extension))
+        {
+            return "Icon.Xp.Video";
+        }
+
+        return null;
     }
 
     public string SizeDisplay => IsDirectory ? string.Empty : ByteSizeFormatter.Format(Length);

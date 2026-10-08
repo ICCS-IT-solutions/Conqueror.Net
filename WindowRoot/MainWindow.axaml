@@ -135,6 +135,21 @@
                 <!-- Shell actions are meaningless on a page, so they follow the active tab. -->
                 <MenuItem Header="_Restart Shell" Command="{Binding SelectedTab.Reload}"
                           IsVisible="{Binding IsTerminalActive}" />
+                        </MenuItem>
+            <!-- Code Editor contextual menu: only visible when a code/config editor tab
+                 is active. Mirrors the pattern used by the Web Browser and Terminal
+                 contextual menus. -->
+            <MenuItem Header="_Code Editor" Classes="xpMenuItem"
+                      IsVisible="{Binding IsEditorActive}">
+                <MenuItem Header="_Find..." Click="OnEditorFindClick"
+                          InputGesture="Ctrl+F" />
+                <MenuItem Header="_Replace..." Click="OnEditorReplaceClick"
+                          InputGesture="Ctrl+H" />
+                <Separator />
+                <MenuItem Header="_Font Larger" Click="OnEditorFontLargerClick"
+                          InputGesture="Ctrl+," />
+                <MenuItem Header="Font _Smaller" Click="OnEditorFontSmallerClick"
+                          InputGesture="Ctrl+." />
             </MenuItem>
             <MenuItem Header="_Help" Classes="xpMenuItem">
                 <MenuItem Header="_About Conqueror.Net" Click="OnAboutClick" />
@@ -152,7 +167,7 @@
                             ToolTip.Tip="Back (Alt+Left)"
                             Margin="0,0,2,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-back32.png"
+                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-back.png"
                                 Stretch="Uniform" Width="32" Height="32" />
                             <TextBlock Text="Back" Margin="4,0,4,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -164,7 +179,7 @@
                             ToolTip.Tip="Forward (Alt+Right)"
                             Margin="0,0,2,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-forward32.png"
+                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-forward.png"
                                 Stretch="Uniform" Width="32" Height="32" />
                             <TextBlock Text="Forward" Margin="4,0,4,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -176,7 +191,7 @@
                             ToolTip.Tip="Up (Alt+Up)"
                             Margin="0,0,2,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-up32.png"
+                            <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-up.png"
                                 Stretch="Uniform" Width="32" Height="32" />
                             <TextBlock Text="Up" Margin="4,0,4,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -199,7 +214,7 @@
                                 ToolTip.Tip="New file (Ctrl+N)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfile32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-newfile.png" Width="32" Height="32" />
                                 <TextBlock Text="New File" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -211,7 +226,7 @@
                                 ToolTip.Tip="New folder"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-newfolder32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-newfolder.png" Width="32" Height="32" />
                                 <TextBlock Text="New Folder" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -224,7 +239,7 @@
                                 ToolTip.Tip="Cut (Ctrl+X)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-cut32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-cut.png" Width="32" Height="32" />
                                 <TextBlock Text="Cut" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -235,7 +250,7 @@
                                 ToolTip.Tip="Copy (Ctrl+C)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-copy32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-copy.png" Width="32" Height="32" />
                                 <TextBlock Text="Copy" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -246,7 +261,7 @@
                                 ToolTip.Tip="Paste (Ctrl+V)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-paste32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-paste.png" Width="32" Height="32" />
                                 <TextBlock Text="Paste" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -257,7 +272,7 @@
                                 ToolTip.Tip="Delete (Del)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-delete32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-delete.png" Width="32" Height="32" />
                                 <TextBlock Text="Delete" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -268,7 +283,7 @@
                                 ToolTip.Tip="Select All (Ctrl+A)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectall32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-selectall.png" Width="32" Height="32" />
                                 <TextBlock Text="Select All" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -280,7 +295,7 @@
                                 ToolTip.Tip="Select None"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-selectnone32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-selectnone.png" Width="32" Height="32" />
                                 <TextBlock Text="Select None" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -292,7 +307,7 @@
                                 ToolTip.Tip="Invert Selection"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-invertselect32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-invertselect.png" Width="32" Height="32" />
                                 <TextBlock Text="Invert Selection" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -304,7 +319,7 @@
                                 ToolTip.Tip="Rename (F2)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-rename32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-rename.png" Width="32" Height="32" />
                                 <TextBlock Text="Rename" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -316,7 +331,7 @@
                                 ToolTip.Tip="Properties (Alt+Return)"
                                 Margin="0,0,2,0">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-properties32.png" Width="32" Height="32" />
+                                <Image Source="avares://Conqueror.Net/Assets/Icons/xp/32/xp-properties.png" Width="32" Height="32" />
                                 <TextBlock Text="Properties" Margin="4,0,4,0" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
@@ -337,22 +352,22 @@
                             Command="{Binding RefreshCommand}"
                             ToolTip.Tip="Refresh (F5)"
                             Margin="0,0,2,0">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-refresh16.png" Width="16" Height="16" />
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-refresh.png" Width="16" Height="16" />
                     </Button>
 
                     <Rectangle Width="1" Margin="4,4,6,4" Fill="{StaticResource BrushShadow}" />
 
                     <Button Classes="xpToolbarButton" Command="{Binding AddFileTabCommand}" ToolTip.Tip="New file tab" Margin="0,0,2,0">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-explorer16.png" Width="16" Height="16" />
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-explorer.png" Width="16" Height="16" />
                     </Button>
                     <Button Classes="xpToolbarButton" Command="{Binding AddWebTabCommand}" ToolTip.Tip="New web tab (Ctrl+T)" Margin="0,0,2,0">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-connection16.png" Width="16" Height="16" />
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-connection.png" Width="16" Height="16" />
                     </Button>
                     <Button Classes="xpToolbarButton" Command="{Binding AddTerminalTabCommand}" ToolTip.Tip="New terminal tab (Ctrl+`)">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-command-prompt16.png" Width="16" Height="16" />
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-command-prompt.png" Width="16" Height="16" />
                     </Button>
                     <Button Classes="xpToolbarButton" Command="{Binding AddEditorTabCommand}" ToolTip.Tip="New editor tab">
-                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-configfile16.png" Width="16" Height="16" />
+                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-configfile.png" Width="16" Height="16" />
                     </Button>                    
                 </StackPanel>
             </Grid>
@@ -442,7 +457,7 @@
                                             Command="{Binding $parent[ItemsControl].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
                                             CommandParameter="{Binding}"
                                             ToolTip.Tip="Close this tab">
-                                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/xp-close16.png"
+                                        <Image Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-close.png"
                                                Stretch="Uniform" Width="16" Height="16" />
                                     </Button>
                                 </Grid>
@@ -513,7 +528,7 @@
                             Command="{Binding NavigateCommand}"
                             ToolTip.Tip="Go to this address (Enter)">
                         <Grid ColumnDefinitions="Auto,Auto" Margin="4,0,4,0">
-                            <Image Grid.Column ="0" Source="avares://Conqueror.Net/Assets/Icons/xp/xp-go16.png"
+                            <Image Grid.Column ="0" Source="avares://Conqueror.Net/Assets/Icons/xp/16/xp-go.png"
                                 Stretch="Uniform" Width="16" Height="16" />
                             <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0"
                                 Text="Go" />

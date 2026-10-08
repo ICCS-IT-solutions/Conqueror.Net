@@ -21,8 +21,11 @@
     <Application.Styles>
         <!-- Fluent supplies the un-themed control internals (scrollbars, menus, popups);
              the Luna stylesheet then repaints them in XP colours. -->
-        <FluentTheme />
+                <FluentTheme />
         <StyleInclude Source="avares://Conqueror.Net/Themes/Luna.Controls.axaml" />
+        <!-- AvaloniaEdit styles: required for the in-process code/config editor's
+             TextEditor control (syntax highlighting, line numbers, scrollbars). -->
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
     </Application.Styles>
 
     <!-- Tab content is resolved from its view-model type, which is what lets the shell

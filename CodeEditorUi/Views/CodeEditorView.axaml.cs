@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -7,17 +8,25 @@ using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using AvaloniaEdit;
 using Conqueror.Net.CodeEditorUi.ViewModels;
 
 namespace Conqueror.Net.CodeEditorUi.Views;
 
 /// <summary>
 /// The editor tab. Owns no file logic - that lives in the view-model - and only adds the
-/// TextBox registration, Ctrl+S keybinding and the XP-style dialog hooks.
+/// TextEditor registration, Ctrl+S keybinding and the XP-style dialog hooks.
 /// </summary>
 public partial class CodeEditorView : UserControl
 {
     private CodeEditorViewModel? _subscribedVm;
+    private AvaloniaEdit.TextEditor? _editor;
+
+    /// <summary>
+    /// Guards against feedback loops when syncing text between the view-model
+    /// (Text property) and the TextEditor control (which has no bindable Text).
+    /// </summary>
+    private bool _syncingText;
 
     public CodeEditorView()
     {
@@ -93,9 +102,9 @@ public partial class CodeEditorView : UserControl
             Title = "Save As",
             SuggestedFileName = string.IsNullOrWhiteSpace(suggestedName) ? "Untitled.txt" : suggestedName,
             SuggestedStartLocation = folder,
-            FileTypeChoices =
+                        FileTypeChoices =
             [
-                new FilePickerFileType("Text files") { Patterns = ["*.txt"] },
+                new FilePickerFileType("Editor files") { Patterns = ["*.txt", "*.ini", "*.cfg", "*.conf", "*.json", "*.xml", "*.yaml", "*.yml", "*.toml", "*.md", "*.cs", "*.css", "*.js", "*.ps1", "*.bat", "*.sh", "*.reg", "*.log"] },
                 new FilePickerFileType("All files") { Patterns = ["*"] },
             ],
         };
@@ -119,15 +128,22 @@ public partial class CodeEditorView : UserControl
         base.OnKeyDown(e);
     }
 
-    private void OnDataContextChanged(object? sender, EventArgs e)
+        private void OnDataContextChanged(object? sender, EventArgs e)
     {
         if (_subscribedVm is not null)
         {
+            if (_editor?.Document is not null)
+            {
+                _editor.Document.TextChanged -= OnEditorTextChanged;
+            }
+
+            _subscribedVm.PropertyChanged -= OnVmPropertyChanged;
             _subscribedVm.EditorBoxProvider = null;
             _subscribedVm.ConfirmAsync = null;
             _subscribedVm.RequestSaveAsPath = null;
             _subscribedVm.ConfirmDiscardAsync = null;
             _subscribedVm = null;
+            _editor = null;
         }
 
         if (Vm is null)
@@ -136,13 +152,60 @@ public partial class CodeEditorView : UserControl
         }
 
         _subscribedVm = Vm;
+        _editor = this.FindControl<AvaloniaEdit.TextEditor>("EditorBox");
 
-        // Registers the live editor TextBox so the VM's cut/copy/paste/delete/select-all
-        // commands act on the selection rather than the whole buffer.
-        Vm.EditorBoxProvider = () => this.FindControl<TextBox>("EditorBox");
+        if (_editor is not null)
+        {
+            // TextEditor.Text is not a bindable StyledProperty in the Avalonia port,
+            // so the VM and control are kept in sync manually. The guard flag prevents
+            // feedback loops: VM.Text -> editor.Text -> TextChanged -> VM.Text.
+            _syncingText = true;
+            _editor.Text = Vm.Text;
+            _syncingText = false;
+
+            if (_editor.Document is not null)
+            {
+                _editor.Document.TextChanged += OnEditorTextChanged;
+            }
+
+            Vm.PropertyChanged += OnVmPropertyChanged;
+
+            // Registers the live editor control so the VM's cut/copy/paste/delete/select-all
+            // commands act on the selection rather than the whole buffer.
+            Vm.EditorBoxProvider = () => _editor is not null ? new TextEditorAdapter(_editor) : null;
+        }
+
         Vm.ConfirmAsync = ConfirmAsync;
         Vm.RequestSaveAsPath = RequestSaveAsPathAsync;
         Vm.ConfirmDiscardAsync = ConfirmDiscardAsync;
+    }
+
+    /// <summary>Updates the editor control when the VM's Text property changes.</summary>
+    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(CodeEditorViewModel.Text) || _editor is null || _syncingText)
+        {
+            return;
+        }
+
+        var vmText = Vm?.Text ?? string.Empty;
+        if (!string.Equals(_editor.Text, vmText, StringComparison.Ordinal))
+        {
+            _syncingText = true;
+            _editor.Text = vmText;
+            _syncingText = false;
+        }
+    }
+
+    /// <summary>Pushes editor edits back to the VM's Text property.</summary>
+    private void OnEditorTextChanged(object? sender, EventArgs e)
+    {
+        if (_syncingText || Vm is null || _editor is null)
+        {
+            return;
+        }
+
+        Vm.Text = _editor.Text;
     }
 
     private async Task<bool> ConfirmDiscardAsync()

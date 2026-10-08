@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
@@ -270,8 +271,179 @@ public partial class MainWindow : Window
         {
             Vm?.NotifyEditorFileTypesChanged();
         }
+        }
+
+    /// <summary>Code Editor ▸ Find — searches forward from the caret and selects the match.</summary>
+            /// <summary>Code Editor ▸ Find — searches forward from the caret and selects the match.</summary>
+    private void OnEditorFindClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is not CodeEditorViewModel editor)
+        {
+            return;
+        }
+
+        ShowFindReplaceDialog(editor, isReplace: false);
     }
 
+    /// <summary>Code Editor ▸ Replace — find-and-replace within the active editor buffer.</summary>
+    private void OnEditorReplaceClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is not CodeEditorViewModel editor)
+        {
+            return;
+        }
+
+        ShowFindReplaceDialog(editor, isReplace: true);
+    }
+
+    /// <summary>Code Editor ▸ Font Larger — grows the editor font by one point.</summary>
+    private void OnEditorFontLargerClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is CodeEditorViewModel editor)
+        {
+            editor.FontSize = Math.Min(editor.FontSize + 1, 40);
+        }
+    }
+
+    /// <summary>Code Editor ▸ Font Smaller — shrinks the editor font by one point.</summary>
+    private void OnEditorFontSmallerClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm?.SelectedTab is CodeEditorViewModel editor)
+        {
+            editor.FontSize = Math.Max(editor.FontSize - 1, 6);
+        }
+    }
+
+    /// <summary>
+    /// <summary>
+    /// Lightweight Find (or Find+Replace) dialog. Reuses the XP-style dialog helpers
+    /// from <see cref="CodeEditorView"/>. Search is done on the VM's Text buffer
+    /// and the selection is pushed back through EditorBoxProvider so the caret
+    /// lands on the match. Wraps to the top of the buffer on overflow.
+    /// </summary>
+    private void ShowFindReplaceDialog(CodeEditorViewModel editor, bool isReplace)
+    {
+        if (TopLevel.GetTopLevel(this) is not Window owner)
+        {
+            return;
+        }
+
+        var title = isReplace ? "Find and Replace" : "Find";
+        var dialog = CodeEditorView.BuildDialog(owner, title, string.Empty);
+
+        var searchBox = new TextBox
+        {
+            Width = 320,
+            MaxWidth = 480,
+        };
+
+        var matchCase = new CheckBox
+        {
+            Content = "Match case",
+            Margin = new Thickness(0, 8, 0, 0),
+        };
+
+        TextBox? replaceBox = null;
+        var prompt = dialog.Content as StackPanel;
+
+        if (isReplace)
+        {
+            replaceBox = new TextBox
+            {
+                Width = 320,
+                MaxWidth = 480,
+                Margin = new Thickness(0, 8, 0, 0),
+            };
+        }
+
+        var insertAt = prompt!.Children.Count - 1;
+
+        if (replaceBox is not null)
+        {
+            prompt.Children.Insert(insertAt, new TextBlock { Text = "Replace with:" });
+            prompt.Children.Insert(insertAt + 1, replaceBox);
+            insertAt += 2;
+        }
+
+        prompt.Children.Insert(insertAt, matchCase);
+        prompt.Children.Insert(insertAt + 1, new TextBlock { Text = "Find:" });
+        prompt.Children.Insert(insertAt + 2, searchBox);
+
+        var findButton = CodeEditorView.NewDialogButton("Find", isDefault: true, isCancel: false);
+        var closeButton = CodeEditorView.NewDialogButton("Close", isDefault: false, isCancel: true);
+
+        void DoFind()
+        {
+            var box = editor.EditorBoxProvider?.Invoke();
+            if (box is null)
+            {
+                return;
+            }
+
+            var text = box.Text ?? string.Empty;
+            var search = searchBox.Text;
+            if (string.IsNullOrEmpty(search))
+            {
+                return;
+            }
+
+            var comparison = matchCase.IsChecked == true
+                ? StringComparison.Ordinal
+                : StringComparison.OrdinalIgnoreCase;
+
+            var start = box.SelectionStart + (box.SelectedText?.Length ?? 0);
+            var index = text.IndexOf(search, start, comparison);
+
+            if (index < 0 && start > 0)
+            {
+                index = text.IndexOf(search, 0, comparison);
+            }
+
+            if (index >= 0)
+            {
+                box.SelectRange(index, search.Length);
+            }
+        }
+
+        findButton.Click += (_, _) => DoFind();
+
+        if (replaceBox is not null)
+        {
+            var replaceButton = CodeEditorView.NewDialogButton("Replace", isDefault: false, isCancel: false);
+
+            replaceButton.Click += (_, _) =>
+            {
+                var box = editor.EditorBoxProvider?.Invoke();
+                if (box is null)
+                {
+                    return;
+                }
+
+                var text = box.Text ?? string.Empty;
+                var search = searchBox.Text;
+                if (string.IsNullOrEmpty(search) || box.SelectedText != search)
+                {
+                    DoFind();
+                    return;
+                }
+
+                var replacement = replaceBox.Text ?? string.Empty;
+                var caret = box.SelectionStart;
+                box.Text = text.Remove(caret, search.Length).Insert(caret, replacement);
+                box.CaretIndex = caret + replacement.Length;
+                box.SelectRange(caret, replacement.Length);
+            };
+
+            prompt.Children[^1] = CodeEditorView.WithButtons(prompt!, findButton, replaceButton, closeButton);
+        }
+        else
+        {
+            prompt.Children[^1] = CodeEditorView.WithButtons(prompt!, findButton, closeButton);
+        }
+
+        dialog.Show(owner);
+        searchBox.Focus();
+    }
     private void OnExitClick(object? sender, RoutedEventArgs e) => Close();
 
     /// <summary>Shows the XP-style About box.</summary>
@@ -358,3 +530,4 @@ public partial class MainWindow : Window
     private const string FolderPaneMenuItemName = "FolderPaneMenuItem";
     private const string HiddenFilesMenuItemName = "HiddenFilesMenuItem";
 }
+

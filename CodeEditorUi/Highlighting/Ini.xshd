@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="INI" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="Green" exampleText="; comment" />
+    <Color name="Section" foreground="Blue" fontWeight="bold" exampleText="[Section]" />
+    <Color name="Key" foreground="Maroon" fontWeight="bold" exampleText="key" />
+    <Color name="Value" foreground="Black" exampleText="value" />
+
+    <RuleSet>
+        <!-- Comments: lines starting with ; or # -->
+        <Rule color="Comment">
+            <Regex>(^|[\r\n])\s*[;#][^\r\n]*</Regex>
+        </Rule>
+
+        <!-- Sections: [Section Name] -->
+        <Rule color="Section">
+            <Regex>\[[^\]]*\]</Regex>
+        </Rule>
+
+        <!-- Keys: word characters before = or : -->
+        <Rule color="Key">
+            <Regex>^[^=:\s\[\]]+(?=\s*[=:])</Regex>
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>

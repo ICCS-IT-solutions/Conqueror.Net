@@ -1,38 +1,2551 @@
-{
-  "source": "Marchmountain Windows XP Icons (CC0-1.0)",
-  "method": "alpha-weighted direct box filter",
-  "sizes": [
-    16,
-    32
-  ],
-  "icons": {
-    "xp-explorer": {
-      "16": "xp-explorer16.png",
-      "32": "xp-explorer32.png"
-    },
-    "xp-command-prompt": {
-      "16": "xp-command-prompt16.png",
-      "32": "xp-command-prompt32.png"
-    },
-    "xp-connection": {
-      "16": "xp-connection16.png",
-      "32": "xp-connection32.png"
-    },
-    "xp-back": {
-      "16": "xp-back16.png",
-      "32": "xp-back32.png"
-    },
-    "xp-forward": {
-      "16": "xp-forward16.png",
-      "32": "xp-forward32.png"
-    },
-    "xp-up": {
-      "16": "xp-up16.png",
-      "32": "xp-up32.png"
-    },
-    "xp-go": {
-      "16": "xp-go16.png",
-      "32": "xp-go32.png"
-    }
-  }
+﻿{
+    "source":  "Windows XP Icon Pack (PSD, CC0-1.0)",
+    "method":  "PSD rendered at 256x256; chrome sizes are Lanczos downscale of 256 base",
+    "baseSize":  256,
+    "chromeSizes":  [
+                        16,
+                        32
+                    ],
+    "icons":  {
+                  "xp-accessibility-wizard":  {
+                                                  "256":  "256/xp-accessibility-wizard.png",
+                                                  "16":  "16/xp-accessibility-wizard.png",
+                                                  "32":  "32/xp-accessibility-wizard.png"
+                                              },
+                  "xp-accessibility":  {
+                                           "256":  "256/xp-accessibility.png",
+                                           "16":  "16/xp-accessibility.png",
+                                           "32":  "32/xp-accessibility.png"
+                                       },
+                  "xp-activation":  {
+                                        "256":  "256/xp-activation.png",
+                                        "16":  "16/xp-activation.png",
+                                        "32":  "32/xp-activation.png"
+                                    },
+                  "xp-add-network-place":  {
+                                               "256":  "256/xp-add-network-place.png",
+                                               "16":  "16/xp-add-network-place.png",
+                                               "32":  "32/xp-add-network-place.png"
+                                           },
+                  "xp-add-new-hardware":  {
+                                              "256":  "256/xp-add-new-hardware.png",
+                                              "16":  "16/xp-add-new-hardware.png",
+                                              "32":  "32/xp-add-new-hardware.png"
+                                          },
+                  "xp-add-new-programs":  {
+                                              "256":  "256/xp-add-new-programs.png",
+                                              "16":  "16/xp-add-new-programs.png",
+                                              "32":  "32/xp-add-new-programs.png"
+                                          },
+                  "xp-add-or-remove-windows-components":  {
+                                                              "256":  "256/xp-add-or-remove-windows-components.png",
+                                                              "16":  "16/xp-add-or-remove-windows-components.png",
+                                                              "32":  "32/xp-add-or-remove-windows-components.png"
+                                                          },
+                  "xp-add":  {
+                                 "256":  "256/xp-add.png",
+                                 "16":  "16/xp-add.png",
+                                 "32":  "32/xp-add.png"
+                             },
+                  "xp-additional-settings":  {
+                                                 "256":  "256/xp-additional-settings.png",
+                                                 "16":  "16/xp-additional-settings.png",
+                                                 "32":  "32/xp-additional-settings.png"
+                                             },
+                  "xp-address-book":  {
+                                          "256":  "256/xp-address-book.png",
+                                          "16":  "16/xp-address-book.png",
+                                          "32":  "32/xp-address-book.png"
+                                      },
+                  "xp-administrative-tools":  {
+                                                  "256":  "256/xp-administrative-tools.png",
+                                                  "16":  "16/xp-administrative-tools.png",
+                                                  "32":  "32/xp-administrative-tools.png"
+                                              },
+                  "xp-alert":  {
+                                   "256":  "256/xp-alert.png",
+                                   "16":  "16/xp-alert.png",
+                                   "32":  "32/xp-alert.png"
+                               },
+                  "xp-appearance":  {
+                                        "256":  "256/xp-appearance.png",
+                                        "16":  "16/xp-appearance.png",
+                                        "32":  "32/xp-appearance.png"
+                                    },
+                  "xp-application-window":  {
+                                                "256":  "256/xp-application-window.png",
+                                                "16":  "16/xp-application-window.png",
+                                                "32":  "32/xp-application-window.png"
+                                            },
+                  "xp-attributes":  {
+                                        "256":  "256/xp-attributes.png",
+                                        "16":  "16/xp-attributes.png",
+                                        "32":  "32/xp-attributes.png"
+                                    },
+                  "xp-audio-cd":  {
+                                      "256":  "256/xp-audio-cd.png",
+                                      "16":  "16/xp-audio-cd.png",
+                                      "32":  "32/xp-audio-cd.png"
+                                  },
+                  "xp-audio-devices":  {
+                                           "256":  "256/xp-audio-devices.png",
+                                           "16":  "16/xp-audio-devices.png",
+                                           "32":  "32/xp-audio-devices.png"
+                                       },
+                  "xp-authorization-manager":  {
+                                                   "256":  "256/xp-authorization-manager.png",
+                                                   "16":  "16/xp-authorization-manager.png",
+                                                   "32":  "32/xp-authorization-manager.png"
+                                               },
+                  "xp-autocomplete":  {
+                                          "256":  "256/xp-autocomplete.png",
+                                          "16":  "16/xp-autocomplete.png",
+                                          "32":  "32/xp-autocomplete.png"
+                                      },
+                  "xp-back":  {
+                                  "256":  "256/xp-back.png",
+                                  "16":  "16/xp-back.png",
+                                  "32":  "32/xp-back.png"
+                              },
+                  "xp-backup-wizard":  {
+                                           "256":  "256/xp-backup-wizard.png",
+                                           "16":  "16/xp-backup-wizard.png",
+                                           "32":  "32/xp-backup-wizard.png"
+                                       },
+                  "xp-backups":  {
+                                     "256":  "256/xp-backups.png",
+                                     "16":  "16/xp-backups.png",
+                                     "32":  "32/xp-backups.png"
+                                 },
+                  "xp-bat":  {
+                                 "256":  "256/xp-bat.png",
+                                 "16":  "16/xp-bat.png",
+                                 "32":  "32/xp-bat.png"
+                             },
+                  "xp-battery-backup":  {
+                                            "256":  "256/xp-battery-backup.png",
+                                            "16":  "16/xp-battery-backup.png",
+                                            "32":  "32/xp-battery-backup.png"
+                                        },
+                  "xp-bitmap":  {
+                                    "256":  "256/xp-bitmap.png",
+                                    "16":  "16/xp-bitmap.png",
+                                    "32":  "32/xp-bitmap.png"
+                                },
+                  "xp-blg":  {
+                                 "256":  "256/xp-blg.png",
+                                 "16":  "16/xp-blg.png",
+                                 "32":  "32/xp-blg.png"
+                             },
+                  "xp-bluetooth-access-point":  {
+                                                    "256":  "256/xp-bluetooth-access-point.png",
+                                                    "16":  "16/xp-bluetooth-access-point.png",
+                                                    "32":  "32/xp-bluetooth-access-point.png"
+                                                },
+                  "xp-bluetooth-devices":  {
+                                               "256":  "256/xp-bluetooth-devices.png",
+                                               "16":  "16/xp-bluetooth-devices.png",
+                                               "32":  "32/xp-bluetooth-devices.png"
+                                           },
+                  "xp-bridged-connection":  {
+                                                "256":  "256/xp-bridged-connection.png",
+                                                "16":  "16/xp-bridged-connection.png",
+                                                "32":  "32/xp-bridged-connection.png"
+                                            },
+                  "xp-briefcase":  {
+                                       "256":  "256/xp-briefcase.png",
+                                       "16":  "16/xp-briefcase.png",
+                                       "32":  "32/xp-briefcase.png"
+                                   },
+                  "xp-burn-audio-cd":  {
+                                           "256":  "256/xp-burn-audio-cd.png",
+                                           "16":  "16/xp-burn-audio-cd.png",
+                                           "32":  "32/xp-burn-audio-cd.png"
+                                       },
+                  "xp-cab":  {
+                                 "256":  "256/xp-cab.png",
+                                 "16":  "16/xp-cab.png",
+                                 "32":  "32/xp-cab.png"
+                             },
+                  "xp-calculator":  {
+                                        "256":  "256/xp-calculator.png",
+                                        "16":  "16/xp-calculator.png",
+                                        "32":  "32/xp-calculator.png"
+                                    },
+                  "xp-camcorder":  {
+                                       "256":  "256/xp-camcorder.png",
+                                       "16":  "16/xp-camcorder.png",
+                                       "32":  "32/xp-camcorder.png"
+                                   },
+                  "xp-cd-r":  {
+                                  "256":  "256/xp-cd-r.png",
+                                  "16":  "16/xp-cd-r.png",
+                                  "32":  "32/xp-cd-r.png"
+                              },
+                  "xp-cd-rom":  {
+                                    "256":  "256/xp-cd-rom.png",
+                                    "16":  "16/xp-cd-rom.png",
+                                    "32":  "32/xp-cd-rom.png"
+                                },
+                  "xp-cd-rw":  {
+                                   "256":  "256/xp-cd-rw.png",
+                                   "16":  "16/xp-cd-rw.png",
+                                   "32":  "32/xp-cd-rw.png"
+                               },
+                  "xp-certificate":  {
+                                         "256":  "256/xp-certificate.png",
+                                         "16":  "16/xp-certificate.png",
+                                         "32":  "32/xp-certificate.png"
+                                     },
+                  "xp-change-connection-settings":  {
+                                                        "256":  "256/xp-change-connection-settings.png",
+                                                        "16":  "16/xp-change-connection-settings.png",
+                                                        "32":  "32/xp-change-connection-settings.png"
+                                                    },
+                  "xp-change-language":  {
+                                             "256":  "256/xp-change-language.png",
+                                             "16":  "16/xp-change-language.png",
+                                             "32":  "32/xp-change-language.png"
+                                         },
+                  "xp-change-or-remove-programs":  {
+                                                       "256":  "256/xp-change-or-remove-programs.png",
+                                                       "16":  "16/xp-change-or-remove-programs.png",
+                                                       "32":  "32/xp-change-or-remove-programs.png"
+                                                   },
+                  "xp-charmap":  {
+                                     "256":  "256/xp-charmap.png",
+                                     "16":  "16/xp-charmap.png",
+                                     "32":  "32/xp-charmap.png"
+                                 },
+                  "xp-checkbox-clear":  {
+                                            "256":  "256/xp-checkbox-clear.png",
+                                            "16":  "16/xp-checkbox-clear.png",
+                                            "32":  "32/xp-checkbox-clear.png"
+                                        },
+                  "xp-checkbox-half-shaded":  {
+                                                  "256":  "256/xp-checkbox-half-shaded.png",
+                                                  "16":  "16/xp-checkbox-half-shaded.png",
+                                                  "32":  "32/xp-checkbox-half-shaded.png"
+                                              },
+                  "xp-checkbox-select-filtered":  {
+                                                      "256":  "256/xp-checkbox-select-filtered.png",
+                                                      "16":  "16/xp-checkbox-select-filtered.png",
+                                                      "32":  "32/xp-checkbox-select-filtered.png"
+                                                  },
+                  "xp-checkbox-shaded":  {
+                                             "256":  "256/xp-checkbox-shaded.png",
+                                             "16":  "16/xp-checkbox-shaded.png",
+                                             "32":  "32/xp-checkbox-shaded.png"
+                                         },
+                  "xp-checkbox":  {
+                                      "256":  "256/xp-checkbox.png",
+                                      "16":  "16/xp-checkbox.png",
+                                      "32":  "32/xp-checkbox.png"
+                                  },
+                  "xp-checklist":  {
+                                       "256":  "256/xp-checklist.png",
+                                       "16":  "16/xp-checklist.png",
+                                       "32":  "32/xp-checklist.png"
+                                   },
+                  "xp-chip":  {
+                                  "256":  "256/xp-chip.png",
+                                  "16":  "16/xp-chip.png",
+                                  "32":  "32/xp-chip.png"
+                              },
+                  "xp-click-to-record":  {
+                                             "256":  "256/xp-click-to-record.png",
+                                             "16":  "16/xp-click-to-record.png",
+                                             "32":  "32/xp-click-to-record.png"
+                                         },
+                  "xp-color-profile":  {
+                                           "256":  "256/xp-color-profile.png",
+                                           "16":  "16/xp-color-profile.png",
+                                           "32":  "32/xp-color-profile.png"
+                                       },
+                  "xp-color-scan":  {
+                                        "256":  "256/xp-color-scan.png",
+                                        "16":  "16/xp-color-scan.png",
+                                        "32":  "32/xp-color-scan.png"
+                                    },
+                  "xp-command-prompt":  {
+                                            "256":  "256/xp-command-prompt.png",
+                                            "16":  "16/xp-command-prompt.png",
+                                            "32":  "32/xp-command-prompt.png"
+                                        },
+                  "xp-compactflash-card":  {
+                                               "256":  "256/xp-compactflash-card.png",
+                                               "16":  "16/xp-compactflash-card.png",
+                                               "32":  "32/xp-compactflash-card.png"
+                                           },
+                  "xp-component-services":  {
+                                                "256":  "256/xp-component-services.png",
+                                                "16":  "16/xp-component-services.png",
+                                                "32":  "32/xp-component-services.png"
+                                            },
+                  "xp-compose-a-fax":  {
+                                           "256":  "256/xp-compose-a-fax.png",
+                                           "16":  "16/xp-compose-a-fax.png",
+                                           "32":  "32/xp-compose-a-fax.png"
+                                       },
+                  "xp-computer-management":  {
+                                                 "256":  "256/xp-computer-management.png",
+                                                 "16":  "16/xp-computer-management.png",
+                                                 "32":  "32/xp-computer-management.png"
+                                             },
+                  "xp-computer-to-computer-connection":  {
+                                                             "256":  "256/xp-computer-to-computer-connection.png",
+                                                             "16":  "16/xp-computer-to-computer-connection.png",
+                                                             "32":  "32/xp-computer-to-computer-connection.png"
+                                                         },
+                  "xp-configure-your-server-wizard":  {
+                                                          "256":  "256/xp-configure-your-server-wizard.png",
+                                                          "16":  "16/xp-configure-your-server-wizard.png",
+                                                          "32":  "32/xp-configure-your-server-wizard.png"
+                                                      },
+                  "xp-connection-manager":  {
+                                                "256":  "256/xp-connection-manager.png",
+                                                "16":  "16/xp-connection-manager.png",
+                                                "32":  "32/xp-connection-manager.png"
+                                            },
+                  "xp-connection-status":  {
+                                               "256":  "256/xp-connection-status.png",
+                                               "16":  "16/xp-connection-status.png",
+                                               "32":  "32/xp-connection-status.png"
+                                           },
+                  "xp-content-advisor":  {
+                                             "256":  "256/xp-content-advisor.png",
+                                             "16":  "16/xp-content-advisor.png",
+                                             "32":  "32/xp-content-advisor.png"
+                                         },
+                  "xp-control-panel":  {
+                                           "256":  "256/xp-control-panel.png",
+                                           "16":  "16/xp-control-panel.png",
+                                           "32":  "32/xp-control-panel.png"
+                                       },
+                  "xp-copy-to-disc":  {
+                                          "256":  "256/xp-copy-to-disc.png",
+                                          "16":  "16/xp-copy-to-disc.png",
+                                          "32":  "32/xp-copy-to-disc.png"
+                                      },
+                  "xp-copy-to":  {
+                                     "256":  "256/xp-copy-to.png",
+                                     "16":  "16/xp-copy-to.png",
+                                     "32":  "32/xp-copy-to.png"
+                                 },
+                  "xp-copy":  {
+                                  "256":  "256/xp-copy.png",
+                                  "16":  "16/xp-copy.png",
+                                  "32":  "32/xp-copy.png"
+                              },
+                  "xp-copying-conflict":  {
+                                              "256":  "256/xp-copying-conflict.png",
+                                              "16":  "16/xp-copying-conflict.png",
+                                              "32":  "32/xp-copying-conflict.png"
+                                          },
+                  "xp-cover-page-editor":  {
+                                               "256":  "256/xp-cover-page-editor.png",
+                                               "16":  "16/xp-cover-page-editor.png",
+                                               "32":  "32/xp-cover-page-editor.png"
+                                           },
+                  "xp-critical":  {
+                                      "256":  "256/xp-critical.png",
+                                      "16":  "16/xp-critical.png",
+                                      "32":  "32/xp-critical.png"
+                                  },
+                  "xp-css":  {
+                                 "256":  "256/xp-css.png",
+                                 "16":  "16/xp-css.png",
+                                 "32":  "32/xp-css.png"
+                             },
+                  "xp-cut":  {
+                                 "256":  "256/xp-cut.png",
+                                 "16":  "16/xp-cut.png",
+                                 "32":  "32/xp-cut.png"
+                             },
+                  "xp-data-execution-prevention":  {
+                                                       "256":  "256/xp-data-execution-prevention.png",
+                                                       "16":  "16/xp-data-execution-prevention.png",
+                                                       "32":  "32/xp-data-execution-prevention.png"
+                                                   },
+                  "xp-date-and-region":  {
+                                             "256":  "256/xp-date-and-region.png",
+                                             "16":  "16/xp-date-and-region.png",
+                                             "32":  "32/xp-date-and-region.png"
+                                         },
+                  "xp-date-and-time":  {
+                                           "256":  "256/xp-date-and-time.png",
+                                           "16":  "16/xp-date-and-time.png",
+                                           "32":  "32/xp-date-and-time.png"
+                                       },
+                  "xp-default-programs-(sp1-version)":  {
+                                                            "256":  "256/xp-default-programs-(sp1-version).png",
+                                                            "16":  "16/xp-default-programs-(sp1-version).png",
+                                                            "32":  "32/xp-default-programs-(sp1-version).png"
+                                                        },
+                  "xp-default-programs":  {
+                                              "256":  "256/xp-default-programs.png",
+                                              "16":  "16/xp-default-programs.png",
+                                              "32":  "32/xp-default-programs.png"
+                                          },
+                  "xp-default":  {
+                                     "256":  "256/xp-default.png",
+                                     "16":  "16/xp-default.png",
+                                     "32":  "32/xp-default.png"
+                                 },
+                  "xp-delete-confirmation":  {
+                                                 "256":  "256/xp-delete-confirmation.png",
+                                                 "16":  "16/xp-delete-confirmation.png",
+                                                 "32":  "32/xp-delete-confirmation.png"
+                                             },
+                  "xp-delete-internet-history":  {
+                                                     "256":  "256/xp-delete-internet-history.png",
+                                                     "16":  "16/xp-delete-internet-history.png",
+                                                     "32":  "32/xp-delete-internet-history.png"
+                                                 },
+                  "xp-delete":  {
+                                    "256":  "256/xp-delete.png",
+                                    "16":  "16/xp-delete.png",
+                                    "32":  "32/xp-delete.png"
+                                },
+                  "xp-desktop":  {
+                                     "256":  "256/xp-desktop.png",
+                                     "16":  "16/xp-desktop.png",
+                                     "32":  "32/xp-desktop.png"
+                                 },
+                  "xp-detail-view":  {
+                                         "256":  "256/xp-detail-view.png",
+                                         "16":  "16/xp-detail-view.png",
+                                         "32":  "32/xp-detail-view.png"
+                                     },
+                  "xp-dial-up-connection":  {
+                                                "256":  "256/xp-dial-up-connection.png",
+                                                "16":  "16/xp-dial-up-connection.png",
+                                                "32":  "32/xp-dial-up-connection.png"
+                                            },
+                  "xp-dialer":  {
+                                    "256":  "256/xp-dialer.png",
+                                    "16":  "16/xp-dialer.png",
+                                    "32":  "32/xp-dialer.png"
+                                },
+                  "xp-digital-camera":  {
+                                            "256":  "256/xp-digital-camera.png",
+                                            "16":  "16/xp-digital-camera.png",
+                                            "32":  "32/xp-digital-camera.png"
+                                        },
+                  "xp-direct-connection":  {
+                                               "256":  "256/xp-direct-connection.png",
+                                               "16":  "16/xp-direct-connection.png",
+                                               "32":  "32/xp-direct-connection.png"
+                                           },
+                  "xp-directx":  {
+                                     "256":  "256/xp-directx.png",
+                                     "16":  "16/xp-directx.png",
+                                     "32":  "32/xp-directx.png"
+                                 },
+                  "xp-disable-network-connection":  {
+                                                        "256":  "256/xp-disable-network-connection.png",
+                                                        "16":  "16/xp-disable-network-connection.png",
+                                                        "32":  "32/xp-disable-network-connection.png"
+                                                    },
+                  "xp-discard-fax":  {
+                                         "256":  "256/xp-discard-fax.png",
+                                         "16":  "16/xp-discard-fax.png",
+                                         "32":  "32/xp-discard-fax.png"
+                                     },
+                  "xp-disconnect-network-drive":  {
+                                                      "256":  "256/xp-disconnect-network-drive.png",
+                                                      "16":  "16/xp-disconnect-network-drive.png",
+                                                      "32":  "32/xp-disconnect-network-drive.png"
+                                                  },
+                  "xp-disk-cleanup":  {
+                                          "256":  "256/xp-disk-cleanup.png",
+                                          "16":  "16/xp-disk-cleanup.png",
+                                          "32":  "32/xp-disk-cleanup.png"
+                                      },
+                  "xp-disk-defragmenter":  {
+                                               "256":  "256/xp-disk-defragmenter.png",
+                                               "16":  "16/xp-disk-defragmenter.png",
+                                               "32":  "32/xp-disk-defragmenter.png"
+                                           },
+                  "xp-disk-management":  {
+                                             "256":  "256/xp-disk-management.png",
+                                             "16":  "16/xp-disk-management.png",
+                                             "32":  "32/xp-disk-management.png"
+                                         },
+                  "xp-display-adaptor":  {
+                                             "256":  "256/xp-display-adaptor.png",
+                                             "16":  "16/xp-display-adaptor.png",
+                                             "32":  "32/xp-display-adaptor.png"
+                                         },
+                  "xp-display-properties":  {
+                                                "256":  "256/xp-display-properties.png",
+                                                "16":  "16/xp-display-properties.png",
+                                                "32":  "32/xp-display-properties.png"
+                                            },
+                  "xp-dll":  {
+                                 "256":  "256/xp-dll.png",
+                                 "16":  "16/xp-dll.png",
+                                 "32":  "32/xp-dll.png"
+                             },
+                  "xp-document-search":  {
+                                             "256":  "256/xp-document-search.png",
+                                             "16":  "16/xp-document-search.png",
+                                             "32":  "32/xp-document-search.png"
+                                         },
+                  "xp-double-click":  {
+                                          "256":  "256/xp-double-click.png",
+                                          "16":  "16/xp-double-click.png",
+                                          "32":  "32/xp-double-click.png"
+                                      },
+                  "xp-dvd-alt":  {
+                                     "256":  "256/xp-dvd-alt.png",
+                                     "16":  "16/xp-dvd-alt.png",
+                                     "32":  "32/xp-dvd-alt.png"
+                                 },
+                  "xp-dvd":  {
+                                 "256":  "256/xp-dvd.png",
+                                 "16":  "16/xp-dvd.png",
+                                 "32":  "32/xp-dvd.png"
+                             },
+                  "xp-dvd-r":  {
+                                   "256":  "256/xp-dvd-r.png",
+                                   "16":  "16/xp-dvd-r.png",
+                                   "32":  "32/xp-dvd-r.png"
+                               },
+                  "xp-dvd-ram":  {
+                                     "256":  "256/xp-dvd-ram.png",
+                                     "16":  "16/xp-dvd-ram.png",
+                                     "32":  "32/xp-dvd-ram.png"
+                                 },
+                  "xp-dvd-rom":  {
+                                     "256":  "256/xp-dvd-rom.png",
+                                     "16":  "16/xp-dvd-rom.png",
+                                     "32":  "32/xp-dvd-rom.png"
+                                 },
+                  "xp-dvd-rw":  {
+                                    "256":  "256/xp-dvd-rw.png",
+                                    "16":  "16/xp-dvd-rw.png",
+                                    "32":  "32/xp-dvd-rw.png"
+                                },
+                  "xp-email":  {
+                                   "256":  "256/xp-email.png",
+                                   "16":  "16/xp-email.png",
+                                   "32":  "32/xp-email.png"
+                               },
+                  "xp-entire-network":  {
+                                            "256":  "256/xp-entire-network.png",
+                                            "16":  "16/xp-entire-network.png",
+                                            "32":  "32/xp-entire-network.png"
+                                        },
+                  "xp-erase-disc":  {
+                                        "256":  "256/xp-erase-disc.png",
+                                        "16":  "16/xp-erase-disc.png",
+                                        "32":  "32/xp-erase-disc.png"
+                                    },
+                  "xp-erase":  {
+                                   "256":  "256/xp-erase.png",
+                                   "16":  "16/xp-erase.png",
+                                   "32":  "32/xp-erase.png"
+                               },
+                  "xp-event-viewer":  {
+                                          "256":  "256/xp-event-viewer.png",
+                                          "16":  "16/xp-event-viewer.png",
+                                          "32":  "32/xp-event-viewer.png"
+                                      },
+                  "xp-exit":  {
+                                  "256":  "256/xp-exit.png",
+                                  "16":  "16/xp-exit.png",
+                                  "32":  "32/xp-exit.png"
+                              },
+                  "xp-explorer-delete":  {
+                                             "256":  "256/xp-explorer-delete.png",
+                                             "16":  "16/xp-explorer-delete.png",
+                                             "32":  "32/xp-explorer-delete.png"
+                                         },
+                  "xp-explorer-properties":  {
+                                                 "256":  "256/xp-explorer-properties.png",
+                                                 "16":  "16/xp-explorer-properties.png",
+                                                 "32":  "32/xp-explorer-properties.png"
+                                             },
+                  "xp-explorer":  {
+                                      "256":  "256/xp-explorer.png",
+                                      "16":  "16/xp-explorer.png",
+                                      "32":  "32/xp-explorer.png"
+                                  },
+                  "xp-favorites":  {
+                                       "256":  "256/xp-favorites.png",
+                                       "16":  "16/xp-favorites.png",
+                                       "32":  "32/xp-favorites.png"
+                                   },
+                  "xp-fax-archive":  {
+                                         "256":  "256/xp-fax-archive.png",
+                                         "16":  "16/xp-fax-archive.png",
+                                         "32":  "32/xp-fax-archive.png"
+                                     },
+                  "xp-fax-console":  {
+                                         "256":  "256/xp-fax-console.png",
+                                         "16":  "16/xp-fax-console.png",
+                                         "32":  "32/xp-fax-console.png"
+                                     },
+                  "xp-fax-cover-page":  {
+                                            "256":  "256/xp-fax-cover-page.png",
+                                            "16":  "16/xp-fax-cover-page.png",
+                                            "32":  "32/xp-fax-cover-page.png"
+                                        },
+                  "xp-fax-devices":  {
+                                         "256":  "256/xp-fax-devices.png",
+                                         "16":  "16/xp-fax-devices.png",
+                                         "32":  "32/xp-fax-devices.png"
+                                     },
+                  "xp-fax-event":  {
+                                       "256":  "256/xp-fax-event.png",
+                                       "16":  "16/xp-fax-event.png",
+                                       "32":  "32/xp-fax-event.png"
+                                   },
+                  "xp-fax-received-succesfully":  {
+                                                      "256":  "256/xp-fax-received-succesfully.png",
+                                                      "16":  "16/xp-fax-received-succesfully.png",
+                                                      "32":  "32/xp-fax-received-succesfully.png"
+                                                  },
+                  "xp-fax-sender-information":  {
+                                                    "256":  "256/xp-fax-sender-information.png",
+                                                    "16":  "16/xp-fax-sender-information.png",
+                                                    "32":  "32/xp-fax-sender-information.png"
+                                                },
+                  "xp-fax-sent-succesfully":  {
+                                                  "256":  "256/xp-fax-sent-succesfully.png",
+                                                  "16":  "16/xp-fax-sent-succesfully.png",
+                                                  "32":  "32/xp-fax-sent-succesfully.png"
+                                              },
+                  "xp-fax":  {
+                                 "256":  "256/xp-fax.png",
+                                 "16":  "16/xp-fax.png",
+                                 "32":  "32/xp-fax.png"
+                             },
+                  "xp-file-and-settings-transfer-wizard":  {
+                                                               "256":  "256/xp-file-and-settings-transfer-wizard.png",
+                                                               "16":  "16/xp-file-and-settings-transfer-wizard.png",
+                                                               "32":  "32/xp-file-and-settings-transfer-wizard.png"
+                                                           },
+                  "xp-firewall":  {
+                                      "256":  "256/xp-firewall.png",
+                                      "16":  "16/xp-firewall.png",
+                                      "32":  "32/xp-firewall.png"
+                                  },
+                  "xp-floppy-disk":  {
+                                         "256":  "256/xp-floppy-disk.png",
+                                         "16":  "16/xp-floppy-disk.png",
+                                         "32":  "32/xp-floppy-disk.png"
+                                     },
+                  "xp-folder-closed":  {
+                                           "256":  "256/xp-folder-closed.png",
+                                           "16":  "16/xp-folder-closed.png",
+                                           "32":  "32/xp-folder-closed.png"
+                                       },
+                  "xp-folder-opened":  {
+                                           "256":  "256/xp-folder-opened.png",
+                                           "16":  "16/xp-folder-opened.png",
+                                           "32":  "32/xp-folder-opened.png"
+                                       },
+                  "xp-folder-options":  {
+                                            "256":  "256/xp-folder-options.png",
+                                            "16":  "16/xp-folder-options.png",
+                                            "32":  "32/xp-folder-options.png"
+                                        },
+                  "xp-folder-view---classic":  {
+                                                   "256":  "256/xp-folder-view---classic.png",
+                                                   "16":  "16/xp-folder-view---classic.png",
+                                                   "32":  "32/xp-folder-view---classic.png"
+                                               },
+                  "xp-folder-view---common-tasks":  {
+                                                        "256":  "256/xp-folder-view---common-tasks.png",
+                                                        "16":  "16/xp-folder-view---common-tasks.png",
+                                                        "32":  "32/xp-folder-view---common-tasks.png"
+                                                    },
+                  "xp-folder-view":  {
+                                         "256":  "256/xp-folder-view.png",
+                                         "16":  "16/xp-folder-view.png",
+                                         "32":  "32/xp-folder-view.png"
+                                     },
+                  "xp-folders-open-in-new-window":  {
+                                                        "256":  "256/xp-folders-open-in-new-window.png",
+                                                        "16":  "16/xp-folders-open-in-new-window.png",
+                                                        "32":  "32/xp-folders-open-in-new-window.png"
+                                                    },
+                  "xp-folders-open-in-same-window":  {
+                                                         "256":  "256/xp-folders-open-in-same-window.png",
+                                                         "16":  "16/xp-folders-open-in-same-window.png",
+                                                         "32":  "32/xp-folders-open-in-same-window.png"
+                                                     },
+                  "xp-font-similarity-view":  {
+                                                  "256":  "256/xp-font-similarity-view.png",
+                                                  "16":  "16/xp-font-similarity-view.png",
+                                                  "32":  "32/xp-font-similarity-view.png"
+                                              },
+                  "xp-font":  {
+                                  "256":  "256/xp-font.png",
+                                  "16":  "16/xp-font.png",
+                                  "32":  "32/xp-font.png"
+                              },
+                  "xp-font2":  {
+                                   "256":  "256/xp-font2.png",
+                                   "16":  "16/xp-font2.png",
+                                   "32":  "32/xp-font2.png"
+                               },
+                  "xp-fonts":  {
+                                   "256":  "256/xp-fonts.png",
+                                   "16":  "16/xp-fonts.png",
+                                   "32":  "32/xp-fonts.png"
+                               },
+                  "xp-forward":  {
+                                     "256":  "256/xp-forward.png",
+                                     "16":  "16/xp-forward.png",
+                                     "32":  "32/xp-forward.png"
+                                 },
+                  "xp-freecell":  {
+                                      "256":  "256/xp-freecell.png",
+                                      "16":  "16/xp-freecell.png",
+                                      "32":  "32/xp-freecell.png"
+                                  },
+                  "xp-full-screen":  {
+                                         "256":  "256/xp-full-screen.png",
+                                         "16":  "16/xp-full-screen.png",
+                                         "32":  "32/xp-full-screen.png"
+                                     },
+                  "xp-game-controller":  {
+                                             "256":  "256/xp-game-controller.png",
+                                             "16":  "16/xp-game-controller.png",
+                                             "32":  "32/xp-game-controller.png"
+                                         },
+                  "xp-generic-audio":  {
+                                           "256":  "256/xp-generic-audio.png",
+                                           "16":  "16/xp-generic-audio.png",
+                                           "32":  "32/xp-generic-audio.png"
+                                       },
+                  "xp-generic-document":  {
+                                              "256":  "256/xp-generic-document.png",
+                                              "16":  "16/xp-generic-document.png",
+                                              "32":  "32/xp-generic-document.png"
+                                          },
+                  "xp-generic-media":  {
+                                           "256":  "256/xp-generic-media.png",
+                                           "16":  "16/xp-generic-media.png",
+                                           "32":  "32/xp-generic-media.png"
+                                       },
+                  "xp-generic-text-document":  {
+                                                   "256":  "256/xp-generic-text-document.png",
+                                                   "16":  "16/xp-generic-text-document.png",
+                                                   "32":  "32/xp-generic-text-document.png"
+                                               },
+                  "xp-generic-video":  {
+                                           "256":  "256/xp-generic-video.png",
+                                           "16":  "16/xp-generic-video.png",
+                                           "32":  "32/xp-generic-video.png"
+                                       },
+                  "xp-get-going-with-tablet-pc":  {
+                                                      "256":  "256/xp-get-going-with-tablet-pc.png",
+                                                      "16":  "16/xp-get-going-with-tablet-pc.png",
+                                                      "32":  "32/xp-get-going-with-tablet-pc.png"
+                                                  },
+                  "xp-get-pictures":  {
+                                          "256":  "256/xp-get-pictures.png",
+                                          "16":  "16/xp-get-pictures.png",
+                                          "32":  "32/xp-get-pictures.png"
+                                      },
+                  "xp-get-support":  {
+                                         "256":  "256/xp-get-support.png",
+                                         "16":  "16/xp-get-support.png",
+                                         "32":  "32/xp-get-support.png"
+                                     },
+                  "xp-gif":  {
+                                 "256":  "256/xp-gif.png",
+                                 "16":  "16/xp-gif.png",
+                                 "32":  "32/xp-gif.png"
+                             },
+                  "xp-go":  {
+                                "256":  "256/xp-go.png",
+                                "16":  "16/xp-go.png",
+                                "32":  "32/xp-go.png"
+                            },
+                  "xp-graph-view":  {
+                                        "256":  "256/xp-graph-view.png",
+                                        "16":  "16/xp-graph-view.png",
+                                        "32":  "32/xp-graph-view.png"
+                                    },
+                  "xp-grayscale-scan":  {
+                                            "256":  "256/xp-grayscale-scan.png",
+                                            "16":  "16/xp-grayscale-scan.png",
+                                            "32":  "32/xp-grayscale-scan.png"
+                                        },
+                  "xp-hearts":  {
+                                    "256":  "256/xp-hearts.png",
+                                    "16":  "16/xp-hearts.png",
+                                    "32":  "32/xp-hearts.png"
+                                },
+                  "xp-help-and-support---change-view-1":  {
+                                                              "256":  "256/xp-help-and-support---change-view-1.png",
+                                                              "16":  "16/xp-help-and-support---change-view-1.png",
+                                                              "32":  "32/xp-help-and-support---change-view-1.png"
+                                                          },
+                  "xp-help-and-support---change-view-2":  {
+                                                              "256":  "256/xp-help-and-support---change-view-2.png",
+                                                              "16":  "16/xp-help-and-support---change-view-2.png",
+                                                              "32":  "32/xp-help-and-support---change-view-2.png"
+                                                          },
+                  "xp-help-and-support---index":  {
+                                                      "256":  "256/xp-help-and-support---index.png",
+                                                      "16":  "16/xp-help-and-support---index.png",
+                                                      "32":  "32/xp-help-and-support---index.png"
+                                                  },
+                  "xp-help-and-support---task-list":  {
+                                                          "256":  "256/xp-help-and-support---task-list.png",
+                                                          "16":  "16/xp-help-and-support---task-list.png",
+                                                          "32":  "32/xp-help-and-support---task-list.png"
+                                                      },
+                  "xp-help-and-support":  {
+                                              "256":  "256/xp-help-and-support.png",
+                                              "16":  "16/xp-help-and-support.png",
+                                              "32":  "32/xp-help-and-support.png"
+                                          },
+                  "xp-hibernate":  {
+                                       "256":  "256/xp-hibernate.png",
+                                       "16":  "16/xp-hibernate.png",
+                                       "32":  "32/xp-hibernate.png"
+                                   },
+                  "xp-high-contrast-settings":  {
+                                                    "256":  "256/xp-high-contrast-settings.png",
+                                                    "16":  "16/xp-high-contrast-settings.png",
+                                                    "32":  "32/xp-high-contrast-settings.png"
+                                                },
+                  "xp-hlp":  {
+                                 "256":  "256/xp-hlp.png",
+                                 "16":  "16/xp-hlp.png",
+                                 "32":  "32/xp-hlp.png"
+                             },
+                  "xp-html":  {
+                                  "256":  "256/xp-html.png",
+                                  "16":  "16/xp-html.png",
+                                  "32":  "32/xp-html.png"
+                              },
+                  "xp-hyper-terminal":  {
+                                            "256":  "256/xp-hyper-terminal.png",
+                                            "16":  "16/xp-hyper-terminal.png",
+                                            "32":  "32/xp-hyper-terminal.png"
+                                        },
+                  "xp-icon-view":  {
+                                       "256":  "256/xp-icon-view.png",
+                                       "16":  "16/xp-icon-view.png",
+                                       "32":  "32/xp-icon-view.png"
+                                   },
+                  "xp-ie-discuss":  {
+                                        "256":  "256/xp-ie-discuss.png",
+                                        "16":  "16/xp-ie-discuss.png",
+                                        "32":  "32/xp-ie-discuss.png"
+                                    },
+                  "xp-ie-edit":  {
+                                     "256":  "256/xp-ie-edit.png",
+                                     "16":  "16/xp-ie-edit.png",
+                                     "32":  "32/xp-ie-edit.png"
+                                 },
+                  "xp-ie-encoding":  {
+                                         "256":  "256/xp-ie-encoding.png",
+                                         "16":  "16/xp-ie-encoding.png",
+                                         "32":  "32/xp-ie-encoding.png"
+                                     },
+                  "xp-ie-enlarge-image":  {
+                                              "256":  "256/xp-ie-enlarge-image.png",
+                                              "16":  "16/xp-ie-enlarge-image.png",
+                                              "32":  "32/xp-ie-enlarge-image.png"
+                                          },
+                  "xp-ie-history":  {
+                                        "256":  "256/xp-ie-history.png",
+                                        "16":  "16/xp-ie-history.png",
+                                        "32":  "32/xp-ie-history.png"
+                                    },
+                  "xp-ie-home":  {
+                                     "256":  "256/xp-ie-home.png",
+                                     "16":  "16/xp-ie-home.png",
+                                     "32":  "32/xp-ie-home.png"
+                                 },
+                  "xp-ie-media":  {
+                                      "256":  "256/xp-ie-media.png",
+                                      "16":  "16/xp-ie-media.png",
+                                      "32":  "32/xp-ie-media.png"
+                                  },
+                  "xp-ie-refresh":  {
+                                        "256":  "256/xp-ie-refresh.png",
+                                        "16":  "16/xp-ie-refresh.png",
+                                        "32":  "32/xp-ie-refresh.png"
+                                    },
+                  "xp-ie-shrink-image":  {
+                                             "256":  "256/xp-ie-shrink-image.png",
+                                             "16":  "16/xp-ie-shrink-image.png",
+                                             "32":  "32/xp-ie-shrink-image.png"
+                                         },
+                  "xp-ie-size":  {
+                                     "256":  "256/xp-ie-size.png",
+                                     "16":  "16/xp-ie-size.png",
+                                     "32":  "32/xp-ie-size.png"
+                                 },
+                  "xp-ie-stop":  {
+                                     "256":  "256/xp-ie-stop.png",
+                                     "16":  "16/xp-ie-stop.png",
+                                     "32":  "32/xp-ie-stop.png"
+                                 },
+                  "xp-iexpress":  {
+                                      "256":  "256/xp-iexpress.png",
+                                      "16":  "16/xp-iexpress.png",
+                                      "32":  "32/xp-iexpress.png"
+                                  },
+                  "xp-important":  {
+                                       "256":  "256/xp-important.png",
+                                       "16":  "16/xp-important.png",
+                                       "32":  "32/xp-important.png"
+                                   },
+                  "xp-incoming-connections":  {
+                                                  "256":  "256/xp-incoming-connections.png",
+                                                  "16":  "16/xp-incoming-connections.png",
+                                                  "32":  "32/xp-incoming-connections.png"
+                                              },
+                  "xp-indexing-service":  {
+                                              "256":  "256/xp-indexing-service.png",
+                                              "16":  "16/xp-indexing-service.png",
+                                              "32":  "32/xp-indexing-service.png"
+                                          },
+                  "xp-inf":  {
+                                 "256":  "256/xp-inf.png",
+                                 "16":  "16/xp-inf.png",
+                                 "32":  "32/xp-inf.png"
+                             },
+                  "xp-information-bar":  {
+                                             "256":  "256/xp-information-bar.png",
+                                             "16":  "16/xp-information-bar.png",
+                                             "32":  "32/xp-information-bar.png"
+                                         },
+                  "xp-information":  {
+                                         "256":  "256/xp-information.png",
+                                         "16":  "16/xp-information.png",
+                                         "32":  "32/xp-information.png"
+                                     },
+                  "xp-inkball":  {
+                                     "256":  "256/xp-inkball.png",
+                                     "16":  "16/xp-inkball.png",
+                                     "32":  "32/xp-inkball.png"
+                                 },
+                  "xp-input-panel":  {
+                                         "256":  "256/xp-input-panel.png",
+                                         "16":  "16/xp-input-panel.png",
+                                         "32":  "32/xp-input-panel.png"
+                                     },
+                  "xp-internet-backgammon":  {
+                                                 "256":  "256/xp-internet-backgammon.png",
+                                                 "16":  "16/xp-internet-backgammon.png",
+                                                 "32":  "32/xp-internet-backgammon.png"
+                                             },
+                  "xp-internet-checkers":  {
+                                               "256":  "256/xp-internet-checkers.png",
+                                               "16":  "16/xp-internet-checkers.png",
+                                               "32":  "32/xp-internet-checkers.png"
+                                           },
+                  "xp-internet-connection-wizard":  {
+                                                        "256":  "256/xp-internet-connection-wizard.png",
+                                                        "16":  "16/xp-internet-connection-wizard.png",
+                                                        "32":  "32/xp-internet-connection-wizard.png"
+                                                    },
+                  "xp-internet-explorer-6":  {
+                                                 "256":  "256/xp-internet-explorer-6.png",
+                                                 "16":  "16/xp-internet-explorer-6.png",
+                                                 "32":  "32/xp-internet-explorer-6.png"
+                                             },
+                  "xp-internet-hearts":  {
+                                             "256":  "256/xp-internet-hearts.png",
+                                             "16":  "16/xp-internet-hearts.png",
+                                             "32":  "32/xp-internet-hearts.png"
+                                         },
+                  "xp-internet-information-services-6":  {
+                                                             "256":  "256/xp-internet-information-services-6.png",
+                                                             "16":  "16/xp-internet-information-services-6.png",
+                                                             "32":  "32/xp-internet-information-services-6.png"
+                                                         },
+                  "xp-internet-options":  {
+                                              "256":  "256/xp-internet-options.png",
+                                              "16":  "16/xp-internet-options.png",
+                                              "32":  "32/xp-internet-options.png"
+                                          },
+                  "xp-internet-reversi":  {
+                                              "256":  "256/xp-internet-reversi.png",
+                                              "16":  "16/xp-internet-reversi.png",
+                                              "32":  "32/xp-internet-reversi.png"
+                                          },
+                  "xp-internet-shortcut":  {
+                                               "256":  "256/xp-internet-shortcut.png",
+                                               "16":  "16/xp-internet-shortcut.png",
+                                               "32":  "32/xp-internet-shortcut.png"
+                                           },
+                  "xp-internet-spades":  {
+                                             "256":  "256/xp-internet-spades.png",
+                                             "16":  "16/xp-internet-spades.png",
+                                             "32":  "32/xp-internet-spades.png"
+                                         },
+                  "xp-ir-file-transfer":  {
+                                              "256":  "256/xp-ir-file-transfer.png",
+                                              "16":  "16/xp-ir-file-transfer.png",
+                                              "32":  "32/xp-ir-file-transfer.png"
+                                          },
+                  "xp-java-script":  {
+                                         "256":  "256/xp-java-script.png",
+                                         "16":  "16/xp-java-script.png",
+                                         "32":  "32/xp-java-script.png"
+                                     },
+                  "xp-jaz-drive":  {
+                                       "256":  "256/xp-jaz-drive.png",
+                                       "16":  "16/xp-jaz-drive.png",
+                                       "32":  "32/xp-jaz-drive.png"
+                                   },
+                  "xp-journal-note":  {
+                                          "256":  "256/xp-journal-note.png",
+                                          "16":  "16/xp-journal-note.png",
+                                          "32":  "32/xp-journal-note.png"
+                                      },
+                  "xp-journal-template":  {
+                                              "256":  "256/xp-journal-template.png",
+                                              "16":  "16/xp-journal-template.png",
+                                              "32":  "32/xp-journal-template.png"
+                                          },
+                  "xp-jpg":  {
+                                 "256":  "256/xp-jpg.png",
+                                 "16":  "16/xp-jpg.png",
+                                 "32":  "32/xp-jpg.png"
+                             },
+                  "xp-key":  {
+                                 "256":  "256/xp-key.png",
+                                 "16":  "16/xp-key.png",
+                                 "32":  "32/xp-key.png"
+                             },
+                  "xp-keyboard":  {
+                                      "256":  "256/xp-keyboard.png",
+                                      "16":  "16/xp-keyboard.png",
+                                      "32":  "32/xp-keyboard.png"
+                                  },
+                  "xp-legacy-floppy-disk":  {
+                                                "256":  "256/xp-legacy-floppy-disk.png",
+                                                "16":  "16/xp-legacy-floppy-disk.png",
+                                                "32":  "32/xp-legacy-floppy-disk.png"
+                                            },
+                  "xp-local-disk":  {
+                                        "256":  "256/xp-local-disk.png",
+                                        "16":  "16/xp-local-disk.png",
+                                        "32":  "32/xp-local-disk.png"
+                                    },
+                  "xp-local-security-policy":  {
+                                                   "256":  "256/xp-local-security-policy.png",
+                                                   "16":  "16/xp-local-security-policy.png",
+                                                   "32":  "32/xp-local-security-policy.png"
+                                               },
+                  "xp-lock":  {
+                                  "256":  "256/xp-lock.png",
+                                  "16":  "16/xp-lock.png",
+                                  "32":  "32/xp-lock.png"
+                              },
+                  "xp-login-question":  {
+                                            "256":  "256/xp-login-question.png",
+                                            "16":  "16/xp-login-question.png",
+                                            "32":  "32/xp-login-question.png"
+                                        },
+                  "xp-logout":  {
+                                    "256":  "256/xp-logout.png",
+                                    "16":  "16/xp-logout.png",
+                                    "32":  "32/xp-logout.png"
+                                },
+                  "xp-magnifier":  {
+                                       "256":  "256/xp-magnifier.png",
+                                       "16":  "16/xp-magnifier.png",
+                                       "32":  "32/xp-magnifier.png"
+                                   },
+                  "xp-malicious-software-removal-tool":  {
+                                                             "256":  "256/xp-malicious-software-removal-tool.png",
+                                                             "16":  "16/xp-malicious-software-removal-tool.png",
+                                                             "32":  "32/xp-malicious-software-removal-tool.png"
+                                                         },
+                  "xp-manage-server-licenses":  {
+                                                    "256":  "256/xp-manage-server-licenses.png",
+                                                    "16":  "16/xp-manage-server-licenses.png",
+                                                    "32":  "32/xp-manage-server-licenses.png"
+                                                },
+                  "xp-manage-server-roles":  {
+                                                 "256":  "256/xp-manage-server-roles.png",
+                                                 "16":  "16/xp-manage-server-roles.png",
+                                                 "32":  "32/xp-manage-server-roles.png"
+                                             },
+                  "xp-manage-your-server":  {
+                                                "256":  "256/xp-manage-your-server.png",
+                                                "16":  "16/xp-manage-your-server.png",
+                                                "32":  "32/xp-manage-your-server.png"
+                                            },
+                  "xp-map-network-drive":  {
+                                               "256":  "256/xp-map-network-drive.png",
+                                               "16":  "16/xp-map-network-drive.png",
+                                               "32":  "32/xp-map-network-drive.png"
+                                           },
+                  "xp-maximize":  {
+                                      "256":  "256/xp-maximize.png",
+                                      "16":  "16/xp-maximize.png",
+                                      "32":  "32/xp-maximize.png"
+                                  },
+                  "xp-media-center-extender-manager":  {
+                                                           "256":  "256/xp-media-center-extender-manager.png",
+                                                           "16":  "16/xp-media-center-extender-manager.png",
+                                                           "32":  "32/xp-media-center-extender-manager.png"
+                                                       },
+                  "xp-media-center-file":  {
+                                               "256":  "256/xp-media-center-file.png",
+                                               "16":  "16/xp-media-center-file.png",
+                                               "32":  "32/xp-media-center-file.png"
+                                           },
+                  "xp-media-center":  {
+                                          "256":  "256/xp-media-center.png",
+                                          "16":  "16/xp-media-center.png",
+                                          "32":  "32/xp-media-center.png"
+                                      },
+                  "xp-memory-stick-with-magicgate":  {
+                                                         "256":  "256/xp-memory-stick-with-magicgate.png",
+                                                         "16":  "16/xp-memory-stick-with-magicgate.png",
+                                                         "32":  "32/xp-memory-stick-with-magicgate.png"
+                                                     },
+                  "xp-memory-stick":  {
+                                          "256":  "256/xp-memory-stick.png",
+                                          "16":  "16/xp-memory-stick.png",
+                                          "32":  "32/xp-memory-stick.png"
+                                      },
+                  "xp-microsoft-activesync":  {
+                                                  "256":  "256/xp-microsoft-activesync.png",
+                                                  "16":  "16/xp-microsoft-activesync.png",
+                                                  "32":  "32/xp-microsoft-activesync.png"
+                                              },
+                  "xp-microsoft-update":  {
+                                              "256":  "256/xp-microsoft-update.png",
+                                              "16":  "16/xp-microsoft-update.png",
+                                              "32":  "32/xp-microsoft-update.png"
+                                          },
+                  "xp-microsoft-windows-network":  {
+                                                       "256":  "256/xp-microsoft-windows-network.png",
+                                                       "16":  "16/xp-microsoft-windows-network.png",
+                                                       "32":  "32/xp-microsoft-windows-network.png"
+                                                   },
+                  "xp-minesweeper":  {
+                                         "256":  "256/xp-minesweeper.png",
+                                         "16":  "16/xp-minesweeper.png",
+                                         "32":  "32/xp-minesweeper.png"
+                                     },
+                  "xp-minimize":  {
+                                      "256":  "256/xp-minimize.png",
+                                      "16":  "16/xp-minimize.png",
+                                      "32":  "32/xp-minimize.png"
+                                  },
+                  "xp-missing-setup-information":  {
+                                                       "256":  "256/xp-missing-setup-information.png",
+                                                       "16":  "16/xp-missing-setup-information.png",
+                                                       "32":  "32/xp-missing-setup-information.png"
+                                                   },
+                  "xp-mobile-device":  {
+                                           "256":  "256/xp-mobile-device.png",
+                                           "16":  "16/xp-mobile-device.png",
+                                           "32":  "32/xp-mobile-device.png"
+                                       },
+                  "xp-modem":  {
+                                   "256":  "256/xp-modem.png",
+                                   "16":  "16/xp-modem.png",
+                                   "32":  "32/xp-modem.png"
+                               },
+                  "xp-mouse":  {
+                                   "256":  "256/xp-mouse.png",
+                                   "16":  "16/xp-mouse.png",
+                                   "32":  "32/xp-mouse.png"
+                               },
+                  "xp-move-this-folder":  {
+                                              "256":  "256/xp-move-this-folder.png",
+                                              "16":  "16/xp-move-this-folder.png",
+                                              "32":  "32/xp-move-this-folder.png"
+                                          },
+                  "xp-move-to-folder":  {
+                                            "256":  "256/xp-move-to-folder.png",
+                                            "16":  "16/xp-move-to-folder.png",
+                                            "32":  "32/xp-move-to-folder.png"
+                                        },
+                  "xp-move-to":  {
+                                     "256":  "256/xp-move-to.png",
+                                     "16":  "16/xp-move-to.png",
+                                     "32":  "32/xp-move-to.png"
+                                 },
+                  "xp-mp3-player":  {
+                                        "256":  "256/xp-mp3-player.png",
+                                        "16":  "16/xp-mp3-player.png",
+                                        "32":  "32/xp-mp3-player.png"
+                                    },
+                  "xp-msn-email":  {
+                                       "256":  "256/xp-msn-email.png",
+                                       "16":  "16/xp-msn-email.png",
+                                       "32":  "32/xp-msn-email.png"
+                                   },
+                  "xp-msn-messenger":  {
+                                           "256":  "256/xp-msn-messenger.png",
+                                           "16":  "16/xp-msn-messenger.png",
+                                           "32":  "32/xp-msn-messenger.png"
+                                       },
+                  "xp-msn":  {
+                                 "256":  "256/xp-msn.png",
+                                 "16":  "16/xp-msn.png",
+                                 "32":  "32/xp-msn.png"
+                             },
+                  "xp-mswmm":  {
+                                   "256":  "256/xp-mswmm.png",
+                                   "16":  "16/xp-mswmm.png",
+                                   "32":  "32/xp-mswmm.png"
+                               },
+                  "xp-mute":  {
+                                  "256":  "256/xp-mute.png",
+                                  "16":  "16/xp-mute.png",
+                                  "32":  "32/xp-mute.png"
+                              },
+                  "xp-my-computer":  {
+                                         "256":  "256/xp-my-computer.png",
+                                         "16":  "16/xp-my-computer.png",
+                                         "32":  "32/xp-my-computer.png"
+                                     },
+                  "xp-my-documents":  {
+                                          "256":  "256/xp-my-documents.png",
+                                          "16":  "16/xp-my-documents.png",
+                                          "32":  "32/xp-my-documents.png"
+                                      },
+                  "xp-my-music":  {
+                                      "256":  "256/xp-my-music.png",
+                                      "16":  "16/xp-my-music.png",
+                                      "32":  "32/xp-my-music.png"
+                                  },
+                  "xp-my-network-places":  {
+                                               "256":  "256/xp-my-network-places.png",
+                                               "16":  "16/xp-my-network-places.png",
+                                               "32":  "32/xp-my-network-places.png"
+                                           },
+                  "xp-my-pictures":  {
+                                         "256":  "256/xp-my-pictures.png",
+                                         "16":  "16/xp-my-pictures.png",
+                                         "32":  "32/xp-my-pictures.png"
+                                     },
+                  "xp-my-videos":  {
+                                       "256":  "256/xp-my-videos.png",
+                                       "16":  "16/xp-my-videos.png",
+                                       "32":  "32/xp-my-videos.png"
+                                   },
+                  "xp-narrator":  {
+                                      "256":  "256/xp-narrator.png",
+                                      "16":  "16/xp-narrator.png",
+                                      "32":  "32/xp-narrator.png"
+                                  },
+                  "xp-netmeeting":  {
+                                        "256":  "256/xp-netmeeting.png",
+                                        "16":  "16/xp-netmeeting.png",
+                                        "32":  "32/xp-netmeeting.png"
+                                    },
+                  "xp-network-and-internet":  {
+                                                  "256":  "256/xp-network-and-internet.png",
+                                                  "16":  "16/xp-network-and-internet.png",
+                                                  "32":  "32/xp-network-and-internet.png"
+                                              },
+                  "xp-network-connection":  {
+                                                "256":  "256/xp-network-connection.png",
+                                                "16":  "16/xp-network-connection.png",
+                                                "32":  "32/xp-network-connection.png"
+                                            },
+                  "xp-network-connections":  {
+                                                 "256":  "256/xp-network-connections.png",
+                                                 "16":  "16/xp-network-connections.png",
+                                                 "32":  "32/xp-network-connections.png"
+                                             },
+                  "xp-network-drive-disconnected":  {
+                                                        "256":  "256/xp-network-drive-disconnected.png",
+                                                        "16":  "16/xp-network-drive-disconnected.png",
+                                                        "32":  "32/xp-network-drive-disconnected.png"
+                                                    },
+                  "xp-network-drive":  {
+                                           "256":  "256/xp-network-drive.png",
+                                           "16":  "16/xp-network-drive.png",
+                                           "32":  "32/xp-network-drive.png"
+                                       },
+                  "xp-network-fax":  {
+                                         "256":  "256/xp-network-fax.png",
+                                         "16":  "16/xp-network-fax.png",
+                                         "32":  "32/xp-network-fax.png"
+                                     },
+                  "xp-network-folder":  {
+                                            "256":  "256/xp-network-folder.png",
+                                            "16":  "16/xp-network-folder.png",
+                                            "32":  "32/xp-network-folder.png"
+                                        },
+                  "xp-network-printer":  {
+                                             "256":  "256/xp-network-printer.png",
+                                             "16":  "16/xp-network-printer.png",
+                                             "32":  "32/xp-network-printer.png"
+                                         },
+                  "xp-network-setup":  {
+                                           "256":  "256/xp-network-setup.png",
+                                           "16":  "16/xp-network-setup.png",
+                                           "32":  "32/xp-network-setup.png"
+                                       },
+                  "xp-new-file":  {
+                                      "256":  "256/xp-new-file.png",
+                                      "16":  "16/xp-new-file.png",
+                                      "32":  "32/xp-new-file.png"
+                                  },
+                  "xp-new-folder":  {
+                                        "256":  "256/xp-new-folder.png",
+                                        "16":  "16/xp-new-folder.png",
+                                        "32":  "32/xp-new-folder.png"
+                                    },
+                  "xp-new-imaging-device":  {
+                                                "256":  "256/xp-new-imaging-device.png",
+                                                "16":  "16/xp-new-imaging-device.png",
+                                                "32":  "32/xp-new-imaging-device.png"
+                                            },
+                  "xp-new-internet-connection":  {
+                                                     "256":  "256/xp-new-internet-connection.png",
+                                                     "16":  "16/xp-new-internet-connection.png",
+                                                     "32":  "32/xp-new-internet-connection.png"
+                                                 },
+                  "xp-new-network-connection":  {
+                                                    "256":  "256/xp-new-network-connection.png",
+                                                    "16":  "16/xp-new-network-connection.png",
+                                                    "32":  "32/xp-new-network-connection.png"
+                                                },
+                  "xp-new-printer":  {
+                                         "256":  "256/xp-new-printer.png",
+                                         "16":  "16/xp-new-printer.png",
+                                         "32":  "32/xp-new-printer.png"
+                                     },
+                  "xp-new-scheduled-task":  {
+                                                "256":  "256/xp-new-scheduled-task.png",
+                                                "16":  "16/xp-new-scheduled-task.png",
+                                                "32":  "32/xp-new-scheduled-task.png"
+                                            },
+                  "xp-notepad":  {
+                                     "256":  "256/xp-notepad.png",
+                                     "16":  "16/xp-notepad.png",
+                                     "32":  "32/xp-notepad.png"
+                                 },
+                  "xp-odbc-data-sources":  {
+                                               "256":  "256/xp-odbc-data-sources.png",
+                                               "16":  "16/xp-odbc-data-sources.png",
+                                               "32":  "32/xp-odbc-data-sources.png"
+                                           },
+                  "xp-oe-attatch":  {
+                                        "256":  "256/xp-oe-attatch.png",
+                                        "16":  "16/xp-oe-attatch.png",
+                                        "32":  "32/xp-oe-attatch.png"
+                                    },
+                  "xp-oe-create-mail":  {
+                                            "256":  "256/xp-oe-create-mail.png",
+                                            "16":  "16/xp-oe-create-mail.png",
+                                            "32":  "32/xp-oe-create-mail.png"
+                                        },
+                  "xp-oe-decode":  {
+                                       "256":  "256/xp-oe-decode.png",
+                                       "16":  "16/xp-oe-decode.png",
+                                       "32":  "32/xp-oe-decode.png"
+                                   },
+                  "xp-oe-encrypt":  {
+                                        "256":  "256/xp-oe-encrypt.png",
+                                        "16":  "16/xp-oe-encrypt.png",
+                                        "32":  "32/xp-oe-encrypt.png"
+                                    },
+                  "xp-oe-folder-list":  {
+                                            "256":  "256/xp-oe-folder-list.png",
+                                            "16":  "16/xp-oe-folder-list.png",
+                                            "32":  "32/xp-oe-folder-list.png"
+                                        },
+                  "xp-oe-forward":  {
+                                        "256":  "256/xp-oe-forward.png",
+                                        "16":  "16/xp-oe-forward.png",
+                                        "32":  "32/xp-oe-forward.png"
+                                    },
+                  "xp-oe-inbox":  {
+                                      "256":  "256/xp-oe-inbox.png",
+                                      "16":  "16/xp-oe-inbox.png",
+                                      "32":  "32/xp-oe-inbox.png"
+                                  },
+                  "xp-oe-mark-as-read":  {
+                                             "256":  "256/xp-oe-mark-as-read.png",
+                                             "16":  "16/xp-oe-mark-as-read.png",
+                                             "32":  "32/xp-oe-mark-as-read.png"
+                                         },
+                  "xp-oe-mark-as-unread":  {
+                                               "256":  "256/xp-oe-mark-as-unread.png",
+                                               "16":  "16/xp-oe-mark-as-unread.png",
+                                               "32":  "32/xp-oe-mark-as-unread.png"
+                                           },
+                  "xp-oe-news-post":  {
+                                          "256":  "256/xp-oe-news-post.png",
+                                          "16":  "16/xp-oe-news-post.png",
+                                          "32":  "32/xp-oe-news-post.png"
+                                      },
+                  "xp-oe-outbox":  {
+                                       "256":  "256/xp-oe-outbox.png",
+                                       "16":  "16/xp-oe-outbox.png",
+                                       "32":  "32/xp-oe-outbox.png"
+                                   },
+                  "xp-oe-preview-pane":  {
+                                             "256":  "256/xp-oe-preview-pane.png",
+                                             "16":  "16/xp-oe-preview-pane.png",
+                                             "32":  "32/xp-oe-preview-pane.png"
+                                         },
+                  "xp-oe-recipients":  {
+                                           "256":  "256/xp-oe-recipients.png",
+                                           "16":  "16/xp-oe-recipients.png",
+                                           "32":  "32/xp-oe-recipients.png"
+                                       },
+                  "xp-oe-reply-all":  {
+                                          "256":  "256/xp-oe-reply-all.png",
+                                          "16":  "16/xp-oe-reply-all.png",
+                                          "32":  "32/xp-oe-reply-all.png"
+                                      },
+                  "xp-oe-reply":  {
+                                      "256":  "256/xp-oe-reply.png",
+                                      "16":  "16/xp-oe-reply.png",
+                                      "32":  "32/xp-oe-reply.png"
+                                  },
+                  "xp-oe-send-and-receive":  {
+                                                 "256":  "256/xp-oe-send-and-receive.png",
+                                                 "16":  "16/xp-oe-send-and-receive.png",
+                                                 "32":  "32/xp-oe-send-and-receive.png"
+                                             },
+                  "xp-oe-send":  {
+                                     "256":  "256/xp-oe-send.png",
+                                     "16":  "16/xp-oe-send.png",
+                                     "32":  "32/xp-oe-send.png"
+                                 },
+                  "xp-oe-sent-items":  {
+                                           "256":  "256/xp-oe-sent-items.png",
+                                           "16":  "16/xp-oe-sent-items.png",
+                                           "32":  "32/xp-oe-sent-items.png"
+                                       },
+                  "xp-oe-sign":  {
+                                     "256":  "256/xp-oe-sign.png",
+                                     "16":  "16/xp-oe-sign.png",
+                                     "32":  "32/xp-oe-sign.png"
+                                 },
+                  "xp-oe-signature":  {
+                                          "256":  "256/xp-oe-signature.png",
+                                          "16":  "16/xp-oe-signature.png",
+                                          "32":  "32/xp-oe-signature.png"
+                                      },
+                  "xp-oe-unscramble":  {
+                                           "256":  "256/xp-oe-unscramble.png",
+                                           "16":  "16/xp-oe-unscramble.png",
+                                           "32":  "32/xp-oe-unscramble.png"
+                                       },
+                  "xp-offline-web-pages":  {
+                                               "256":  "256/xp-offline-web-pages.png",
+                                               "16":  "16/xp-offline-web-pages.png",
+                                               "32":  "32/xp-offline-web-pages.png"
+                                           },
+                  "xp-on-screen-keyboard":  {
+                                                "256":  "256/xp-on-screen-keyboard.png",
+                                                "16":  "16/xp-on-screen-keyboard.png",
+                                                "32":  "32/xp-on-screen-keyboard.png"
+                                            },
+                  "xp-open":  {
+                                  "256":  "256/xp-open.png",
+                                  "16":  "16/xp-open.png",
+                                  "32":  "32/xp-open.png"
+                              },
+                  "xp-opentype":  {
+                                      "256":  "256/xp-opentype.png",
+                                      "16":  "16/xp-opentype.png",
+                                      "32":  "32/xp-opentype.png"
+                                  },
+                  "xp-optical-drive":  {
+                                           "256":  "256/xp-optical-drive.png",
+                                           "16":  "16/xp-optical-drive.png",
+                                           "32":  "32/xp-optical-drive.png"
+                                       },
+                  "xp-outlook-express":  {
+                                             "256":  "256/xp-outlook-express.png",
+                                             "16":  "16/xp-outlook-express.png",
+                                             "32":  "32/xp-outlook-express.png"
+                                         },
+                  "xp-packager":  {
+                                      "256":  "256/xp-packager.png",
+                                      "16":  "16/xp-packager.png",
+                                      "32":  "32/xp-packager.png"
+                                  },
+                  "xp-padlock-alt":  {
+                                         "256":  "256/xp-padlock-alt.png",
+                                         "16":  "16/xp-padlock-alt.png",
+                                         "32":  "32/xp-padlock-alt.png"
+                                     },
+                  "xp-padlock":  {
+                                     "256":  "256/xp-padlock.png",
+                                     "16":  "16/xp-padlock.png",
+                                     "32":  "32/xp-padlock.png"
+                                 },
+                  "xp-paint":  {
+                                   "256":  "256/xp-paint.png",
+                                   "16":  "16/xp-paint.png",
+                                   "32":  "32/xp-paint.png"
+                               },
+                  "xp-paste":  {
+                                   "256":  "256/xp-paste.png",
+                                   "16":  "16/xp-paste.png",
+                                   "32":  "32/xp-paste.png"
+                               },
+                  "xp-pcmcia-card":  {
+                                         "256":  "256/xp-pcmcia-card.png",
+                                         "16":  "16/xp-pcmcia-card.png",
+                                         "32":  "32/xp-pcmcia-card.png"
+                                     },
+                  "xp-performance-monitor":  {
+                                                 "256":  "256/xp-performance-monitor.png",
+                                                 "16":  "16/xp-performance-monitor.png",
+                                                 "32":  "32/xp-performance-monitor.png"
+                                             },
+                  "xp-performance":  {
+                                         "256":  "256/xp-performance.png",
+                                         "16":  "16/xp-performance.png",
+                                         "32":  "32/xp-performance.png"
+                                     },
+                  "xp-phone-and-modem-options":  {
+                                                     "256":  "256/xp-phone-and-modem-options.png",
+                                                     "16":  "16/xp-phone-and-modem-options.png",
+                                                     "32":  "32/xp-phone-and-modem-options.png"
+                                                 },
+                  "xp-phone":  {
+                                   "256":  "256/xp-phone.png",
+                                   "16":  "16/xp-phone.png",
+                                   "32":  "32/xp-phone.png"
+                               },
+                  "xp-pinball":  {
+                                     "256":  "256/xp-pinball.png",
+                                     "16":  "16/xp-pinball.png",
+                                     "32":  "32/xp-pinball.png"
+                                 },
+                  "xp-play":  {
+                                  "256":  "256/xp-play.png",
+                                  "16":  "16/xp-play.png",
+                                  "32":  "32/xp-play.png"
+                              },
+                  "xp-pop-up-allowed":  {
+                                            "256":  "256/xp-pop-up-allowed.png",
+                                            "16":  "16/xp-pop-up-allowed.png",
+                                            "32":  "32/xp-pop-up-allowed.png"
+                                        },
+                  "xp-pop-up-blocked":  {
+                                            "256":  "256/xp-pop-up-blocked.png",
+                                            "16":  "16/xp-pop-up-blocked.png",
+                                            "32":  "32/xp-pop-up-blocked.png"
+                                        },
+                  "xp-pop-up-information":  {
+                                                "256":  "256/xp-pop-up-information.png",
+                                                "16":  "16/xp-pop-up-information.png",
+                                                "32":  "32/xp-pop-up-information.png"
+                                            },
+                  "xp-portable-media-devices":  {
+                                                    "256":  "256/xp-portable-media-devices.png",
+                                                    "16":  "16/xp-portable-media-devices.png",
+                                                    "32":  "32/xp-portable-media-devices.png"
+                                                },
+                  "xp-power-options":  {
+                                           "256":  "256/xp-power-options.png",
+                                           "16":  "16/xp-power-options.png",
+                                           "32":  "32/xp-power-options.png"
+                                       },
+                  "xp-power-status":  {
+                                          "256":  "256/xp-power-status.png",
+                                          "16":  "16/xp-power-status.png",
+                                          "32":  "32/xp-power-status.png"
+                                      },
+                  "xp-power":  {
+                                   "256":  "256/xp-power.png",
+                                   "16":  "16/xp-power.png",
+                                   "32":  "32/xp-power.png"
+                               },
+                  "xp-print-photos":  {
+                                          "256":  "256/xp-print-photos.png",
+                                          "16":  "16/xp-print-photos.png",
+                                          "32":  "32/xp-print-photos.png"
+                                      },
+                  "xp-print-server-properties":  {
+                                                     "256":  "256/xp-print-server-properties.png",
+                                                     "16":  "16/xp-print-server-properties.png",
+                                                     "32":  "32/xp-print-server-properties.png"
+                                                 },
+                  "xp-print-to-file":  {
+                                           "256":  "256/xp-print-to-file.png",
+                                           "16":  "16/xp-print-to-file.png",
+                                           "32":  "32/xp-print-to-file.png"
+                                       },
+                  "xp-printer-missing":  {
+                                             "256":  "256/xp-printer-missing.png",
+                                             "16":  "16/xp-printer-missing.png",
+                                             "32":  "32/xp-printer-missing.png"
+                                         },
+                  "xp-printer":  {
+                                     "256":  "256/xp-printer.png",
+                                     "16":  "16/xp-printer.png",
+                                     "32":  "32/xp-printer.png"
+                                 },
+                  "xp-printers-and-faxes":  {
+                                                "256":  "256/xp-printers-and-faxes.png",
+                                                "16":  "16/xp-printers-and-faxes.png",
+                                                "32":  "32/xp-printers-and-faxes.png"
+                                            },
+                  "xp-printers-and-hardware":  {
+                                                   "256":  "256/xp-printers-and-hardware.png",
+                                                   "16":  "16/xp-printers-and-hardware.png",
+                                                   "32":  "32/xp-printers-and-hardware.png"
+                                               },
+                  "xp-privacy":  {
+                                     "256":  "256/xp-privacy.png",
+                                     "16":  "16/xp-privacy.png",
+                                     "32":  "32/xp-privacy.png"
+                                 },
+                  "xp-programs":  {
+                                      "256":  "256/xp-programs.png",
+                                      "16":  "16/xp-programs.png",
+                                      "32":  "32/xp-programs.png"
+                                  },
+                  "xp-prohibited":  {
+                                        "256":  "256/xp-prohibited.png",
+                                        "16":  "16/xp-prohibited.png",
+                                        "32":  "32/xp-prohibited.png"
+                                    },
+                  "xp-properties":  {
+                                        "256":  "256/xp-properties.png",
+                                        "16":  "16/xp-properties.png",
+                                        "32":  "32/xp-properties.png"
+                                    },
+                  "xp-proxy-server":  {
+                                          "256":  "256/xp-proxy-server.png",
+                                          "16":  "16/xp-proxy-server.png",
+                                          "32":  "32/xp-proxy-server.png"
+                                      },
+                  "xp-publish-photos-to-web":  {
+                                                   "256":  "256/xp-publish-photos-to-web.png",
+                                                   "16":  "16/xp-publish-photos-to-web.png",
+                                                   "32":  "32/xp-publish-photos-to-web.png"
+                                               },
+                  "xp-publish-to-web":  {
+                                            "256":  "256/xp-publish-to-web.png",
+                                            "16":  "16/xp-publish-to-web.png",
+                                            "32":  "32/xp-publish-to-web.png"
+                                        },
+                  "xp-question":  {
+                                      "256":  "256/xp-question.png",
+                                      "16":  "16/xp-question.png",
+                                      "32":  "32/xp-question.png"
+                                  },
+                  "xp-recent-documents":  {
+                                              "256":  "256/xp-recent-documents.png",
+                                              "16":  "16/xp-recent-documents.png",
+                                              "32":  "32/xp-recent-documents.png"
+                                          },
+                  "xp-record":  {
+                                    "256":  "256/xp-record.png",
+                                    "16":  "16/xp-record.png",
+                                    "32":  "32/xp-record.png"
+                                },
+                  "xp-recycle-bin-(empty)":  {
+                                                 "256":  "256/xp-recycle-bin-(empty).png",
+                                                 "16":  "16/xp-recycle-bin-(empty).png",
+                                                 "32":  "32/xp-recycle-bin-(empty).png"
+                                             },
+                  "xp-recycle-bin-(full)":  {
+                                                "256":  "256/xp-recycle-bin-(full).png",
+                                                "16":  "16/xp-recycle-bin-(full).png",
+                                                "32":  "32/xp-recycle-bin-(full).png"
+                                            },
+                  "xp-redo":  {
+                                  "256":  "256/xp-redo.png",
+                                  "16":  "16/xp-redo.png",
+                                  "32":  "32/xp-redo.png"
+                              },
+                  "xp-regional-settings":  {
+                                               "256":  "256/xp-regional-settings.png",
+                                               "16":  "16/xp-regional-settings.png",
+                                               "32":  "32/xp-regional-settings.png"
+                                           },
+                  "xp-registry-document":  {
+                                               "256":  "256/xp-registry-document.png",
+                                               "16":  "16/xp-registry-document.png",
+                                               "32":  "32/xp-registry-document.png"
+                                           },
+                  "xp-registry-editor":  {
+                                             "256":  "256/xp-registry-editor.png",
+                                             "16":  "16/xp-registry-editor.png",
+                                             "32":  "32/xp-registry-editor.png"
+                                         },
+                  "xp-related-web-content":  {
+                                                 "256":  "256/xp-related-web-content.png",
+                                                 "16":  "16/xp-related-web-content.png",
+                                                 "32":  "32/xp-related-web-content.png"
+                                             },
+                  "xp-remote-access-service":  {
+                                                   "256":  "256/xp-remote-access-service.png",
+                                                   "16":  "16/xp-remote-access-service.png",
+                                                   "32":  "32/xp-remote-access-service.png"
+                                               },
+                  "xp-remote-assistance":  {
+                                               "256":  "256/xp-remote-assistance.png",
+                                               "16":  "16/xp-remote-assistance.png",
+                                               "32":  "32/xp-remote-assistance.png"
+                                           },
+                  "xp-remote-desktop-server":  {
+                                                   "256":  "256/xp-remote-desktop-server.png",
+                                                   "16":  "16/xp-remote-desktop-server.png",
+                                                   "32":  "32/xp-remote-desktop-server.png"
+                                               },
+                  "xp-remote-desktop":  {
+                                            "256":  "256/xp-remote-desktop.png",
+                                            "16":  "16/xp-remote-desktop.png",
+                                            "32":  "32/xp-remote-desktop.png"
+                                        },
+                  "xp-removable-media":  {
+                                             "256":  "256/xp-removable-media.png",
+                                             "16":  "16/xp-removable-media.png",
+                                             "32":  "32/xp-removable-media.png"
+                                         },
+                  "xp-rename":  {
+                                    "256":  "256/xp-rename.png",
+                                    "16":  "16/xp-rename.png",
+                                    "32":  "32/xp-rename.png"
+                                },
+                  "xp-restart":  {
+                                     "256":  "256/xp-restart.png",
+                                     "16":  "16/xp-restart.png",
+                                     "32":  "32/xp-restart.png"
+                                 },
+                  "xp-restore-all-items":  {
+                                               "256":  "256/xp-restore-all-items.png",
+                                               "16":  "16/xp-restore-all-items.png",
+                                               "32":  "32/xp-restore-all-items.png"
+                                           },
+                  "xp-restore":  {
+                                     "256":  "256/xp-restore.png",
+                                     "16":  "16/xp-restore.png",
+                                     "32":  "32/xp-restore.png"
+                                 },
+                  "xp-restricted":  {
+                                        "256":  "256/xp-restricted.png",
+                                        "16":  "16/xp-restricted.png",
+                                        "32":  "32/xp-restricted.png"
+                                    },
+                  "xp-router":  {
+                                    "256":  "256/xp-router.png",
+                                    "16":  "16/xp-router.png",
+                                    "32":  "32/xp-router.png"
+                                },
+                  "xp-rtc-share":  {
+                                       "256":  "256/xp-rtc-share.png",
+                                       "16":  "16/xp-rtc-share.png",
+                                       "32":  "32/xp-rtc-share.png"
+                                   },
+                  "xp-rtf":  {
+                                 "256":  "256/xp-rtf.png",
+                                 "16":  "16/xp-rtf.png",
+                                 "32":  "32/xp-rtf.png"
+                             },
+                  "xp-run":  {
+                                 "256":  "256/xp-run.png",
+                                 "16":  "16/xp-run.png",
+                                 "32":  "32/xp-run.png"
+                             },
+                  "xp-safely-remove-hardware":  {
+                                                    "256":  "256/xp-safely-remove-hardware.png",
+                                                    "16":  "16/xp-safely-remove-hardware.png",
+                                                    "32":  "32/xp-safely-remove-hardware.png"
+                                                },
+                  "xp-save":  {
+                                  "256":  "256/xp-save.png",
+                                  "16":  "16/xp-save.png",
+                                  "32":  "32/xp-save.png"
+                              },
+                  "xp-scanner-and-camera-wizard":  {
+                                                       "256":  "256/xp-scanner-and-camera-wizard.png",
+                                                       "16":  "16/xp-scanner-and-camera-wizard.png",
+                                                       "32":  "32/xp-scanner-and-camera-wizard.png"
+                                                   },
+                  "xp-scanner":  {
+                                     "256":  "256/xp-scanner.png",
+                                     "16":  "16/xp-scanner.png",
+                                     "32":  "32/xp-scanner.png"
+                                 },
+                  "xp-scanners-and-cameras":  {
+                                                  "256":  "256/xp-scanners-and-cameras.png",
+                                                  "16":  "16/xp-scanners-and-cameras.png",
+                                                  "32":  "32/xp-scanners-and-cameras.png"
+                                              },
+                  "xp-scheduled-tasks":  {
+                                             "256":  "256/xp-scheduled-tasks.png",
+                                             "16":  "16/xp-scheduled-tasks.png",
+                                             "32":  "32/xp-scheduled-tasks.png"
+                                         },
+                  "xp-scrap":  {
+                                   "256":  "256/xp-scrap.png",
+                                   "16":  "16/xp-scrap.png",
+                                   "32":  "32/xp-scrap.png"
+                               },
+                  "xp-script-component":  {
+                                              "256":  "256/xp-script-component.png",
+                                              "16":  "16/xp-script-component.png",
+                                              "32":  "32/xp-script-component.png"
+                                          },
+                  "xp-sd-card---alt":  {
+                                           "256":  "256/xp-sd-card---alt.png",
+                                           "16":  "16/xp-sd-card---alt.png",
+                                           "32":  "32/xp-sd-card---alt.png"
+                                       },
+                  "xp-sd-card":  {
+                                     "256":  "256/xp-sd-card.png",
+                                     "16":  "16/xp-sd-card.png",
+                                     "32":  "32/xp-sd-card.png"
+                                 },
+                  "xp-search-for-people":  {
+                                               "256":  "256/xp-search-for-people.png",
+                                               "16":  "16/xp-search-for-people.png",
+                                               "32":  "32/xp-search-for-people.png"
+                                           },
+                  "xp-search-results":  {
+                                            "256":  "256/xp-search-results.png",
+                                            "16":  "16/xp-search-results.png",
+                                            "32":  "32/xp-search-results.png"
+                                        },
+                  "xp-search":  {
+                                    "256":  "256/xp-search.png",
+                                    "16":  "16/xp-search.png",
+                                    "32":  "32/xp-search.png"
+                                },
+                  "xp-security---ok":  {
+                                           "256":  "256/xp-security---ok.png",
+                                           "16":  "16/xp-security---ok.png",
+                                           "32":  "32/xp-security---ok.png"
+                                       },
+                  "xp-security-alert":  {
+                                            "256":  "256/xp-security-alert.png",
+                                            "16":  "16/xp-security-alert.png",
+                                            "32":  "32/xp-security-alert.png"
+                                        },
+                  "xp-security-center":  {
+                                             "256":  "256/xp-security-center.png",
+                                             "16":  "16/xp-security-center.png",
+                                             "32":  "32/xp-security-center.png"
+                                         },
+                  "xp-security-error":  {
+                                            "256":  "256/xp-security-error.png",
+                                            "16":  "16/xp-security-error.png",
+                                            "32":  "32/xp-security-error.png"
+                                        },
+                  "xp-security-question":  {
+                                               "256":  "256/xp-security-question.png",
+                                               "16":  "16/xp-security-question.png",
+                                               "32":  "32/xp-security-question.png"
+                                           },
+                  "xp-security-settings":  {
+                                               "256":  "256/xp-security-settings.png",
+                                               "16":  "16/xp-security-settings.png",
+                                               "32":  "32/xp-security-settings.png"
+                                           },
+                  "xp-select-all":  {
+                                        "256":  "256/xp-select-all.png",
+                                        "16":  "16/xp-select-all.png",
+                                        "32":  "32/xp-select-all.png"
+                                    },
+                  "xp-send-a-fax":  {
+                                        "256":  "256/xp-send-a-fax.png",
+                                        "16":  "16/xp-send-a-fax.png",
+                                        "32":  "32/xp-send-a-fax.png"
+                                    },
+                  "xp-serial-connection":  {
+                                               "256":  "256/xp-serial-connection.png",
+                                               "16":  "16/xp-serial-connection.png",
+                                               "32":  "32/xp-serial-connection.png"
+                                           },
+                  "xp-server-license":  {
+                                            "256":  "256/xp-server-license.png",
+                                            "16":  "16/xp-server-license.png",
+                                            "32":  "32/xp-server-license.png"
+                                        },
+                  "xp-services":  {
+                                      "256":  "256/xp-services.png",
+                                      "16":  "16/xp-services.png",
+                                      "32":  "32/xp-services.png"
+                                  },
+                  "xp-settings-alert":  {
+                                            "256":  "256/xp-settings-alert.png",
+                                            "16":  "16/xp-settings-alert.png",
+                                            "32":  "32/xp-settings-alert.png"
+                                        },
+                  "xp-setup-back":  {
+                                        "256":  "256/xp-setup-back.png",
+                                        "16":  "16/xp-setup-back.png",
+                                        "32":  "32/xp-setup-back.png"
+                                    },
+                  "xp-setup-language":  {
+                                            "256":  "256/xp-setup-language.png",
+                                            "16":  "16/xp-setup-language.png",
+                                            "32":  "32/xp-setup-language.png"
+                                        },
+                  "xp-setup-skip":  {
+                                        "256":  "256/xp-setup-skip.png",
+                                        "16":  "16/xp-setup-skip.png",
+                                        "32":  "32/xp-setup-skip.png"
+                                    },
+                  "xp-setup-task":  {
+                                        "256":  "256/xp-setup-task.png",
+                                        "16":  "16/xp-setup-task.png",
+                                        "32":  "32/xp-setup-task.png"
+                                    },
+                  "xp-setup":  {
+                                   "256":  "256/xp-setup.png",
+                                   "16":  "16/xp-setup.png",
+                                   "32":  "32/xp-setup.png"
+                               },
+                  "xp-shared-folder-alt":  {
+                                               "256":  "256/xp-shared-folder-alt.png",
+                                               "16":  "16/xp-shared-folder-alt.png",
+                                               "32":  "32/xp-shared-folder-alt.png"
+                                           },
+                  "xp-shared-folder":  {
+                                           "256":  "256/xp-shared-folder.png",
+                                           "16":  "16/xp-shared-folder.png",
+                                           "32":  "32/xp-shared-folder.png"
+                                       },
+                  "xp-shared-printer":  {
+                                            "256":  "256/xp-shared-printer.png",
+                                            "16":  "16/xp-shared-printer.png",
+                                            "32":  "32/xp-shared-printer.png"
+                                        },
+                  "xp-sharing-hand":  {
+                                          "256":  "256/xp-sharing-hand.png",
+                                          "16":  "16/xp-sharing-hand.png",
+                                          "32":  "32/xp-sharing-hand.png"
+                                      },
+                  "xp-shortcut-overlay":  {
+                                              "256":  "256/xp-shortcut-overlay.png",
+                                              "16":  "16/xp-shortcut-overlay.png",
+                                              "32":  "32/xp-shortcut-overlay.png"
+                                          },
+                  "xp-single-click":  {
+                                          "256":  "256/xp-single-click.png",
+                                          "16":  "16/xp-single-click.png",
+                                          "32":  "32/xp-single-click.png"
+                                      },
+                  "xp-slideshow":  {
+                                       "256":  "256/xp-slideshow.png",
+                                       "16":  "16/xp-slideshow.png",
+                                       "32":  "32/xp-slideshow.png"
+                                   },
+                  "xp-smart-card-reader":  {
+                                               "256":  "256/xp-smart-card-reader.png",
+                                               "16":  "16/xp-smart-card-reader.png",
+                                               "32":  "32/xp-smart-card-reader.png"
+                                           },
+                  "xp-smartmedia-card":  {
+                                             "256":  "256/xp-smartmedia-card.png",
+                                             "16":  "16/xp-smartmedia-card.png",
+                                             "32":  "32/xp-smartmedia-card.png"
+                                         },
+                  "xp-smartscreen":  {
+                                         "256":  "256/xp-smartscreen.png",
+                                         "16":  "16/xp-smartscreen.png",
+                                         "32":  "32/xp-smartscreen.png"
+                                     },
+                  "xp-solitaire":  {
+                                       "256":  "256/xp-solitaire.png",
+                                       "16":  "16/xp-solitaire.png",
+                                       "32":  "32/xp-solitaire.png"
+                                   },
+                  "xp-sort-alphabetically":  {
+                                                 "256":  "256/xp-sort-alphabetically.png",
+                                                 "16":  "16/xp-sort-alphabetically.png",
+                                                 "32":  "32/xp-sort-alphabetically.png"
+                                             },
+                  "xp-sort-by-date":  {
+                                          "256":  "256/xp-sort-by-date.png",
+                                          "16":  "16/xp-sort-by-date.png",
+                                          "32":  "32/xp-sort-by-date.png"
+                                      },
+                  "xp-sort-by-size":  {
+                                          "256":  "256/xp-sort-by-size.png",
+                                          "16":  "16/xp-sort-by-size.png",
+                                          "32":  "32/xp-sort-by-size.png"
+                                      },
+                  "xp-speech":  {
+                                    "256":  "256/xp-speech.png",
+                                    "16":  "16/xp-speech.png",
+                                    "32":  "32/xp-speech.png"
+                                },
+                  "xp-spider-solitaire":  {
+                                              "256":  "256/xp-spider-solitaire.png",
+                                              "16":  "16/xp-spider-solitaire.png",
+                                              "32":  "32/xp-spider-solitaire.png"
+                                          },
+                  "xp-standby":  {
+                                     "256":  "256/xp-standby.png",
+                                     "16":  "16/xp-standby.png",
+                                     "32":  "32/xp-standby.png"
+                                 },
+                  "xp-start-menu-programs-alt":  {
+                                                     "256":  "256/xp-start-menu-programs-alt.png",
+                                                     "16":  "16/xp-start-menu-programs-alt.png",
+                                                     "32":  "32/xp-start-menu-programs-alt.png"
+                                                 },
+                  "xp-start-menu-programs":  {
+                                                 "256":  "256/xp-start-menu-programs.png",
+                                                 "16":  "16/xp-start-menu-programs.png",
+                                                 "32":  "32/xp-start-menu-programs.png"
+                                             },
+                  "xp-stickynotes":  {
+                                         "256":  "256/xp-stickynotes.png",
+                                         "16":  "16/xp-stickynotes.png",
+                                         "32":  "32/xp-stickynotes.png"
+                                     },
+                  "xp-stop":  {
+                                  "256":  "256/xp-stop.png",
+                                  "16":  "16/xp-stop.png",
+                                  "32":  "32/xp-stop.png"
+                              },
+                  "xp-success":  {
+                                     "256":  "256/xp-success.png",
+                                     "16":  "16/xp-success.png",
+                                     "32":  "32/xp-success.png"
+                                 },
+                  "xp-support-topic":  {
+                                           "256":  "256/xp-support-topic.png",
+                                           "16":  "16/xp-support-topic.png",
+                                           "32":  "32/xp-support-topic.png"
+                                       },
+                  "xp-switch-user":  {
+                                         "256":  "256/xp-switch-user.png",
+                                         "16":  "16/xp-switch-user.png",
+                                         "32":  "32/xp-switch-user.png"
+                                     },
+                  "xp-sync-all":  {
+                                      "256":  "256/xp-sync-all.png",
+                                      "16":  "16/xp-sync-all.png",
+                                      "32":  "32/xp-sync-all.png"
+                                  },
+                  "xp-sync":  {
+                                  "256":  "256/xp-sync.png",
+                                  "16":  "16/xp-sync.png",
+                                  "32":  "32/xp-sync.png"
+                              },
+                  "xp-synchronize":  {
+                                         "256":  "256/xp-synchronize.png",
+                                         "16":  "16/xp-synchronize.png",
+                                         "32":  "32/xp-synchronize.png"
+                                     },
+                  "xp-system-information":  {
+                                                "256":  "256/xp-system-information.png",
+                                                "16":  "16/xp-system-information.png",
+                                                "32":  "32/xp-system-information.png"
+                                            },
+                  "xp-system-properties":  {
+                                               "256":  "256/xp-system-properties.png",
+                                               "16":  "16/xp-system-properties.png",
+                                               "32":  "32/xp-system-properties.png"
+                                           },
+                  "xp-system-restore":  {
+                                            "256":  "256/xp-system-restore.png",
+                                            "16":  "16/xp-system-restore.png",
+                                            "32":  "32/xp-system-restore.png"
+                                        },
+                  "xp-tablet-and-pen-settings":  {
+                                                     "256":  "256/xp-tablet-and-pen-settings.png",
+                                                     "16":  "16/xp-tablet-and-pen-settings.png",
+                                                     "32":  "32/xp-tablet-and-pen-settings.png"
+                                                 },
+                  "xp-take-picture":  {
+                                          "256":  "256/xp-take-picture.png",
+                                          "16":  "16/xp-take-picture.png",
+                                          "32":  "32/xp-take-picture.png"
+                                      },
+                  "xp-tape-drive-2":  {
+                                          "256":  "256/xp-tape-drive-2.png",
+                                          "16":  "16/xp-tape-drive-2.png",
+                                          "32":  "32/xp-tape-drive-2.png"
+                                      },
+                  "xp-tape-drive":  {
+                                        "256":  "256/xp-tape-drive.png",
+                                        "16":  "16/xp-tape-drive.png",
+                                        "32":  "32/xp-tape-drive.png"
+                                    },
+                  "xp-task-manager":  {
+                                          "256":  "256/xp-task-manager.png",
+                                          "16":  "16/xp-task-manager.png",
+                                          "32":  "32/xp-task-manager.png"
+                                      },
+                  "xp-taskbar-and-start-menu":  {
+                                                    "256":  "256/xp-taskbar-and-start-menu.png",
+                                                    "16":  "16/xp-taskbar-and-start-menu.png",
+                                                    "32":  "32/xp-taskbar-and-start-menu.png"
+                                                },
+                  "xp-theme":  {
+                                   "256":  "256/xp-theme.png",
+                                   "16":  "16/xp-theme.png",
+                                   "32":  "32/xp-theme.png"
+                               },
+                  "xp-thumbnail-view":  {
+                                            "256":  "256/xp-thumbnail-view.png",
+                                            "16":  "16/xp-thumbnail-view.png",
+                                            "32":  "32/xp-thumbnail-view.png"
+                                        },
+                  "xp-tiff":  {
+                                  "256":  "256/xp-tiff.png",
+                                  "16":  "16/xp-tiff.png",
+                                  "32":  "32/xp-tiff.png"
+                              },
+                  "xp-tile-view":  {
+                                       "256":  "256/xp-tile-view.png",
+                                       "16":  "16/xp-tile-view.png",
+                                       "32":  "32/xp-tile-view.png"
+                                   },
+                  "xp-tip-of-the-day":  {
+                                            "256":  "256/xp-tip-of-the-day.png",
+                                            "16":  "16/xp-tip-of-the-day.png",
+                                            "32":  "32/xp-tip-of-the-day.png"
+                                        },
+                  "xp-tour-xp":  {
+                                     "256":  "256/xp-tour-xp.png",
+                                     "16":  "16/xp-tour-xp.png",
+                                     "32":  "32/xp-tour-xp.png"
+                                 },
+                  "xp-troubleshoot":  {
+                                          "256":  "256/xp-troubleshoot.png",
+                                          "16":  "16/xp-troubleshoot.png",
+                                          "32":  "32/xp-troubleshoot.png"
+                                      },
+                  "xp-truetype":  {
+                                      "256":  "256/xp-truetype.png",
+                                      "16":  "16/xp-truetype.png",
+                                      "32":  "32/xp-truetype.png"
+                                  },
+                  "xp-truetype2":  {
+                                       "256":  "256/xp-truetype2.png",
+                                       "16":  "16/xp-truetype2.png",
+                                       "32":  "32/xp-truetype2.png"
+                                   },
+                  "xp-tweak-ui":  {
+                                      "256":  "256/xp-tweak-ui.png",
+                                      "16":  "16/xp-tweak-ui.png",
+                                      "32":  "32/xp-tweak-ui.png"
+                                  },
+                  "xp-txt":  {
+                                 "256":  "256/xp-txt.png",
+                                 "16":  "16/xp-txt.png",
+                                 "32":  "32/xp-txt.png"
+                             },
+                  "xp-uddi-services":  {
+                                           "256":  "256/xp-uddi-services.png",
+                                           "16":  "16/xp-uddi-services.png",
+                                           "32":  "32/xp-uddi-services.png"
+                                       },
+                  "xp-undo":  {
+                                  "256":  "256/xp-undo.png",
+                                  "16":  "16/xp-undo.png",
+                                  "32":  "32/xp-undo.png"
+                              },
+                  "xp-undock-pc":  {
+                                       "256":  "256/xp-undock-pc.png",
+                                       "16":  "16/xp-undock-pc.png",
+                                       "32":  "32/xp-undock-pc.png"
+                                   },
+                  "xp-unknown-disc":  {
+                                          "256":  "256/xp-unknown-disc.png",
+                                          "16":  "16/xp-unknown-disc.png",
+                                          "32":  "32/xp-unknown-disc.png"
+                                      },
+                  "xp-up":  {
+                                "256":  "256/xp-up.png",
+                                "16":  "16/xp-up.png",
+                                "32":  "32/xp-up.png"
+                            },
+                  "xp-url":  {
+                                 "256":  "256/xp-url.png",
+                                 "16":  "16/xp-url.png",
+                                 "32":  "32/xp-url.png"
+                             },
+                  "xp-user-accounts":  {
+                                           "256":  "256/xp-user-accounts.png",
+                                           "16":  "16/xp-user-accounts.png",
+                                           "32":  "32/xp-user-accounts.png"
+                                       },
+                  "xp-vbs":  {
+                                 "256":  "256/xp-vbs.png",
+                                 "16":  "16/xp-vbs.png",
+                                 "32":  "32/xp-vbs.png"
+                             },
+                  "xp-virus-protection":  {
+                                              "256":  "256/xp-virus-protection.png",
+                                              "16":  "16/xp-virus-protection.png",
+                                              "32":  "32/xp-virus-protection.png"
+                                          },
+                  "xp-volume-alt":  {
+                                        "256":  "256/xp-volume-alt.png",
+                                        "16":  "16/xp-volume-alt.png",
+                                        "32":  "32/xp-volume-alt.png"
+                                    },
+                  "xp-volume-level":  {
+                                          "256":  "256/xp-volume-level.png",
+                                          "16":  "16/xp-volume-level.png",
+                                          "32":  "32/xp-volume-level.png"
+                                      },
+                  "xp-volume":  {
+                                    "256":  "256/xp-volume.png",
+                                    "16":  "16/xp-volume.png",
+                                    "32":  "32/xp-volume.png"
+                                },
+                  "xp-vpn-connection":  {
+                                            "256":  "256/xp-vpn-connection.png",
+                                            "16":  "16/xp-vpn-connection.png",
+                                            "32":  "32/xp-vpn-connection.png"
+                                        },
+                  "xp-web-services-printer":  {
+                                                  "256":  "256/xp-web-services-printer.png",
+                                                  "16":  "16/xp-web-services-printer.png",
+                                                  "32":  "32/xp-web-services-printer.png"
+                                              },
+                  "xp-webcam":  {
+                                    "256":  "256/xp-webcam.png",
+                                    "16":  "16/xp-webcam.png",
+                                    "32":  "32/xp-webcam.png"
+                                },
+                  "xp-windows-catalog":  {
+                                             "256":  "256/xp-windows-catalog.png",
+                                             "16":  "16/xp-windows-catalog.png",
+                                             "32":  "32/xp-windows-catalog.png"
+                                         },
+                  "xp-windows-journal-viewer":  {
+                                                    "256":  "256/xp-windows-journal-viewer.png",
+                                                    "16":  "16/xp-windows-journal-viewer.png",
+                                                    "32":  "32/xp-windows-journal-viewer.png"
+                                                },
+                  "xp-windows-journal":  {
+                                             "256":  "256/xp-windows-journal.png",
+                                             "16":  "16/xp-windows-journal.png",
+                                             "32":  "32/xp-windows-journal.png"
+                                         },
+                  "xp-windows-media-connect":  {
+                                                   "256":  "256/xp-windows-media-connect.png",
+                                                   "16":  "16/xp-windows-media-connect.png",
+                                                   "32":  "32/xp-windows-media-connect.png"
+                                               },
+                  "xp-windows-media-encoder":  {
+                                                   "256":  "256/xp-windows-media-encoder.png",
+                                                   "16":  "16/xp-windows-media-encoder.png",
+                                                   "32":  "32/xp-windows-media-encoder.png"
+                                               },
+                  "xp-windows-media-player-10":  {
+                                                     "256":  "256/xp-windows-media-player-10.png",
+                                                     "16":  "16/xp-windows-media-player-10.png",
+                                                     "32":  "32/xp-windows-media-player-10.png"
+                                                 },
+                  "xp-windows-media-player-9":  {
+                                                    "256":  "256/xp-windows-media-player-9.png",
+                                                    "16":  "16/xp-windows-media-player-9.png",
+                                                    "32":  "32/xp-windows-media-player-9.png"
+                                                },
+                  "xp-windows-media-player-skin":  {
+                                                       "256":  "256/xp-windows-media-player-skin.png",
+                                                       "16":  "16/xp-windows-media-player-skin.png",
+                                                       "32":  "32/xp-windows-media-player-skin.png"
+                                                   },
+                  "xp-windows-media-services":  {
+                                                    "256":  "256/xp-windows-media-services.png",
+                                                    "16":  "16/xp-windows-media-services.png",
+                                                    "32":  "32/xp-windows-media-services.png"
+                                                },
+                  "xp-windows-messenger":  {
+                                               "256":  "256/xp-windows-messenger.png",
+                                               "16":  "16/xp-windows-messenger.png",
+                                               "32":  "32/xp-windows-messenger.png"
+                                           },
+                  "xp-windows-movie-maker":  {
+                                                 "256":  "256/xp-windows-movie-maker.png",
+                                                 "16":  "16/xp-windows-movie-maker.png",
+                                                 "32":  "32/xp-windows-movie-maker.png"
+                                             },
+                  "xp-windows-picture-and-fax-viewer":  {
+                                                            "256":  "256/xp-windows-picture-and-fax-viewer.png",
+                                                            "16":  "16/xp-windows-picture-and-fax-viewer.png",
+                                                            "32":  "32/xp-windows-picture-and-fax-viewer.png"
+                                                        },
+                  "xp-windows-update":  {
+                                            "256":  "256/xp-windows-update.png",
+                                            "16":  "16/xp-windows-update.png",
+                                            "32":  "32/xp-windows-update.png"
+                                        },
+                  "xp-wireless-connection-settings":  {
+                                                          "256":  "256/xp-wireless-connection-settings.png",
+                                                          "16":  "16/xp-wireless-connection-settings.png",
+                                                          "32":  "32/xp-wireless-connection-settings.png"
+                                                      },
+                  "xp-wireless-network-connection":  {
+                                                         "256":  "256/xp-wireless-network-connection.png",
+                                                         "16":  "16/xp-wireless-network-connection.png",
+                                                         "32":  "32/xp-wireless-network-connection.png"
+                                                     },
+                  "xp-wireless-network-setup":  {
+                                                    "256":  "256/xp-wireless-network-setup.png",
+                                                    "16":  "16/xp-wireless-network-setup.png",
+                                                    "32":  "32/xp-wireless-network-setup.png"
+                                                },
+                  "xp-wizard":  {
+                                    "256":  "256/xp-wizard.png",
+                                    "16":  "16/xp-wizard.png",
+                                    "32":  "32/xp-wizard.png"
+                                },
+                  "xp-wme-broadcast-company-meeting":  {
+                                                           "256":  "256/xp-wme-broadcast-company-meeting.png",
+                                                           "16":  "16/xp-wme-broadcast-company-meeting.png",
+                                                           "32":  "32/xp-wme-broadcast-company-meeting.png"
+                                                       },
+                  "xp-wme-broadcast-live-event":  {
+                                                      "256":  "256/xp-wme-broadcast-live-event.png",
+                                                      "16":  "16/xp-wme-broadcast-live-event.png",
+                                                      "32":  "32/xp-wme-broadcast-live-event.png"
+                                                  },
+                  "xp-wme-capture-audio-or-video":  {
+                                                        "256":  "256/xp-wme-capture-audio-or-video.png",
+                                                        "16":  "16/xp-wme-capture-audio-or-video.png",
+                                                        "32":  "32/xp-wme-capture-audio-or-video.png"
+                                                    },
+                  "xp-wme-capture-live-content-for-streaming":  {
+                                                                    "256":  "256/xp-wme-capture-live-content-for-streaming.png",
+                                                                    "16":  "16/xp-wme-capture-live-content-for-streaming.png",
+                                                                    "32":  "32/xp-wme-capture-live-content-for-streaming.png"
+                                                                },
+                  "xp-wme-capture-live-content-locally":  {
+                                                              "256":  "256/xp-wme-capture-live-content-locally.png",
+                                                              "16":  "16/xp-wme-capture-live-content-locally.png",
+                                                              "32":  "32/xp-wme-capture-live-content-locally.png"
+                                                          },
+                  "xp-wme-capture-screen":  {
+                                                "256":  "256/xp-wme-capture-screen.png",
+                                                "16":  "16/xp-wme-capture-screen.png",
+                                                "32":  "32/xp-wme-capture-screen.png"
+                                            },
+                  "xp-wme-convert-a-file":  {
+                                                "256":  "256/xp-wme-convert-a-file.png",
+                                                "16":  "16/xp-wme-convert-a-file.png",
+                                                "32":  "32/xp-wme-convert-a-file.png"
+                                            },
+                  "xp-wme-convert-film":  {
+                                              "256":  "256/xp-wme-convert-film.png",
+                                              "16":  "16/xp-wme-convert-film.png",
+                                              "32":  "32/xp-wme-convert-film.png"
+                                          },
+                  "xp-wme-custom-session":  {
+                                                "256":  "256/xp-wme-custom-session.png",
+                                                "16":  "16/xp-wme-custom-session.png",
+                                                "32":  "32/xp-wme-custom-session.png"
+                                            },
+                  "xp-wmp-auto-playlist":  {
+                                               "256":  "256/xp-wmp-auto-playlist.png",
+                                               "16":  "16/xp-wmp-auto-playlist.png",
+                                               "32":  "32/xp-wmp-auto-playlist.png"
+                                           },
+                  "xp-wmp-copy-protected-music":  {
+                                                      "256":  "256/xp-wmp-copy-protected-music.png",
+                                                      "16":  "16/xp-wmp-copy-protected-music.png",
+                                                      "32":  "32/xp-wmp-copy-protected-music.png"
+                                                  },
+                  "xp-wmp-device-error":  {
+                                              "256":  "256/xp-wmp-device-error.png",
+                                              "16":  "16/xp-wmp-device-error.png",
+                                              "32":  "32/xp-wmp-device-error.png"
+                                          },
+                  "xp-wmp-general-error":  {
+                                               "256":  "256/xp-wmp-general-error.png",
+                                               "16":  "16/xp-wmp-general-error.png",
+                                               "32":  "32/xp-wmp-general-error.png"
+                                           },
+                  "xp-wmp-import-audio-cd":  {
+                                                 "256":  "256/xp-wmp-import-audio-cd.png",
+                                                 "16":  "16/xp-wmp-import-audio-cd.png",
+                                                 "32":  "32/xp-wmp-import-audio-cd.png"
+                                             },
+                  "xp-wmp-import-playlist":  {
+                                                 "256":  "256/xp-wmp-import-playlist.png",
+                                                 "16":  "16/xp-wmp-import-playlist.png",
+                                                 "32":  "32/xp-wmp-import-playlist.png"
+                                             },
+                  "xp-wmp-import-video":  {
+                                              "256":  "256/xp-wmp-import-video.png",
+                                              "16":  "16/xp-wmp-import-video.png",
+                                              "32":  "32/xp-wmp-import-video.png"
+                                          },
+                  "xp-wmp-library-error":  {
+                                               "256":  "256/xp-wmp-library-error.png",
+                                               "16":  "16/xp-wmp-library-error.png",
+                                               "32":  "32/xp-wmp-library-error.png"
+                                           },
+                  "xp-wmp-library":  {
+                                         "256":  "256/xp-wmp-library.png",
+                                         "16":  "16/xp-wmp-library.png",
+                                         "32":  "32/xp-wmp-library.png"
+                                     },
+                  "xp-wmp-missing-disc":  {
+                                              "256":  "256/xp-wmp-missing-disc.png",
+                                              "16":  "16/xp-wmp-missing-disc.png",
+                                              "32":  "32/xp-wmp-missing-disc.png"
+                                          },
+                  "xp-wmp-missing-file":  {
+                                              "256":  "256/xp-wmp-missing-file.png",
+                                              "16":  "16/xp-wmp-missing-file.png",
+                                              "32":  "32/xp-wmp-missing-file.png"
+                                          },
+                  "xp-wmp-network-error":  {
+                                               "256":  "256/xp-wmp-network-error.png",
+                                               "16":  "16/xp-wmp-network-error.png",
+                                               "32":  "32/xp-wmp-network-error.png"
+                                           },
+                  "xp-wmp-performance":  {
+                                             "256":  "256/xp-wmp-performance.png",
+                                             "16":  "16/xp-wmp-performance.png",
+                                             "32":  "32/xp-wmp-performance.png"
+                                         },
+                  "xp-wmp-playlist":  {
+                                          "256":  "256/xp-wmp-playlist.png",
+                                          "16":  "16/xp-wmp-playlist.png",
+                                          "32":  "32/xp-wmp-playlist.png"
+                                      },
+                  "xp-wmp-plugin":  {
+                                        "256":  "256/xp-wmp-plugin.png",
+                                        "16":  "16/xp-wmp-plugin.png",
+                                        "32":  "32/xp-wmp-plugin.png"
+                                    },
+                  "xp-wmp-stream-error":  {
+                                              "256":  "256/xp-wmp-stream-error.png",
+                                              "16":  "16/xp-wmp-stream-error.png",
+                                              "32":  "32/xp-wmp-stream-error.png"
+                                          },
+                  "xp-wmp-timed-lyrics":  {
+                                              "256":  "256/xp-wmp-timed-lyrics.png",
+                                              "16":  "16/xp-wmp-timed-lyrics.png",
+                                              "32":  "32/xp-wmp-timed-lyrics.png"
+                                          },
+                  "xp-wms-allow-connections":  {
+                                                   "256":  "256/xp-wms-allow-connections.png",
+                                                   "16":  "16/xp-wms-allow-connections.png",
+                                                   "32":  "32/xp-wms-allow-connections.png"
+                                               },
+                  "xp-wms-broadcast-alt":  {
+                                               "256":  "256/xp-wms-broadcast-alt.png",
+                                               "16":  "16/xp-wms-broadcast-alt.png",
+                                               "32":  "32/xp-wms-broadcast-alt.png"
+                                           },
+                  "xp-wms-broadcast":  {
+                                           "256":  "256/xp-wms-broadcast.png",
+                                           "16":  "16/xp-wms-broadcast.png",
+                                           "32":  "32/xp-wms-broadcast.png"
+                                       },
+                  "xp-wms-cache":  {
+                                       "256":  "256/xp-wms-cache.png",
+                                       "16":  "16/xp-wms-cache.png",
+                                       "32":  "32/xp-wms-cache.png"
+                                   },
+                  "xp-wms-deny-connections":  {
+                                                  "256":  "256/xp-wms-deny-connections.png",
+                                                  "16":  "16/xp-wms-deny-connections.png",
+                                                  "32":  "32/xp-wms-deny-connections.png"
+                                              },
+                  "xp-wms-playlist":  {
+                                          "256":  "256/xp-wms-playlist.png",
+                                          "16":  "16/xp-wms-playlist.png",
+                                          "32":  "32/xp-wms-playlist.png"
+                                      },
+                  "xp-wms-streaming-server":  {
+                                                  "256":  "256/xp-wms-streaming-server.png",
+                                                  "16":  "16/xp-wms-streaming-server.png",
+                                                  "32":  "32/xp-wms-streaming-server.png"
+                                              },
+                  "xp-wms-troubleshoot":  {
+                                              "256":  "256/xp-wms-troubleshoot.png",
+                                              "16":  "16/xp-wms-troubleshoot.png",
+                                              "32":  "32/xp-wms-troubleshoot.png"
+                                          },
+                  "xp-wms-wrapper-file":  {
+                                              "256":  "256/xp-wms-wrapper-file.png",
+                                              "16":  "16/xp-wms-wrapper-file.png",
+                                              "32":  "32/xp-wms-wrapper-file.png"
+                                          },
+                  "xp-wmv-2":  {
+                                   "256":  "256/xp-wmv-2.png",
+                                   "16":  "16/xp-wmv-2.png",
+                                   "32":  "32/xp-wmv-2.png"
+                               },
+                  "xp-wmv":  {
+                                 "256":  "256/xp-wmv.png",
+                                 "16":  "16/xp-wmv.png",
+                                 "32":  "32/xp-wmv.png"
+                             },
+                  "xp-wordpad":  {
+                                     "256":  "256/xp-wordpad.png",
+                                     "16":  "16/xp-wordpad.png",
+                                     "32":  "32/xp-wordpad.png"
+                                 },
+                  "xp-workgroup":  {
+                                       "256":  "256/xp-workgroup.png",
+                                       "16":  "16/xp-workgroup.png",
+                                       "32":  "32/xp-workgroup.png"
+                                   },
+                  "xp-wri":  {
+                                 "256":  "256/xp-wri.png",
+                                 "16":  "16/xp-wri.png",
+                                 "32":  "32/xp-wri.png"
+                             },
+                  "xp-write-files-to-disc":  {
+                                                 "256":  "256/xp-write-files-to-disc.png",
+                                                 "16":  "16/xp-write-files-to-disc.png",
+                                                 "32":  "32/xp-write-files-to-disc.png"
+                                             },
+                  "xp-xml":  {
+                                 "256":  "256/xp-xml.png",
+                                 "16":  "16/xp-xml.png",
+                                 "32":  "32/xp-xml.png"
+                             },
+                  "xp-xps-document":  {
+                                          "256":  "256/xp-xps-document.png",
+                                          "16":  "16/xp-xps-document.png",
+                                          "32":  "32/xp-xps-document.png"
+                                      },
+                  "xp-xps-viewer":  {
+                                        "256":  "256/xp-xps-viewer.png",
+                                        "16":  "16/xp-xps-viewer.png",
+                                        "32":  "32/xp-xps-viewer.png"
+                                    },
+                  "xp-xpsp3res-unknown-1":  {
+                                                "256":  "256/xp-xpsp3res-unknown-1.png",
+                                                "16":  "16/xp-xpsp3res-unknown-1.png",
+                                                "32":  "32/xp-xpsp3res-unknown-1.png"
+                                            },
+                  "xp-xpsp3res-unknown-2":  {
+                                                "256":  "256/xp-xpsp3res-unknown-2.png",
+                                                "16":  "16/xp-xpsp3res-unknown-2.png",
+                                                "32":  "32/xp-xpsp3res-unknown-2.png"
+                                            },
+                  "xp-xsl":  {
+                                 "256":  "256/xp-xsl.png",
+                                 "16":  "16/xp-xsl.png",
+                                 "32":  "32/xp-xsl.png"
+                             },
+                  "xp-zip-drive":  {
+                                       "256":  "256/xp-zip-drive.png",
+                                       "16":  "16/xp-zip-drive.png",
+                                       "32":  "32/xp-zip-drive.png"
+                                   },
+                  "xp-zip-folder":  {
+                                        "256":  "256/xp-zip-folder.png",
+                                        "16":  "16/xp-zip-folder.png",
+                                        "32":  "32/xp-zip-folder.png"
+                                    }
+              }
 }

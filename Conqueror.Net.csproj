@@ -41,8 +41,8 @@
        there is no vector equivalent of the Luna back/forward/go buttons. Produced by
        tools/import-xp-chrome-icons.ps1 from the CC0-1.0 Marchmountain pack.
   -->
-  <ItemGroup>
-    <AvaloniaResource Include="Assets/Icons/xp/*.png" />
+    <ItemGroup>
+    <AvaloniaResource Include="Assets/Icons/xp/**/*.png" />
   </ItemGroup>
 
   <!--
@@ -66,8 +66,16 @@
     <EmbeddedResource Remove="Shell/**" />
   </ItemGroup>
 
+  <!-- Syntax highlighting definitions (XSHD) for the built-in code editor.
+       Embedded as assembly resources so SyntaxHighlightingResolver can load
+       them via GetManifestResourceStream at runtime. -->
+  <ItemGroup>
+    <EmbeddedResource Include="CodeEditorUi/Highlighting/*.xshd" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.22" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.3.0" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.22" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.22" />

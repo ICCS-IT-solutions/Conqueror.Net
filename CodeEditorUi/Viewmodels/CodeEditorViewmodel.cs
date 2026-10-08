@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Controls;
+using AvaloniaEdit.Highlighting;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Conqueror.Net.Core.Tabs;
@@ -15,11 +15,12 @@ namespace Conqueror.Net.CodeEditorUi.ViewModels;
 /// shelling out to an external program, so config tweaks never leave the window.
 /// </summary>
 /// <remarks>
-/// Text editing itself is delegated to the view's <see cref="TextBox"/> (registered via
-/// <see cref="EditorBoxProvider"/>), exactly like <c>TerminalViewModel.InputBoxProvider</c>:
-/// the VM owns file IO, dirty tracking and clipboard verbs, while the control owns caret
-/// and selection state. When no box is registered the commands fall back to whole-text
-/// semantics so the VM stays testable headless.
+/// Text editing itself is delegated to the view's editor control (registered via
+/// <see cref="EditorBoxProvider"/>) through the <see cref="IEditorBox"/> abstraction,
+/// exactly like <c>TerminalViewModel.InputBoxProvider</c>: the VM owns file IO,
+/// dirty tracking and clipboard verbs, while the control owns caret and selection
+/// state and syntax highlighting. When no box is registered the commands fall back
+/// to whole-text semantics so the VM stays testable headless.
 /// </remarks>
 public sealed partial class CodeEditorViewModel : ObservableObject, ITabViewModel
 {
@@ -46,13 +47,24 @@ public sealed partial class CodeEditorViewModel : ObservableObject, ITabViewMode
     [ObservableProperty]
     private string? _filePath;
 
-    /// <summary>Live buffer text. Two-way bound to the view's TextBox.</summary>
+        /// <summary>Live buffer text. Two-way bound to the view's editor control.</summary>
     [ObservableProperty]
     private string _text = string.Empty;
 
-    /// <summary>Word-wrap toggle, bound to the view's TextBox.</summary>
-    [ObservableProperty]
+                /// <summary>Word-wrap toggle, bound to the view's TextEditor.</summary>
+        [ObservableProperty]
     private bool _wordWrap = true;
+
+    /// <summary>Editor font size in device-independent pixels. Bound to the view's TextEditor.</summary>
+    [ObservableProperty]
+    private double _fontSize = 13;
+
+    /// <summary>
+    /// Syntax-highlighting definition resolved from <see cref="FilePath"/>'s extension,
+    /// or null for plain-text types (.txt, .log, etc.). Bound to the view's TextEditor.
+    /// </summary>
+    [ObservableProperty]
+    private IHighlightingDefinition? _syntaxHighlighting;
 
     /// <summary>Status-bar line: file state, encoding and size.</summary>
     [ObservableProperty]
@@ -92,8 +104,8 @@ public sealed partial class CodeEditorViewModel : ObservableObject, ITabViewMode
     /// <summary>True when the buffer differs from what is on disk (or a new buffer has text).</summary>
     public bool IsDirty => !string.Equals(Text, _savedText, StringComparison.Ordinal);
 
-    /// <summary>Provides the live editor TextBox. Set by the view; null in tests/headless.</summary>
-    public Func<TextBox?>? EditorBoxProvider { get; set; }
+        /// <summary>Provides the live editor control. Set by the view; null in tests/headless.</summary>
+    public Func<IEditorBox?>? EditorBoxProvider { get; set; }
 
     /// <summary>
     /// Yes/No prompt for destructive verbs. Wired by the view to an XP-style dialog;
@@ -128,11 +140,13 @@ public sealed partial class CodeEditorViewModel : ObservableObject, ITabViewMode
 
     partial void OnFilePathChanged(string? value) => RefreshDerived();
 
-    private void RefreshDerived()
+        private void RefreshDerived()
     {
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(Location));
         OnPropertyChanged(nameof(IsDirty));
+        SyntaxHighlighting = SyntaxHighlightingResolver.Resolve(
+            Path.GetExtension(FilePath ?? string.Empty));
         SaveCommand.NotifyCanExecuteChanged();
         RevertCommand.NotifyCanExecuteChanged();
     }
@@ -369,7 +383,7 @@ public sealed partial class CodeEditorViewModel : ObservableObject, ITabViewMode
 
     // ---- Text editing (driven by the shell's Edit menu) ----
     //
-    // The view registers the live TextBox via EditorBoxProvider (set in the code-behind
+        // The view registers the live editor control via EditorBoxProvider (set in the code-behind
     // on DataContextChanged); when no box is registered the commands fall back to the
     // Text string with whole-text semantics.
 

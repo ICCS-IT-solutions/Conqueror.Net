@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="TOML" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="Green" exampleText="# comment" />
+    <Color name="Section" foreground="Blue" fontWeight="bold" exampleText="[section]" />
+    <Color name="Key" foreground="Maroon" fontWeight="bold" exampleText="key" />
+    <Color name="String" foreground="Blue" exampleText="&quot;value&quot;" />
+    <Color name="Number" foreground="DarkBlue" exampleText="42" />
+    <Color name="Boolean" foreground="DarkCyan" fontWeight="bold" exampleText="true" />
+
+    <RuleSet>
+        <!-- Comments: lines starting with # -->
+        <Rule color="Comment">
+            <Regex>(^|[\r\n])\s*#[^\r\n]*</Regex>
+        </Rule>
+
+        <!-- Sections: [section.name] -->
+        <Rule color="Section">
+            <Regex>\[[^\]]*\]</Regex>
+        </Rule>
+
+        <!-- Keys: word characters before = -->
+        <Rule color="Key">
+            <Regex>^\s*[^=\s\[\]#\r\n]+(?=\s*=)</Regex>
+        </Rule>
+
+        <!-- Booleans -->
+        <Keywords color="Boolean">
+            <Word>true</Word>
+            <Word>false</Word>
+        </Keywords>
+
+        <!-- Numbers -->
+        <Rule color="Number">
+            <Regex>(\b\d+\.?\d*|\.\d+)([eE][+-]?\d+)?</Regex>
+        </Rule>
+
+        <!-- Strings -->
+        <Span color="String">
+            <Begin>"</Begin>
+            <End>"</End>
+            <Multiline>true</Multiline>
+        </Span>
+    </RuleSet>
+</SyntaxDefinition>

@@ -22,8 +22,11 @@ namespace Conqueror.Net.WindowRoot.ViewModels;
 /// from a binding has no matching runtime conversion, so it silently draws nothing.
 /// </para>
 /// <para>
-/// The size suffix follows the requested render size, because the pack is downscaled to exactly
-/// the two sizes the chrome draws. Anything else falls back to 16, the tab-strip size.
+/// Icons exist at three resolutions in <c>Assets/Icons/xp/{16|32|256}/</c>. The 16 and 32 px
+/// PNGs are pre-rendered by <c>tools/import-xp-from-psd.ps1</c> for the tab strip, toolbar and
+/// small-icon file-list views where pixel-perfect hard-scaled art matters. Any other requested
+/// size loads the 256 px base and downscales it at runtime through Avalonia's render target,
+/// which lets the medium/large/extra-large file views share one set of source artwork.
 /// </para>
 /// </remarks>
 public sealed class IconKeyToXpImageConverter : IValueConverter
@@ -50,11 +53,56 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
         // (program links) or over xp-genericdocument, instead of loading whole pre-composed art.
         ["Icon.Xp.BatFile"] = "xp-batfile",
         ["Icon.Xp.Program"] = "xp-program",
+        ["Icon.Xp.LibFile"] = "xp-libfile",
+        ["Icon.Xp.Audio"] = "xp-audio",
+        ["Icon.Xp.Video"] = "xp-video",
 
         // The editor tab. xp-configfile is the XP notepad-with-gear artwork from the pack,
         // which reads as "text/config file" the way a plain document glyph would not.
         ["Icon.Xp.ConfigFile"] = "xp-configfile",
+
+        // Clipboard file-operation glyphs.
+        ["Icon.Xp.Copy"] = "xp-copy",
+        ["Icon.Xp.Cut"] = "xp-cut",
+        ["Icon.Xp.Paste"] = "xp-paste",
+        ["Icon.Xp.Delete"] = "xp-delete",
+        ["Icon.Xp.Rename"] = "xp-rename",
+        ["Icon.Xp.Refresh"] = "xp-refresh",
+
+        // Checkbox states for select-all / invert-select toggles.
+        ["Icon.Xp.CheckboxCheck"] = "xp-checkbox-check",
+        ["Icon.Xp.CheckboxClear"] = "xp-checkbox-clear",
+        ["Icon.Xp.CheckboxHalf"] = "xp-checkbox-half",
+        ["Icon.Xp.CheckboxFilter"] = "xp-checkbox-filter",
+        ["Icon.Xp.CheckboxShaded"] = "xp-checkbox-shaded",
+        ["Icon.Xp.Checklist"] = "xp-checklist",
+        ["Icon.Xp.InvertSelect"] = "xp-invertselect",
+        ["Icon.Xp.SelectAll"] = "xp-selectall",
+        ["Icon.Xp.SelectNone"] = "xp-selectnone",
+
+        // Folder glyphs.
+        ["Icon.Xp.ClosedFolder"] = "xp-closedfolder",
+        ["Icon.Xp.OpenFolder"] = "xp-openfolder",
+        ["Icon.Xp.NewFolder"] = "xp-newfolder",
+
+        // Generic file / document glyphs.
+        ["Icon.Xp.GenericDocument"] = "xp-genericdocument",
+        ["Icon.Xp.NewFile"] = "xp-newfile",
+        ["Icon.Xp.ProgramShortcut"] = "xp-programshortcut",
+
+        // Window close control.
+        ["Icon.Xp.Close"] = "xp-close",
+
+        // Properties dialog.
+        ["Icon.Xp.Properties"] = "xp-properties",
     };
+
+    /// <summary>
+    /// Chrome sizes with pre-rendered PNGs. Any other size is derived from the 256 px base
+    /// at runtime so the file-browser views can request 48, 64, 96, 128 or 256 without
+    /// shipping extra assets.
+    /// </summary>
+    private static readonly HashSet<int> ChromeSizes = new() { 16, 32 };
 
     /// <summary>
     /// Decoded icons, keyed by avares URI for single-asset keys and by key+path+size for
@@ -78,7 +126,7 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
             return null;
         }
 
-        var size = ChooseSize(parameter);
+        var size = ResolveSize(parameter);
 
         // Shortcut keys may carry the link's full path after '@' (see FileSystemEntry), which
         // is what lets a program shortcut extract its target's own icon. Known shortcut keys
@@ -86,7 +134,9 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
         var at = key.IndexOf('@');
         var template = at > 0 ? key[..at] : key;
 
-        if (template is "Icon.Xp.ProgramShortcut" or "Icon.Xp.FileShortcut")
+        if (
+            template is "Icon.Xp.ProgramShortcut" or "Icon.Xp.FileShortcut" or "Icon.Xp.BatFileShortcut"
+        )
         {
             return ComposeShortcut(template, at > 0 ? key[(at + 1)..] : null, size);
         }
@@ -96,45 +146,13 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
             return null;
         }
 
-        var uri = $"{Prefix}{stem}{size}.png";
-
-        // Locked because several tab DataTemplates can convert concurrently during startup.
-        lock (Cache)
-        {
-            if (Cache.TryGetValue(uri, out var cached))
-            {
-                return cached;
-            }
-
-            Bitmap bitmap;
-
-            try
-            {
-                // The Bitmap(string) constructor treats its argument as a file path, not as an
-                // avares URI, so it looks in the working directory and throws. Going through the
-                // asset loader explicitly is what makes "avares://" work from C#.
-                bitmap = new Bitmap(AssetLoader.Open(new Uri(uri)));
-            }
-            catch (Exception)
-            {
-                // A converter that throws makes the whole binding fail silently, which is how a
-                // missing or renamed asset turns into "no icon" with no clue why. Returning null
-                // leaves the other icon binding in the template free to take over.
-                return null;
-            }
-
-            Cache[uri] = bitmap;
-
-            return bitmap;
-        }
+        return LoadIcon(stem, size);
     }
 
     /// <summary>
-    /// Builds a shortcut icon: <c>xp-shortcutarrow</c> over a base image. A program shortcut
-    /// gets its target's own icon when the shell can supply one — what Explorer draws — and
-    /// falls back to the XP program artwork when it cannot; every other shortcut gets the XP
-    /// generic document, so an unreadable link still reads as a shortcut rather than losing
-    /// the overlay.
+    /// Composes a base icon with the overlay arrow that marks shortcuts. A program link
+    /// (.lnk) may extract its target icon directly from the shell; otherwise the pack's
+    /// generic document, bat-file, or program artwork is used as the base.
     /// </summary>
     private static Bitmap? ComposeShortcut(string template, string? linkPath, int size)
     {
@@ -150,6 +168,7 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
 
         Bitmap? composed = null;
         var isProgram = template is "Icon.Xp.ProgramShortcut";
+        var isBatShortcut = template is "Icon.Xp.BatFileShortcut";
 
         if (
             isProgram
@@ -164,15 +183,21 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
         )
         {
             using var own = ToWriteableBitmap(width, height, pixels);
-            composed = Compose(size, own, LoadPng("xp-shortcutarrow", size));
+            composed = Compose(size, own, LoadIcon("xp-shortcutarrow", size));
         }
 
-        // The fallback for program links, and the whole path for document shortcuts. A missing
-        // asset makes Compose return null, which hands the row back to the SVG icon underneath.
+        // The fallback for program links, the whole path for document shortcuts, and bat-file
+        // shortcuts (which use the bat-file artwork rather than extracting a target icon).
+        // A missing asset makes Compose return null, which hands the row back to the SVG icon
+        // underneath.
         composed ??= Compose(
             size,
-            LoadPng(isProgram ? "xp-program" : "xp-genericdocument", size),
-            LoadPng("xp-shortcutarrow", size)
+            isProgram
+                ? LoadIcon("xp-program", size)
+                : isBatShortcut
+                    ? LoadIcon("xp-batfile", size)
+                    : LoadIcon("xp-genericdocument", size),
+            LoadIcon("xp-shortcutarrow", size)
         );
 
         if (composed is not null)
@@ -186,32 +211,140 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
         return composed;
     }
 
-    /// <summary>Loads and caches one PNG from <c>Assets/Icons/xp</c>, or null if it is missing.</summary>
-    private static Bitmap? LoadPng(string stem, int size)
+    /// <summary>
+    /// Loads and caches one PNG from <c>Assets/Icons/xp</c> at the requested pixel size,
+    /// or <c>null</c> if it is missing.
+    /// </summary>
+    /// <remarks>
+    /// The 16 and 32 px artwork is pre-rendered into size-specific folders; those paths are
+    /// loaded directly. Any other size (e.g. the file list's medium/extra-large modes) loads
+    /// the 256 px base and downscales through a render target so the full icon set ships in
+    /// only three resolutions rather than a bespoke PNG per display size.
+    /// </remarks>
+    private static Bitmap? LoadIcon(string stem, int size)
     {
-        var uri = $"{Prefix}{stem}{size}.png";
+        if (ChromeSizes.Contains(size))
+        {
+            return LoadChrome(stem, size);
+        }
 
+        return Downscale(LoadBase(stem), size);
+    }
+
+    /// <summary>
+    /// Loads a pre-rendered 16 or 32 px PNG from <c>Assets/Icons/xp/{size}/{stem}.png</c>.
+    /// </summary>
+    private static Bitmap? LoadChrome(string stem, int size)
+    {
+        var uri = $"{Prefix}{size}/{stem}.png";
+
+        return Load(uri);
+    }
+
+    /// <summary>
+    /// Loads the 256 px base asset from <c>Assets/Icons/xp/256/{stem}.png</c>.
+    /// </summary>
+    private static Bitmap? LoadBase(string stem)
+    {
+        var uri = $"{Prefix}256/{stem}.png";
+
+        return Load(uri);
+    }
+
+    /// <summary>
+    /// Shared decode: opens the avares URI through the asset loader and caches the result.
+    /// Returns <c>null</c> on any load failure so a single bad icon never breaks a binding.
+    /// </summary>
+    private static Bitmap? Load(string uri)
+    {
         lock (Cache)
         {
             if (Cache.TryGetValue(uri, out var cached))
             {
                 return cached;
             }
+        }
 
-            try
+        Bitmap bitmap;
+
+        try
+        {
+            // The Bitmap(string) constructor treats its argument as a file path, not as an
+            // avares URI, so it looks in the working directory and throws. Going through the
+            // asset loader explicitly is what makes "avares://" work from C#.
+            bitmap = new Bitmap(AssetLoader.Open(new Uri(uri)));
+        }
+        catch (Exception)
+        {
+            // A converter that throws makes the whole binding fail silently, which is how a
+            // missing or renamed asset turns into "no icon" with no clue why. Returning null
+            // leaves the other icon binding in the template free to take over.
+            return null;
+        }
+
+        lock (Cache)
+        {
+            Cache[uri] = bitmap;
+        }
+
+        return bitmap;
+    }
+
+    /// <summary>
+    /// Renders <paramref name="source"/> (expected 256 px) onto a new <paramref name="size"/>
+    /// square canvas so file-browser views can request 48, 64, 96, 128, etc. without separate
+    /// assets. The 256 base is cached separately, so repeated requests at the same size reuse a
+    /// single downscaled bitmap.
+    /// </summary>
+    private static Bitmap? Downscale(Bitmap? source, int size)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+
+        // Already the requested size: nothing to do.
+        if (source.PixelSize.Width == size && source.PixelSize.Height == size)
+        {
+            return source;
+        }
+
+        var key = $"downscale:{source.PixelSize.Width}to{size}";
+
+        lock (Cache)
+        {
+            if (Cache.TryGetValue(key, out var cached))
             {
-                var bitmap = new Bitmap(AssetLoader.Open(new Uri(uri)));
-                Cache[uri] = bitmap;
-                return bitmap;
+                return cached;
             }
-            catch (Exception)
+        }
+
+        var target = new RenderTargetBitmap(new PixelSize(size, size));
+
+        try
+        {
+            using (var context = target.CreateDrawingContext())
             {
-                return null;
+                context.DrawImage(source, new Rect(0, 0, size, size));
             }
+
+            lock (Cache)
+            {
+                Cache[key] = target;
+            }
+
+            return target;
+        }
+        catch (Exception)
+        {
+            target.Dispose();
+            return null;
         }
     }
 
-    /// <summary>Draws the layers bottom-first onto a size×size canvas.</summary>
+    /// <summary>
+    /// Draws the layers bottom-first onto a size×size canvas.
+    /// </summary>
     private static Bitmap? Compose(int size, params Bitmap?[] layers)
     {
         foreach (var layer in layers)
@@ -246,7 +379,9 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
         }
     }
 
-    /// <summary>Wraps extracted pixels in a writeable bitmap the drawing context can blit.</summary>
+    /// <summary>
+    /// Wraps extracted pixels in a writeable bitmap the drawing context can blit.
+    /// </summary>
     private static WriteableBitmap ToWriteableBitmap(int width, int height, byte[] bgra)
     {
         var bitmap = new WriteableBitmap(
@@ -279,19 +414,30 @@ public sealed class IconKeyToXpImageConverter : IValueConverter
     }
 
     /// <summary>
-    /// Picks 16 or 32 from whatever the binding passed. An unset or unrecognised parameter
-    /// yields 16, the tab-strip size and by far the most common case.
+    /// Resolves the pixel size from the binding parameter. The parameter is usually a string
+    /// like "16", "32", "48", "96" or "256" coming from a DataTemplate's width/height or from
+    /// the file browser's icon-size enumeration. A missing or unrecognised value defaults to
+    /// 16, the tab-strip size and by far the most common case.
     /// </summary>
-    private static int ChooseSize(object? parameter)
+    /// <remarks>
+    /// Non-chrome sizes (anything other than 16 or 32) are not pre-rendered; they are handled
+    /// by <see cref="LoadIcon"/>, which loads the 256 px base and downscales at runtime.
+    /// </remarks>
+    private static int ResolveSize(object? parameter)
     {
-        var text = parameter?.ToString();
+        if (parameter is null)
+        {
+            return 16;
+        }
+
+        var text = parameter.ToString();
 
         if (
             double.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out var pixels)
-            && pixels > 20
+            && pixels > 0
         )
         {
-            return 32;
+            return (int)Math.Round(pixels);
         }
 
         return 16;

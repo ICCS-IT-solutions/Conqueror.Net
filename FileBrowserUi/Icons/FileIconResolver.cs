@@ -23,6 +23,7 @@ public static class FileIconResolver
     public const string Archive = "archive";
     public const string Package = "package";
     public const string Executable = "executable";
+    public const string Library = "library";
     public const string Install = "install";
     public const string Pdf = "pdf";
     public const string Document = "document";
@@ -32,6 +33,7 @@ public static class FileIconResolver
     public const string Desktop = "desktop";
     public const string Home = "home";
     public const string Trash = "trash";
+    public const string Shortcut = "shortcut";
 
     /// <summary>Icon key by extension, with the dot omitted.</summary>
     private static readonly Dictionary<string, string> ByExtension = new(StringComparer.OrdinalIgnoreCase)
@@ -69,7 +71,7 @@ public static class FileIconResolver
         [".deb"] = Package, [".rpm"] = Package,
 
         // Executables and installers
-        [".exe"] = Executable, [".dll"] = Executable, [".msi"] = Install, [".appx"] = Install,
+        [".lnk"] = Shortcut, [".exe"] = Executable, [".dll"] = Library, [".sys"] = Library, [".msi"] = Install, [".appx"] = Install,
     };
 
     /// <summary>Icon key for a file extension, or <see cref="Text"/> when unrecognised.</summary>
@@ -260,6 +262,18 @@ public static class FileIconResolver
 
     /// <summary>Turns an icon key into the avares URI the SVG control loads.</summary>
     public static string UriFor(string key) => AssetPrefix + key + ".svg";
+
+    /// <summary>
+    /// Whether the given file extension is classified as audio in <see cref="ByExtension"/>.
+    /// </summary>
+    public static bool IsAudioExtension(string extension) =>
+        ByExtension.TryGetValue(extension, out var key) && key == Audio;
+
+    /// <summary>
+    /// Whether the given file extension is classified as video in <see cref="ByExtension"/>.
+    /// </summary>
+    public static bool IsVideoExtension(string extension) =>
+        ByExtension.TryGetValue(extension, out var key) && key == Video;
 }
 
 /// <summary>

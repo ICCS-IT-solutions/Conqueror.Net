@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="Batch" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="Green" exampleText="REM comment" />
+    <Color name="Label" foreground="Blue" fontWeight="bold" exampleText=":label" />
+    <Color name="Command" foreground="Maroon" fontWeight="bold" exampleText="echo" />
+    <Color name="Variable" foreground="Purple" exampleText="%VAR%" />
+    <Color name="String" foreground="Blue" exampleText="&quot;text&quot;" />
+
+    <RuleSet>
+        <!-- Comments: REM or :: -->
+        <Rule color="Comment">
+            <Regex>(^|[\r\n])\s*(REM\b|::)[^\r\n]*</Regex>
+        </Rule>
+
+        <!-- Labels -->
+        <Rule color="Label">
+            <Regex>:\w+</Regex>
+        </Rule>
+
+        <!-- Variables %VAR% -->
+        <Rule color="Variable">
+            <Regex>%[^%\s]+%</Regex>
+        </Rule>
+
+        <!-- Commands at start of line -->
+        <Keywords color="Command">
+            <Word>echo</Word>
+            <Word>set</Word>
+            <Word>setlocal</Word>
+            <Word>endlocal</Word>
+            <Word>cd</Word>
+            <Word>chdir</Word>
+            <Word>pushd</Word>
+            <Word>popd</Word>
+            <Word>dir</Word>
+            <Word>md</Word>
+            <Word>mkdir</Word>
+            <Word>rd</Word>
+            <Word>rmdir</Word>
+            <Word>del</Word>
+            <Word>copy</Word>
+            <Word>move</Word>
+            <Word>ren</Word>
+            <Word>rename</Word>
+            <Word>type</Word>
+            <Word>cat</Word>
+            <Word>more</Word>
+            <Word>cls</Word>
+            <Word>exit</Word>
+            <Word>exit</Word>
+            <Word>call</Word>
+            <Word>start</Word>
+            <Word>if</Word>
+            <Word>else</Word>
+            <Word>for</Word>
+            <Word>goto</Word>
+            <Word>pause</Word>
+            <Word>color</Word>
+            <Word>title</Word>
+            <Word>prompt</Word>
+            <Word>ver</Word>
+            <Word>ver</Word>
+            <Word>where</Word>
+            <Word>whoami</Word>
+            <Word>tasklist</Word>
+            <Word>taskkill</Word>
+            <Word>find</Word>
+            <Word>findstr</Word>
+            <Word>sort</Word>
+            <Word>tree</Word>
+            <Word>attrib</Word>
+            <Word>icacls</Word>
+            <Word>takeown</Word>
+            <Word>schtasks</Word>
+        </Keywords>
+    </RuleSet>
+</SyntaxDefinition>

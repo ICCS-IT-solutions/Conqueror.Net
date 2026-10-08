@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Conqueror.Net.CodeEditorUi.ViewModels"
+             xmlns:editor="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
              x:Class="Conqueror.Net.CodeEditorUi.Views.CodeEditorView"
              x:DataType="vm:CodeEditorViewModel"
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="520">
@@ -35,23 +36,25 @@
                 </StackPanel>
             </Grid>
 
-            <!-- The buffer. AcceptsTab keeps Tab as indentation (no focus trap: Ctrl+Tab still switches tabs). -->
-            <TextBox Name="EditorBox"
-                     Text="{Binding Text, Mode=TwoWay}"
-                     AcceptsReturn="True" AcceptsTab="True"
-                     TextWrapping="{Binding WordWrap, Converter={x:Static vm:BoolToWrapConverter.Instance}}"
-                     Background="White" Foreground="#1A1A1A"
-                     BorderThickness="0" CaretBrush="#1A1A1A"
+            <!-- The buffer. AvaloniaEdit's TextEditor provides syntax highlighting,
+                 line numbers and superior text editing over a plain TextBox. -->
+                        <editor:TextEditor Name="EditorBox"
+                     WordWrap="{Binding WordWrap}"
+                     SyntaxHighlighting="{Binding SyntaxHighlighting}"
+                     ShowLineNumbers="True"
                      FontFamily="Consolas,Menlo,Monospace"
-                     FontSize="13" Padding="8,6"
+                                          FontSize="{Binding FontSize}"
+                     Padding="8,6"
                      VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                     Background="White" Foreground="#1A1A1A"
+                     BorderThickness="0"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <!-- Right-click menu. Headers and gestures mirror the shell's Edit menu so
                      the two stay in sync; Save/Revert disable themselves through their
                      CanExecute. The ContextMenu inherits this control's DataContext, so the
                      bindings resolve against the editor view-model. -->
-                <TextBox.ContextMenu>
+                <editor:TextEditor.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="_Cut" Classes="xpMenuItem"
                                   Command="{Binding CutCommand}" InputGesture="Ctrl+X" />
@@ -72,8 +75,8 @@
                         <MenuItem Header="_Revert" Classes="xpMenuItem"
                                   Command="{Binding RevertCommand}" />
                     </ContextMenu>
-                </TextBox.ContextMenu>
-            </TextBox>
+                </editor:TextEditor.ContextMenu>
+            </editor:TextEditor>
         </DockPanel>
     </Border>
 </UserControl>

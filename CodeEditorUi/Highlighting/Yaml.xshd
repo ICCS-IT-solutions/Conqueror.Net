@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="YAML" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="Green" exampleText="# comment" />
+    <Color name="Key" foreground="Maroon" fontWeight="bold" exampleText="key:" />
+    <Color name="String" foreground="Blue" exampleText="&quot;value&quot;" />
+    <Color name="Number" foreground="DarkBlue" exampleText="42" />
+    <Color name="Boolean" foreground="DarkCyan" fontWeight="bold" exampleText="true" />
+
+    <RuleSet>
+        <!-- Comments: lines starting with # -->
+        <Rule color="Comment">
+            <Regex>(^|[\r\n])\s*#[^\r\n]*</Regex>
+        </Rule>
+
+        <!-- Booleans -->
+        <Keywords color="Boolean">
+            <Word>true</Word>
+            <Word>false</Word>
+            <Word>null</Word>
+            <Word>~</Word>
+        </Keywords>
+
+        <!-- Numbers -->
+        <Rule color="Number">
+            <Regex>(\b\d+\.?\d*|\.\d+)([eE][+-]?\d+)?</Regex>
+        </Rule>
+
+        <!-- Single-quoted strings -->
+        <Span color="String">
+            <Begin>'</Begin>
+            <End>'</End>
+        </Span>
+
+        <!-- Double-quoted strings -->
+        <Span color="String">
+            <Begin>"</Begin>
+            <End>"</End>
+        </Span>
+
+        <!-- Keys: word characters followed by : at end of line -->
+        <Rule color="Key">
+            <Regex>^\s*[^#\r\n:]+(?=\s*:)</Regex>
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>

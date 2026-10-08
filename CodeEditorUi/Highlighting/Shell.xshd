@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="Shell" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="Green" exampleText="# comment" />
+    <Color name="Keyword" foreground="Blue" fontWeight="bold" exampleText="if" />
+    <Color name="String" foreground="DarkRed" exampleText="&quot;text&quot;" />
+    <Color name="Variable" foreground="Purple" exampleText="$VAR" />
+    <Color name="Number" foreground="DarkBlue" exampleText="42" />
+
+    <RuleSet>
+        <!-- Comments: lines starting with # -->
+        <Rule color="Comment">
+            <Regex>(^|[\r\n])\s*#[^\r\n]*</Regex>
+        </Rule>
+
+        <!-- Keywords -->
+        <Keywords color="Keyword">
+            <Word>if</Word>
+            <Word>then</Word>
+            <Word>else</Word>
+            <Word>fi</Word>
+            <Word>case</Word>
+            <Word>esac</Word>
+            <Word>for</Word>
+            <Word>do</Word>
+            <Word>done</Word>
+            <Word>while</Word>
+            <Word>until</Word>
+            <Word>function</Word>
+            <Word>return</Word>
+            <Word>export</Word>
+            <Word>local</Word>
+            <Word>declare</Word>
+            <Word>readonly</Word>
+            <Word>unset</Word>
+            <Word>echo</Word>
+            <Word>printf</Word>
+            <Word>read</Word>
+            <Word>source</Word>
+            <Word>eval</Word>
+            <Word>exec</Word>
+            <Word>test</Word>
+            <Word>true</Word>
+            <Word>false</Word>
+            <Word>exit</Word>
+            <Word>shift</Word>
+            <Word>trap</Word>
+            <Word>wait</Word>
+            <Word>alias</Word>
+            <Word>unalias</Word>
+            <Word>jobs</Word>
+            <Word>fg</Word>
+            <Word>bg</Word>
+            <Word>kill</Word>
+            <Word>pkill</Word>
+            <Word>grep</Word>
+            <Word>sed</Word>
+            <Word>awk</Word>
+            <Word>cd</Word>
+            <Word>pushd</Word>
+            <Word>popd</Word>
+            <Word>pwd</Word>
+        </Keywords>
+
+        <!-- Variables $VAR, ${VAR}, $(), etc -->
+        <Rule color="Variable">
+            <Regex>\$(\{[^}]+\}|\w+|\([^)]*\))</Regex>
+        </Rule>
+
+        <!-- Double-quoted strings -->
+        <Span color="String">
+            <Begin>"</Begin>
+            <End>"</End>
+        </Span>
+
+        <!-- Single-quoted strings -->
+        <Span color="String">
+            <Begin>'</Begin>
+            <End>'</End>
+        </Span>
+
+        <!-- Numbers -->
+        <Rule color="Number">
+            <Regex>\b\d+\b</Regex>
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>

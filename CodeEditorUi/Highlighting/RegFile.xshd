@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="RegFile" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="Green" exampleText="; comment" />
+    <Color name="Keyword" foreground="Navy" fontWeight="bold" />
+    <Color name="Section" foreground="Blue" fontWeight="bold" exampleText="[HKEY_LOCAL_MACHINE]" />
+    <Color name="Key" foreground="Maroon" fontWeight="bold" exampleText="&quot;Name&quot;" />
+    <Color name="ValueType" foreground="Purple" exampleText="DWORD" />
+    <Color name="ValueDword" foreground="DarkBlue" exampleText="dword:00000001" />
+    <Color name="ValueString" foreground="DarkRed" exampleText="&quot;value&quot;" />
+    <Color name="ValueHex" foreground="DarkBlue" exampleText="hex:01,02" />
+
+    <RuleSet>
+        <!-- Comments: lines starting with ; -->
+        <Rule color="Comment">
+            <Regex>(^|[\r\n])\s*;[^\r\n]*</Regex>
+        </Rule>
+
+        <!-- REGEDIT directives -->
+        <Keywords color="Keyword">
+            <Word>REGEDIT</Word>
+            <Word>REGEDIT4</Word>
+            <Word>Windows Registry Editor Version 5.00</Word>
+        </Keywords>
+
+        <!-- Sections: [HKEY_LOCAL_MACHINE\...] -->
+        <Rule color="Section">
+            <Regex>\[[^\]]*\]</Regex>
+        </Rule>
+
+        <!-- Types: dword, hex, hex(2), hex(7), etc -->
+        <Rule color="ValueType">
+            <Regex>\b(dword|hex(?:\(\d+\))?|hex\([\da-fA-F]+,[\da-fA-F]+\))\b</Regex>
+        </Rule>
+
+        <!-- DWORD values -->
+        <Rule color="ValueDword">
+            <Regex>\bdword:[0-9a-fA-F]+</Regex>
+        </Rule>
+
+        <!-- Hex values -->
+        <Rule color="ValueHex">
+            <Regex>\bhex(?:\(\d+\))?:(?:[0-9a-fA-F]{2},)*[0-9a-fA-F]{2}</Regex>
+        </Rule>
+
+        <!-- String values: "..." -->
+        <Span color="ValueString">
+            <Begin>"</Begin>
+            <End>"</End>
+        </Span>
+
+        <!-- Keys: "Name"= -->
+        <Rule color="Key">
+            <Regex>"[^"]*"(?=\s*=)</Regex>
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>
