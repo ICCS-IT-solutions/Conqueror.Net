@@ -32,8 +32,8 @@ public sealed record FileClipboardPayload(IReadOnlyList<string> Paths, bool IsCu
     }
 
     /// <summary>
-    /// Parses an Explorer file-drop clipboard payload back into paths. Used when pasting
-    /// files copied from outside the app.
+    /// Parses a clipboard file-drop payload back into paths. Used when pasting
+    /// files copied from outside the app. Supports Windows (C:\path) and Linux/macOS (/path, file:// URIs).
     /// </summary>
     public static bool TryParseDropFiles(string? text, out IReadOnlyList<string> paths)
     {
@@ -46,7 +46,16 @@ public sealed record FileClipboardPayload(IReadOnlyList<string> Paths, bool IsCu
         var list = text
             .Split(['\r', '\n'], System.StringSplitOptions.RemoveEmptyEntries)
             .Select(p => p.Trim().Trim('"'))
-            .Where(p => p.Length > 1 && p[1] == ':')
+            .Where(p =>
+                // Windows: C:\path or C:/path
+                (p.Length > 1 && p[1] == ':' && (p[2] == '\\' || p[2] == '/')) ||
+                // Linux/macOS: /absolute/path
+                p.StartsWith('/') ||
+                // file:// URIs (cross-platform)
+                p.StartsWith("file://"))
+            .Select(p => p.StartsWith("file://")
+                ? Uri.UnescapeDataString(p["file://".Length..]).Replace('/', Path.DirectorySeparatorChar)
+                : p)
             .ToList();
 
         if (list.Count == 0)

@@ -38,12 +38,10 @@ public partial class App : Application
     /// </remarks>
     public static bool TryConfigureChromium()
     {
-        if (!OperatingSystem.IsWindows())
+        // CEF is supported on Windows and Linux. On macOS it's not available via WebViewControl-Avalonia.
+        if (OperatingSystem.IsMacOS())
         {
-            Log?.Invoke(
-                $"CEF is not configured on {Environment.OSVersion.Platform}: the browser tab "
-                    + "is unavailable, the other tab kinds are unaffected."
-            );
+            Log?.Invoke($"CEF is not available on macOS: the browser tab is unavailable, other tabs are unaffected.");
             return false;
         }
 
@@ -59,9 +57,6 @@ public partial class App : Application
 
             WebViewControl.WebView.Settings.CachePath = cachePath;
 
-            // Evidence channel: CEF's own log (extension loads, content-script injection,
-            // errors). Truncate first so each run's log covers only that run; setting
-            // LogFile also flips severity to Verbose (EnableErrorLogOnly defaults false).
             var cefLogPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Conqueror.Net",
@@ -77,18 +72,23 @@ public partial class App : Application
             }
 
             WebViewControl.WebView.Settings.LogFile = cefLogPath;
-
-            // System.Drawing colour: the control predates Avalonia's colour type.
             WebViewControl.WebView.Settings.BackgroundColor = System.Drawing.Color.White;
 
             // Enable experimental web-platform features before the engine spins up.
             WebViewControl.WebView.Settings.AddCommandLineSwitch("enable-experimental-web-platform-features", null);
 
+            // On Linux with software rendering (X11/Wayland), CEF needs --no-sandbox
+            // and GPU-related flags disabled. These must be set before first WebView creation.
+            if (OperatingSystem.IsLinux())
+            {
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("no-sandbox", null);
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-gpu", null);
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-gpu-compositing", null);
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-software-rasterizer", null);
+            }
+
             // Pre-initialise CEF with NoSandbox=true so that the --no-sandbox flag is propagated
             // to ALL subprocesses (browser, renderer, GPU), not just the browser process.
-            // This must happen before any WebView is constructed — the first WebView's
-            // constructor calls CefRuntimeLoader.Load() which would otherwise run the
-            // default initialiser that leaves NoSandbox=false on Windows.
             CefExtensionHost.PreInitialize();
 
             return true;
