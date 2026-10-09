@@ -363,7 +363,7 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
-    public (bool Success, string? Error) Delete(IEnumerable<string> paths)
+public (bool Success, string? Error) Delete(IEnumerable<string> paths)
     {
         var list = paths.Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
         if (list.Count == 0)
@@ -377,17 +377,11 @@ public sealed class FileSystemService : IFileSystemService
             {
                 if (Directory.Exists(path))
                 {
-                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
-                        path,
-                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-                        Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                    DeleteDirectory(path);
                 }
                 else if (File.Exists(path))
                 {
-                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
-                        path,
-                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-                        Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                    DeleteFile(path);
                 }
             }
 
@@ -400,6 +394,113 @@ public sealed class FileSystemService : IFileSystemService
         }
     }
 
+    /// <summary>
+    /// Deletes a file, sending it to the recycle bin where one exists. On Windows this is the
+    /// shell's own SHFileOperation; on Linux and macOS the bin is a per-user trash directory
+    /// (~/.local/share/Trash, per the FreeDesktop spec) and the file is moved there with its
+    /// original name, with a numeric suffix appended if a same-named item is already trashed.
+    /// Permanent deletion is the fallback when no trash is available.
+    /// </summary>
+    /// <remarks>
+    /// Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile with SendToRecycleBin is the natural
+    /// choice on Windows but throws PlatformNotSupportedException ("UI not available for copy
+    /// or move") on Linux -- it shells out to a native dialog. Routing through this method
+    /// keeps one code path and one behaviour everywhere.
+    /// </remarks>
+    private static void DeleteFile(string path)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
+                path,
+                Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+            return;
+        }
+
+        var trash = GetTrashDirectory();
+        if (trash is not null)
+        {
+            var dest = UniqueTrashPath(trash, Path.GetFileName(path));
+            File.Move(path, dest);
+            return;
+        }
+
+        File.Delete(path);
+    }
+
+    /// <summary>
+    /// Deletes a directory, sending it to the recycle bin where one exists. Directories are
+    /// moved whole into the trash rather than walked and deleted, so a trashed folder can be
+    /// restored with its contents intact -- matching Explorer's behaviour.
+    /// </summary>
+    private static void DeleteDirectory(string path)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
+                path,
+                Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+            return;
+        }
+
+        var trash = GetTrashDirectory();
+        if (trash is not null)
+        {
+            var dest = UniqueTrashPath(trash, Path.GetFileName(path));
+            Directory.Move(path, dest);
+            return;
+        }
+
+        Directory.Delete(path, recursive: true);
+    }
+
+    /// <summary>The FreeDesktop trash directory, or null when the platform has none.</summary>
+    private static string? GetTrashDirectory()
+    {
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        if (string.IsNullOrEmpty(home))
+        {
+            return null;
+        }
+
+        var trash = Path.Combine(home, ".local", "share", "Trash");
+        try
+        {
+            Directory.CreateDirectory(trash);
+            return Directory.Exists(trash) ? trash : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// A destination in the trash that does not collide with an existing entry. The FreeDesktop
+    /// spec appends a numeric suffix to the name rather than failing, which is what Explorer
+    /// does too when you delete a second file of the same name into the bin.
+    /// </summary>
+    private static string UniqueTrashPath(string trashDir, string name)
+    {
+        var candidate = Path.Combine(trashDir, name);
+        if (!File.Exists(candidate) && !Directory.Exists(candidate))
+        {
+            return candidate;
+        }
+
+        var stem = Path.GetFileNameWithoutExtension(name);
+        var ext = Path.GetExtension(name);
+        var n = 2;
+        while (File.Exists(candidate) || Directory.Exists(candidate))
+        {
+            candidate = Path.Combine(trashDir, $"{stem} {n}{ext}");
+            n++;
+        }
+
+        return candidate;
+    }
     public (bool Success, string? Error) Copy(IEnumerable<string> paths, string destinationDirectory)
     {
         try
@@ -518,5 +619,36 @@ public sealed class FileSystemService : IFileSystemService
         {
             return (0, 0);
         }
+    }
+
+    public Stream? OpenFile(string path)
+    {
+        try
+        {
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            // Read/Write/Delete share so a file another program holds open can still be read,
+            // matching the permissive sharing SniffFile already uses.
+            return new FileStream(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    public (bool Success, string? TempPath, string? Error) TryMaterialize(string path)
+    {
+        // A local file is already a real file; no copy is needed. Callers treat a returned
+        // path as "already on disk, do not delete" only for local, but the contract is the
+        // same either way: they get a usable path back.
+        return File.Exists(path) ? (true, path, null) : (false, null, $"Cannot find '{path}'.");
     }
 }

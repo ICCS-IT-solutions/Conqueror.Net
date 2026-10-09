@@ -1,9 +1,11 @@
 using System.IO;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Conqueror.Net.FileBrowserUi.Services;
+using Conqueror.Net.FileBrowserUi.Services.Vfs;
 using Conqueror.Net.WebBrowserUi.Services;
 using Conqueror.Net.WindowRoot;
 using Conqueror.Net.WindowRoot.ViewModels;
@@ -16,8 +18,10 @@ public partial class App : Application
     public static Action<string>? Log { get; set; }
 
     /// <summary>
-    /// Shared file-system access. One instance serves every tab.</summary>
-    public static IFileSystemService FileSystem { get; } = new FileSystemService();
+    /// Shared file-system access. One instance serves every tab. Routes local paths to the
+    /// real file system and zip:/tar: paths into archives as browsable folders.
+    /// </summary>
+    public static IFileSystemService FileSystem { get; } = new CompositeFileSystemService();
 
     /// <summary>
     /// Shared extension registry. One instance serves every browser tab so enable/disable
@@ -72,6 +76,16 @@ public partial class App : Application
             }
 
             WebViewControl.WebView.Settings.LogFile = cefLogPath;
+
+            // Keep CEF's own log to errors only. CefExtensionHost.PreInitialize reads this
+            // flag to choose the log severity: with a LogFile set but EnableErrorLogOnly
+            // false it picks CefLogSeverity.Verbose, which makes Chromium enable
+            // --enable-logging --v=1 and flood the console with VERBOSE1 lines — most
+            // visibly the D-Bus probes in dbus/bus.cc ("org.freedesktop.login1
+            // GetNameOwner"), a code path that only exists on Linux. Setting it true selects
+            // CefLogSeverity.Error so those VLOG(1) traces are never emitted.
+            WebViewControl.WebView.Settings.EnableErrorLogOnly = true;
+
             WebViewControl.WebView.Settings.BackgroundColor = System.Drawing.Color.White;
 
             // Enable experimental web-platform features before the engine spins up.
@@ -123,13 +137,17 @@ public partial class App : Application
 
     public override void Initialize()
     {
+        
+        //Crash here needs to be fixed or I need a different web browser engine.
+        //When chromium available returns false, the init method stops and nothing loads.
+ 
         // Before AvaloniaXamlLoader runs, so no DataTemplate can build a WebView first.
         ChromiumAvailable = TryConfigureChromium();
 
         // Extension toggles install/uninstall must re-sync the native CEF host. Before the
         // first WebView exists this is a no-op; that WebView's Attach performs the sync.
         Extensions.ExtensionsChanged += () => WebBrowserUi.Services.CefExtensionHost.Sync(Extensions);
-
+        
         AvaloniaXamlLoader.Load(this);
     }
 

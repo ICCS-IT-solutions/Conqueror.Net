@@ -173,11 +173,11 @@ public static class CefExtensionHost
 
             CefRuntimeLoader.Initialize(cefSettings, flags.ToArray(), customSchemes);
 
-            // CefRuntimeLoader.Load is internal — invoke it via reflection to trigger
-            // InternalInitialize, which calls CefRuntime.Load + CefRuntime.Initialize.
-            var load = typeof(CefRuntimeLoader).GetMethod("Load",
-                BindingFlags.NonPublic | BindingFlags.Static);
-            load?.Invoke(null, new object?[] { null });
+            // CefRuntimeLoader.Initialize already drives InternalInitialize (which calls
+            // CefRuntime.Load + CefRuntime.Initialize) on the current thread. The reflection
+            // Load call that used to sit here double-initialised the native engine on Linux,
+            // corrupting the heap and aborting the process with free(): invalid pointer
+            // before any managed exception could be raised — so it is gone.
 
             Log("PreInitialize: CEF initialised with NoSandbox=true (subprocesses will inherit --no-sandbox)");
         }

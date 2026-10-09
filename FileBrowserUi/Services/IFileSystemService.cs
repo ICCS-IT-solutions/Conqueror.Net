@@ -88,6 +88,24 @@ public interface IFileSystemService
     (long Total, long Free) GetDriveInfo(string pathOrDrive);
 
     /// <summary>
+    /// Opens the bytes of a file at <paramref name="path"/> for reading, or null when the path
+    /// is a directory, is missing, or belongs to a backend that cannot stream it. Used to open
+    /// a leaf that lives inside an archive or on a remote without a real on-disk file.
+    /// </summary>
+    System.IO.Stream? OpenFile(string path);
+
+    /// <summary>
+    /// Materialises <paramref name="path"/> as a real file on disk and returns its temp path,
+    /// for handing to code that can only cope with a genuine file (the OS "open" routing, an
+    /// editor). Returns false for a directory or a backend that cannot materialise.
+    /// </summary>
+    /// <remarks>
+    /// The caller owns the returned temp file and should delete it when done. Local paths are
+    /// returned as-is (already real files); only virtual paths are copied to a temp location.
+    /// </remarks>
+    (bool Success, string? TempPath, string? Error) TryMaterialize(string path);
+
+    /// <summary>
     /// Volume label for the drive or mount point containing <paramref name="pathOrDrive"/>, or
     /// an empty string when the volume has none. Used for the breadcrumb root, which Explorer
     /// shows as "Win10 (C:)" when a label exists and as a bare "C:\" when it does not.

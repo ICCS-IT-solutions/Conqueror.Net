@@ -135,6 +135,13 @@ public sealed partial class FileBrowserViewModel
     /// Reveals <paramref name="path"/> in the tree: opens each ancestor and selects the node, so
     /// the pane stays in step when navigation came from the address bar or the entry list.
     /// </summary>
+    /// <remarks>
+    /// The reveal walks the real on-disk path rather than the already-loaded tree, because
+    /// typing a deep path into the address bar never expanded those ancestors — a search over
+    /// loaded children would silently find nothing and leave the pane looking stale. Each
+    /// ancestor is expanded on demand (which loads its children) before the next segment is
+    /// looked up, so the chain appears one level at a time, exactly as Explorer does.
+    /// </remarks>
     public void RevealInTree(string path)
     {
         var full = SafeFullPath(path);
@@ -143,58 +150,81 @@ public sealed partial class FileBrowserViewModel
             return;
         }
 
-        var match = FindNode(full);
-        if (match is null)
+        var root = Path.GetPathRoot(full);
+        if (string.IsNullOrEmpty(root))
         {
             return;
         }
 
-        // Expand top-down so each ancestor has loaded its children before the next lookup.
-        var chain = new List<FolderTreeNode>();
-        for (var node = match; node is not null; node = node.Parent)
+        // The path as a stack of directory names under the root, e.g. C:\a\b\c -> [a, b, c].
+        var segments = full[root.Length..]
+            .Split(
+                [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+                StringSplitOptions.RemoveEmptyEntries);
+
+        var current = FindRoot(root);
+        if (current is null)
         {
-            chain.Insert(0, node);
+            return;
         }
 
-        foreach (var node in chain)
+        // Expand the root itself so its children are enumerated before we look for the first
+        // segment; without this the root's expander stays shut and the reveal halts.
+        ExpandToLoad(current);
+
+        foreach (var segment in segments)
         {
-            node.IsExpanded = true;
+            var next = FindChild(current, segment);
+            if (next is null)
+            {
+                // The target is not a directory we list (a file, a virtual path, a folder
+                // that has since been deleted) — reveal as far as we could and stop.
+                return;
+            }
+
+            ExpandToLoad(next);
+            current = next;
         }
 
-        SelectedTreeNode = match;
+        current.IsSelected = true;
+        SelectedTreeNode = current;
     }
 
-    private FolderTreeNode? FindNode(string fullPath)
+    /// <summary>Finds the tree root whose path matches <paramref name="rootPath"/>, if any.</summary>
+    private FolderTreeNode? FindRoot(string rootPath)
     {
         foreach (var root in TreeRoots)
         {
-            if (TryFindNode(root, fullPath, out var found))
+            if (PathsEqual(root.Path, rootPath))
             {
-                return found;
+                return root;
             }
         }
 
         return null;
     }
 
-    private static bool TryFindNode(FolderTreeNode node, string fullPath, out FolderTreeNode? found)
+    /// <summary>Among <paramref name="parent"/>'s loaded children, the one named <paramref name="segment"/>, if any.</summary>
+    private static FolderTreeNode? FindChild(FolderTreeNode parent, string segment)
     {
-        if (PathsEqual(node.Path, fullPath))
+        foreach (var child in parent.Children)
         {
-            found = node;
-            return true;
-        }
-
-        foreach (var child in node.Children)
-        {
-            if (TryFindNode(child, fullPath, out found))
+            if (string.Equals(child.Name, segment, StringComparison.OrdinalIgnoreCase))
             {
-                return true;
+                return child;
             }
         }
 
-        found = null;
-        return false;
+        return null;
+    }
+
+    /// <summary>Expands <paramref name="node"/> if it has not enumerated its children yet.</summary>
+    private static void ExpandToLoad(FolderTreeNode node)
+    {
+        if (!node.ChildrenLoaded)
+        {
+            node.IsExpanded = true;
+        }
     }
 
     /// <summary>

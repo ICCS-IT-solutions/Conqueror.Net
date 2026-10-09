@@ -16,34 +16,70 @@ public sealed class FileSystemEntry
     private string? _iconKey;
     private string? _xpIconKey;
 
+    // Virtual entries (archive members, remote listings) carry their metadata directly rather
+    // than through a FileSystemInfo, which only the real file system produces. Info stays null
+    // for those, and every member below falls back to the stored fields when it is.
+    private readonly bool _isVirtual;
+    private readonly string _virtualPath = string.Empty;
+    private readonly string _virtualName = string.Empty;
+    private readonly bool _virtualIsDirectory;
+    private readonly long _virtualLength;
+    private readonly DateTime _virtualModified;
+
     public FileSystemEntry(FileSystemInfo info)
     {
         Info = info ?? throw new ArgumentNullException(nameof(info));
     }
 
-    public FileSystemInfo Info { get; }
+    /// <summary>
+    /// Builds an entry that is not backed by a <see cref="FileSystemInfo"/> — a node inside an
+    /// archive, or a remote listing. <see cref="Info"/> is null; the metadata passed here is
+    /// authoritative.
+    /// </summary>
+    public FileSystemEntry(
+        string fullPath,
+        string name,
+        bool isDirectory,
+        long length,
+        DateTime modified
+    )
+    {
+        _isVirtual = true;
+        _virtualPath = fullPath;
+        _virtualName = name;
+        _virtualIsDirectory = isDirectory;
+        _virtualLength = isDirectory ? 0 : length;
+        _virtualModified = modified;
+    }
 
-    public string FullPath => Info.FullName;
+    public FileSystemInfo? Info { get; }
 
-    public string Name => Info.Name;
+    public string FullPath => Info?.FullName ?? _virtualPath;
+
+    public string Name => Info?.Name ?? _virtualName;
 
     public FileAttributes Attributes => _attributes ??= ReadAttributes();
 
-    public bool IsDirectory => Attributes.HasFlag(FileAttributes.Directory);
+    public bool IsDirectory => _isVirtual
+        ? _virtualIsDirectory
+        : Attributes.HasFlag(FileAttributes.Directory);
 
     public bool IsHidden =>
         Attributes.HasFlag(FileAttributes.Hidden) || Attributes.HasFlag(FileAttributes.System);
 
     /// <summary>Junctions/symlinks. Explorer shows these with a shortcut overlay.</summary>
-    public bool IsLink => Attributes.HasFlag(FileAttributes.ReparsePoint);
+    public bool IsLink => !_isVirtual && Attributes.HasFlag(FileAttributes.ReparsePoint);
 
     public bool IsReadOnly => Attributes.HasFlag(FileAttributes.ReadOnly);
 
     public long Length => IsDirectory ? 0 : _length ??= ReadLength();
 
-    public DateTime Modified => Info.LastWriteTime;
+    public DateTime Modified => Info?.LastWriteTime ?? _virtualModified;
 
-    public string Extension => IsDirectory ? string.Empty : Info.Extension;
+    public string Extension => IsDirectory
+        ? string.Empty
+        : Info?.Extension ?? Path.GetExtension(_virtualName);
+
 
     /// <summary>Human readable kind shown in the "Type" column, e.g. "Text Document".</summary>
     public string TypeDescription => _typeDescription ??= ResolveTypeDescription();
@@ -73,6 +109,13 @@ public sealed class FileSystemEntry
             if (string.Equals(Extension, ".lnk", StringComparison.OrdinalIgnoreCase))
             {
                 return _iconKey = Icons.FileIconResolver.Shortcut;
+            }
+
+            // A virtual entry's path is not a real file, so there is nothing to sniff; resolve
+            // from the extension alone. This also avoids a wasted open attempt per row.
+            if (_isVirtual)
+            {
+                return _iconKey = Icons.FileIconResolver.ForExtension(Extension);
             }
 
             var mime = Services.MimeTypeResolver.Shared.Resolve(FullPath);
@@ -202,9 +245,16 @@ public sealed class FileSystemEntry
 
     private FileAttributes ReadAttributes()
     {
+        // A virtual entry has no FileSystemInfo; synthesise the flags from the stored metadata.
+        if (_isVirtual)
+        {
+            return _virtualIsDirectory ? FileAttributes.Directory : FileAttributes.Normal;
+        }
+
         try
         {
-            return Info.Attributes;
+            // _isVirtual is false here (the virtual branch returned above), so Info is non-null.
+            return Info!.Attributes;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -215,6 +265,12 @@ public sealed class FileSystemEntry
 
     private long ReadLength()
     {
+        // A virtual entry carries its size directly; there is no FileInfo to ask.
+        if (_isVirtual)
+        {
+            return _virtualLength;
+        }
+
         if (Info is not FileInfo file)
         {
             return 0;

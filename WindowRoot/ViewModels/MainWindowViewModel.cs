@@ -13,6 +13,7 @@ using Conqueror.Net.Core.Tabs;
 using Conqueror.Net.Core.Terminal;
 using Conqueror.Net.FileBrowserUi.Models;
 using Conqueror.Net.FileBrowserUi.Services;
+using Conqueror.Net.FileBrowserUi.Services.Vfs;
 using Conqueror.Net.FileBrowserUi.ViewModels;
 using Conqueror.Net.WebBrowserUi.ViewModels;
 
@@ -204,17 +205,30 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     /// <summary>
     /// Opens the command-line target in the best tab for it: a browser tab for anything
-    /// with a URL scheme, otherwise a folder tab navigated to that path.
+    /// with a URL scheme, otherwise a folder tab navigated to that path. Archive schemes
+    /// (zip:, tar:) are treated as folder tabs even though they contain "://".
     /// </summary>
     public void OpenStartupTarget(string target)
     {
-        if (
-            target.Contains("://", StringComparison.Ordinal)
-            || target.StartsWith("about:", StringComparison.OrdinalIgnoreCase)
-        )
+        var location = VfsLocation.Parse(target);
+
+        if (location.IsLocal)
+        {
+            // No scheme, or "file:" — local path
+        }
+        else if (VfsLocation.IsSupportedScheme(location.Scheme))
+        {
+            // zip: or tar: — browse as folder
+        }
+        else if (target.Contains("://", StringComparison.Ordinal)
+            || target.StartsWith("about:", StringComparison.OrdinalIgnoreCase))
         {
             AddWebTab(target);
             return;
+        }
+        else
+        {
+            // Unknown scheme — try folder tab anyway (the service will report unsupported)
         }
 
         if (Tabs.OfType<FileBrowserViewModel>().FirstOrDefault() is { } fileTab)
@@ -922,6 +936,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void OnFileBrowserOpenFileRequest(FileSystemEntry entry)
     {
+        // An archive (.zip, .tar, .tar.gz, .tgz) is browsed by navigating into it,
+        // not by handing it to the OS. That is the KIO behaviour: an archive is a folder.
+        if (!entry.IsDirectory && IsArchiveEntry(entry))
+        {
+            SelectedTab?.Navigate(entry.FullPath);
+            return;
+        }
+
         // A web shortcut or a local .html file belongs in a browser tab; text and config
         // files go to the in-process editor, and everything else is handed to whatever
         // the user has associated with it.
@@ -931,22 +953,57 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        // VFS paths (zip:/..., tar:/...) are not real files. Materialise them to a temp
+        // location first so the editor and the OS "open" routing see a genuine file.
+        var pathToOpen = entry.FullPath;
+        var isVirtual = VfsLocation.Parse(entry.FullPath).IsLocal is false;
+
+        if (isVirtual)
+        {
+            var materialized = App.FileSystem.TryMaterialize(entry.FullPath);
+            if (!materialized.Success)
+            {
+                App.Log?.Invoke($"Could not open '{entry.Name}': {materialized.Error}");
+                return;
+            }
+
+            pathToOpen = materialized.TempPath!;
+        }
+
         if (!entry.IsDirectory && EditorFileTypes.Contains(entry.Extension))
         {
-            AddEditorTab(entry.FullPath);
+            AddEditorTab(pathToOpen);
             return;
         }
 
         try
         {
-            Process.Start(new ProcessStartInfo(entry.FullPath) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(pathToOpen) { UseShellExecute = true });
         }
         catch (Exception ex)
         {
             // Nothing is registered for this type, or the OS refused to launch it.
             App.Log?.Invoke($"Could not open '{entry.Name}': {ex.Message}");
         }
+        finally
+        {
+            // Temp files extracted from archives are cleaned up when the app exits;
+            // we don't delete them immediately because the launched process may still
+            // need them. A proper temp-file manager could track this, but for now the
+            // OS temp directory is cleaned on reboot.
+        }
     }
+
+    /// <summary>
+    /// True when <paramref name="entry"/> is a supported archive format that we can browse
+    /// as a virtual folder. Mirrors the schemes in <see cref="VfsLocation.IsSupportedScheme"/>.
+    /// </summary>
+    private static bool IsArchiveEntry(FileSystemEntry entry) =>
+        !entry.IsDirectory
+        && (entry.Extension.Equals(".zip", StringComparison.OrdinalIgnoreCase)
+            || entry.Extension.Equals(".tar", StringComparison.OrdinalIgnoreCase)
+            || entry.Extension.Equals(".tar.gz", StringComparison.OrdinalIgnoreCase)
+            || entry.Extension.Equals(".tgz", StringComparison.OrdinalIgnoreCase));
 
     private void OnFileBrowserEditFileRequest(FileSystemEntry entry)
     {
@@ -1036,19 +1093,19 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
         return null;
     }
-/// <summary>
-/// How the address bar presents the current location. Only meaningful for a folder tab; a web
-/// tab has a URL rather than a path, so it always uses the editable box.
-/// </summary>
-public enum AddressBarMode
-{
-    /// <summary>An editable text box holding the full path. Explorer's default.</summary>
-    Path,
-
     /// <summary>
-    /// A row of clickable path segments. Explorer reaches this by clicking the "Address:" label,
-    /// which is why the label itself acts as the toggle.
+    /// How the address bar presents the current location. Only meaningful for a folder tab; a web
+    /// tab has a URL rather than a path, so it always uses the editable box.
     /// </summary>
-    Breadcrumbs,
-}
+    public enum AddressBarMode
+    {
+        /// <summary>An editable text box holding the full path. Explorer's default.</summary>
+        Path,
+
+        /// <summary>
+        /// A row of clickable path segments. Explorer reaches this by clicking the "Address:" label,
+        /// which is why the label itself acts as the toggle.
+        /// </summary>
+        Breadcrumbs,
+    }
 }

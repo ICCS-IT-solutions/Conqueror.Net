@@ -7,6 +7,15 @@
              x:Class="Conqueror.Net.FileBrowserUi.Views.TerminalView"
              x:DataType="vm:TerminalViewModel">
 
+    
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ContextMenu x:Key="TerminalContextMenu">
+                <MenuItem Header="_Copy" Command="{Binding CopySelectionCommand}" />
+            </ContextMenu>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <Border Background="#0C0C0C" BorderBrush="{StaticResource BrushShadow}" BorderThickness="1">
         <DockPanel LastChildFill="True">
 
@@ -57,20 +66,26 @@
                         Content="Send" />
             </Grid>
 
-            <!-- Scrollback. Each line is its own TextBlock rather than one SelectableTextBox
-                 because a piped shell emits no cursor addressing, so a real cell grid would
-                 be tracking semantics the backend does not provide. -->
+            <!-- Scrollback. Each line is a TextBox so users can select and copy text.
+                 The context menu on the ScrollViewer provides a Copy option. -->
             <ScrollViewer Name="OutputScroll"
                           Background="#0C0C0C" VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Auto">
+                          HorizontalScrollBarVisibility="Auto"
+                          ContextMenu="{StaticResource TerminalContextMenu}">
                 <ItemsControl ItemsSource="{Binding Lines}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="x:String">
-                            <TextBlock Text="{Binding}"
+                            <TextBox Text="{Binding}"
                                        Foreground="#D4D4D4"
+                                       Background="Transparent"
+                                       BorderThickness="0"
+                                       CaretBrush="#D4D4D4"
+                                       SelectionBrush="#316AC5"
                                        FontFamily="Consolas,Menlo,Monospace"
                                        FontSize="12"
-                                       TextWrapping="NoWrap" />
+                                       TextWrapping="NoWrap"
+                                       IsReadOnly="True"
+                                       PointerPressed="OnOutputTextBoxPointerPressed" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

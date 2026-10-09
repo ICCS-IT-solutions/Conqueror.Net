@@ -44,25 +44,10 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         }
         else
         {
-            // Auto-select PTY backend on Linux, piped on Windows
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                // Try to use PTY backend on Linux for proper TTY behavior
-                try
-                {
-                    _backend = new PtyProcessBackend(workingDirectory);
-                }
-                catch
-                {
-                    // Fall back to piped if PTY fails (missing dependencies, etc.)
-                    _backend = new PipedProcessBackend(workingDirectory);
-                }
-            }
-            else
-            {
-                // Windows uses piped (no PTY needed/available in same way)
-                _backend = new PipedProcessBackend(workingDirectory);
-            }
+            // Use PipedProcessBackend on all platforms. The PTY backend was disabled because
+            // fork() in managed code causes process hangs/exits on Linux. A future PTY
+            // implementation using fork+exec in native code can be added later.
+            _backend = new PipedProcessBackend(workingDirectory);
         }
 
         _backend.OutputReceived += OnOutputReceived;
@@ -279,6 +264,13 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
     /// <summary>Provides the live input TextBox. Set by the view; null in tests/headless.</summary>
     public Func<Avalonia.Controls.TextBox?>? InputBoxProvider { get; set; }
 
+    /// <summary>
+    /// Provides the currently selected output TextBox so the view model can access
+    /// the selected text for copy operations. Set by the view when the output area
+    /// is initialized.
+    /// </summary>
+    public Func<Avalonia.Controls.TextBox?>? OutputBoxProvider { get; set; }
+
     /// <summary>Cuts the input selection to the clipboard (input box only).</summary>
     [RelayCommand]
     private async Task CutInputAsync()
@@ -315,6 +307,23 @@ public sealed partial class TerminalViewModel : ObservableObject, ITabViewModel,
         }
 
         await CopyTextAsync(text);
+    }
+
+    /// <summary>Copies the currently selected text from the terminal output area.</summary>
+    [RelayCommand]
+    private async Task CopySelectionAsync()
+    {
+        var box = OutputBoxProvider?.Invoke();
+        if (box is null)
+        {
+            return;
+        }
+
+        var selected = box.SelectedText;
+        if (!string.IsNullOrEmpty(selected))
+        {
+            await CopyTextAsync(selected);
+        }
     }
 
     /// <summary>Pastes the clipboard text at the input caret.</summary>

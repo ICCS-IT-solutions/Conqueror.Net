@@ -12,6 +12,8 @@ namespace Conqueror.Net.FileBrowserUi.Views;
 /// </summary>
 public partial class TerminalView : UserControl
 {
+private TextBox? _lastClickedOutputTextBox;
+
     public TerminalView()
     {
         InitializeComponent();
@@ -39,6 +41,9 @@ public partial class TerminalView : UserControl
 
         // The shell is started once the view exists, because a tab is constructed before its
         // view and a process must not be started for a tab that is never shown.
+// Track the last right-clicked output TextBox so the Copy command can access
+        // the selected text from the context menu.
+        Vm.OutputBoxProvider = () => _lastClickedOutputTextBox;
         _ = Vm.StartAsync();
     }
 
@@ -76,6 +81,14 @@ public partial class TerminalView : UserControl
         }
     }
 
+/// <summary>Tracks the last output TextBox that received a pointer press.</summary>
+    private void OnOutputTextBoxPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is TextBox box)
+        {
+            _lastClickedOutputTextBox = box;
+        }
+    }
     private void ScrollToEnd()
     {
         if (this.FindControl<ScrollViewer>("OutputScroll") is { } scroller)
