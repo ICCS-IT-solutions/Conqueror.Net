@@ -59,6 +59,12 @@ public partial class App : Application
 
             Directory.CreateDirectory(cachePath);
 
+            // Validate the cache for corruption before CEF spins up. On Linux,
+            // a half-written Preferences / Local State or corrupt SQLite triggers
+            // a CHECK crash on startup; quarantining the directory to
+            // *.quarantined-* lets CEF create a fresh cache instead of hanging.
+            CefCacheGuard.ValidateOrQuarantine(cachePath);
+
             WebViewControl.WebView.Settings.CachePath = cachePath;
 
             var cefLogPath = Path.Combine(
@@ -80,25 +86,31 @@ public partial class App : Application
             // Keep CEF's own log to errors only. CefExtensionHost.PreInitialize reads this
             // flag to choose the log severity: with a LogFile set but EnableErrorLogOnly
             // false it picks CefLogSeverity.Verbose, which makes Chromium enable
-            // --enable-logging --v=1 and flood the console with VERBOSE1 lines — most
-            // visibly the D-Bus probes in dbus/bus.cc ("org.freedesktop.login1
-            // GetNameOwner"), a code path that only exists on Linux. Setting it true selects
-            // CefLogSeverity.Error so those VLOG(1) traces are never emitted.
+            // --enable-logging --v=1 and flood with console VERBOSE1 lines. Keep
+            // it on so only error-level messages survive.
             WebViewControl.WebView.Settings.EnableErrorLogOnly = true;
 
-            WebViewControl.WebView.Settings.BackgroundColor = System.Drawing.Color.White;
+            WebViewControl.WebView.Settings.BackgroundColor
+                = System.Drawing.Color.White;
 
             // Enable experimental web-platform features before the engine spins up.
             WebViewControl.WebView.Settings.AddCommandLineSwitch("enable-experimental-web-platform-features", null);
 
-            // On Linux with software rendering (X11/Wayland), CEF needs --no-sandbox
-            // and GPU-related flags disabled. These must be set before first WebView creation.
+            // On Linux without a working GPU (containers, VPS, Wayland software
+            // rendering), CEF needs --no-sandbox and software-rendering fallbacks.
+            // These must be set before first WebView creation.
+            //   disable-dev-shm-usage      : write to /tmp instead of /dev/shm (64 MB on Docker)
+            //   enable-unsafe-swiftshader  : software WebGL via SwiftShader when GPU is off
+            // Removed --disable-software-rasterizer: it deletes the only remaining
+            // raster path, which is what forces cache deletion to recover.
             if (OperatingSystem.IsLinux())
             {
                 WebViewControl.WebView.Settings.AddCommandLineSwitch("no-sandbox", null);
                 WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-gpu", null);
                 WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-gpu-compositing", null);
-                WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-software-rasterizer", null);
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-dev-shm-usage", null);
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("disable-setuid-sandbox", null);
+                WebViewControl.WebView.Settings.AddCommandLineSwitch("enable-unsafe-swiftshader", null);
             }
 
             // Pre-initialise CEF with NoSandbox=true so that the --no-sandbox flag is propagated
@@ -112,6 +124,7 @@ public partial class App : Application
             // A failed engine init must not take the whole window down with it; the browser
             // tab degrades to an error page and everything else keeps working.
             Log?.Invoke($"Could not configure CEF: {ex.Message}");
+            App.ChromiumAvailable = false;
             return false;
         }
     }
@@ -137,17 +150,12 @@ public partial class App : Application
 
     public override void Initialize()
     {
-        
-        //Crash here needs to be fixed or I need a different web browser engine.
-        //When chromium available returns false, the init method stops and nothing loads.
- 
-        // Before AvaloniaXamlLoader runs, so no DataTemplate can build a WebView first.
         ChromiumAvailable = TryConfigureChromium();
 
         // Extension toggles install/uninstall must re-sync the native CEF host. Before the
         // first WebView exists this is a no-op; that WebView's Attach performs the sync.
         Extensions.ExtensionsChanged += () => WebBrowserUi.Services.CefExtensionHost.Sync(Extensions);
-        
+
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -173,3 +181,4 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 }
+

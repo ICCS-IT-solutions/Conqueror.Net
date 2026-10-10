@@ -1,4 +1,6 @@
-﻿using Avalonia;
+using System.IO;
+using Avalonia;
+using Conqueror.Net.WebBrowserUi.Services;
 
 namespace Conqueror.Net;
 
@@ -44,6 +46,12 @@ class Program
         };
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+
+        // Clean CEF shutdown to flush the cache and release subprocesses / singleton
+        // locks. An unclean exit leaves stale sockets and half-flushed SQLite that
+        // crash CEF on the next launch — the root cause of "delete the cache" on Linux.
+        App.Log?.Invoke("[Program] Shutting down CEF runtime...");
+        CefExtensionHost.Shutdown();
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

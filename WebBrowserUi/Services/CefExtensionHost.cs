@@ -184,6 +184,29 @@ public static class CefExtensionHost
         catch (Exception ex)
         {
             Log($"PreInitialize failed: {ex.Message}");
+                }
+    }
+
+    /// <summary>
+    /// Shuts down the CEF runtime. Call after the application exits to flush
+    /// the cache, release subprocesses and clear singleton locks — preventing
+    /// the stale-cache crashes that happen when the process is killed uncleanly.
+    /// </summary>
+    public static void Shutdown()
+    {
+        if (!CefRuntimeLoader.IsLoaded)
+        {
+            return;
+        }
+
+        try
+        {
+            CefRuntime.Shutdown();
+            Log("CefRuntime.Shutdown() called");
+        }
+        catch (Exception ex)
+        {
+            Log($"CefRuntime.Shutdown() failed: {ex.Message}");
         }
     }
 
