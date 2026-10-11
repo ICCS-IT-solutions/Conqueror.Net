@@ -269,7 +269,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
             return;
         }
 
-        var vm = new BrowserTabViewModel(address ?? DefaultStartPage);
+        var vm = new BrowserTabViewModel(address ?? DefaultStartPage, App.Extensions, App.OAuthRedirect);
         void OnNewTab(string url) => AddWebTab(url);
         vm.NewTabRequested += OnNewTab;
         // Unsubscribe the popup handler when the tab is closed, otherwise the dead VM

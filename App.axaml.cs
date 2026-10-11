@@ -31,6 +31,12 @@ public partial class App : Application
         new WebBrowserUi.Services.FileBasedExtensionService();
 
     /// <summary>
+    /// OAuth redirect service for handling OAuth 2.0 flows via system browser.
+    /// </summary>
+    public static IOAuthRedirectService OAuthRedirect { get; } =
+        new WebBrowserUi.Services.WindowsOAuthRedirectService();
+
+    /// <summary>
     /// Applies CEF's process-wide settings. This must run before the first <c>WebView</c>
     /// control is constructed: the control spins the Chromium engine up during its own
     /// constructor, and every setting then throws "after WebView engine has been loaded".
@@ -163,9 +169,35 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // Register OAuth redirect scheme for system browser OAuth flows
+            _ = OAuthRedirect.RegisterSchemeAsync();
+
+            // Handle OAuth callback from custom URI scheme (conqueror://oauth-callback?code=xxx&state=yyy)
+            var args = desktop.Args ?? [];
+            if (args.Length > 0 && args[0].StartsWith("conqueror://", StringComparison.OrdinalIgnoreCase))
+            {
+                if (Uri.TryCreate(args[0], UriKind.Absolute, out var callbackUri))
+                {
+                    if (OAuthRedirect.IsOAuthCallback(callbackUri))
+                    {
+                        var code = OAuthRedirect.ParseCallback(callbackUri);
+                        if (code != null)
+                        {
+                            Log?.Invoke($"[OAuth] Authorization code received: {code[..Math.Min(8, code.Length)]}...");
+                        }
+                        else
+                        {
+                            Log?.Invoke("[OAuth] Failed to parse callback");
+                        }
+                        // Don't open a main window for OAuth callback
+                        return;
+                    }
+                }
+            }
+
             var viewModel = new MainWindowViewModel(FileSystem);
 
-            var target = GetStartupTarget(desktop.Args ?? []);
+            var target = GetStartupTarget(args);
 
             if (target is not null)
             {

@@ -57,6 +57,41 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         dialog.DataContext = dialogVm;
         dialog.Show();
     }
+
+    private IRelayCommand? _userAgentCommand;
+    public IRelayCommand UserAgentCommand
+    {
+        get
+        {
+            if (_userAgentCommand is null)
+            {
+                _userAgentCommand = new RelayCommand(OnUserAgentClicked);
+            }
+            return _userAgentCommand;
+        }
+    }
+
+    private async void OnUserAgentClicked()
+    {
+        var dialogVm = new UserAgentDialogViewModel(UserAgent);
+        var dialog = new UserAgentDialog { Title = "Configure User Agent" };
+        dialog.DataContext = dialogVm;
+
+        var owner = Avalonia.Controls.TopLevel.GetTopLevel(_host) as Window;
+
+        if (owner == null && Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktopLifetime)
+        {
+            owner = desktopLifetime.MainWindow;
+        }
+
+        var result = await dialog.ShowDialog<string?>(owner);
+
+        if (!string.IsNullOrWhiteSpace(result))
+        {
+            UserAgent = result;
+        }
+    }
+
     private const string HomeAddress = "about:blank";
 
     private WebView? _browser;
@@ -64,6 +99,7 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     private string? _pendingAddress;
     private bool _handlersWired;
     private double _zoomPercentage = 100;
+    private readonly IOAuthRedirectService? _oauthRedirect;
 
     [ObservableProperty]
     private string _title = "New Tab";
@@ -80,14 +116,18 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
     [ObservableProperty]
     private bool _isBusy;
 
+    [ObservableProperty]
+    private string _userAgent = "";
+
     public BrowserTabViewModel(string? initialAddress = null)
-        : this(initialAddress, App.Extensions)
+        : this(initialAddress, App.Extensions, App.OAuthRedirect)
     {
     }
 
-    public BrowserTabViewModel(string? initialAddress, IExtensionService extensionService)
+    public BrowserTabViewModel(string? initialAddress, IExtensionService extensionService, IOAuthRedirectService? oauthRedirect = null)
     {
         _extensionService = extensionService ?? throw new ArgumentNullException(nameof(extensionService));
+        _oauthRedirect = oauthRedirect;
         Address = NormalizeAddress(initialAddress);
     }
 
@@ -596,6 +636,13 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
 
     private void LoadUrl(string address)
     {
+        // Check if this is an OAuth/auth URL that should be handled by the system browser
+        if (ShouldRedirectToSystemBrowser(address))
+        {
+            _ = RedirectToSystemBrowserAsync(address);
+            return;
+        }
+
         if (_browser is null)
         {
             _pendingAddress = address;
@@ -607,6 +654,95 @@ public sealed partial class BrowserTabViewModel : ObservableObject, ITabViewMode
         // LoadUrl is the explicit navigation entry point. Assigning the Address property
         // only reflects the current location and does not reliably start a load.
         _browser.LoadUrl(address, null);
+    }
+
+    /// <summary>
+    /// Determines if a URL should be handled by the system browser instead of the embedded CEF browser.
+    /// This includes OAuth authorization endpoints AND known sign-in pages that block embedded browsers.
+    /// </summary>
+    private static readonly string[] BlockedAuthDomains = new[]
+    {
+        "accounts.google.com",        // Google sign-in & OAuth (blocks embedded browsers)
+        "login.microsoftonline.com",  // Microsoft Entra/Azure AD
+        "login.live.com",             // Microsoft Live
+        "github.com/login/oauth",     // GitHub OAuth
+        "auth.atlassian.com",         // Atlassian
+        "login.salesforce.com",       // Salesforce
+        "oauth2.googleapis.com",      // Google OAuth API
+    };
+
+    private bool ShouldRedirectToSystemBrowser(string url)
+    {
+        if (_oauthRedirect == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            var uri = new Uri(url);
+            var host = uri.Host.ToLowerInvariant();
+
+            // Check if the host matches known blocked auth domains
+            foreach (var domain in BlockedAuthDomains)
+            {
+                if (host.Equals(domain, StringComparison.OrdinalIgnoreCase) ||
+                    host.EndsWith("." + domain, StringComparison.OrdinalIgnoreCase))
+                {
+                    // For Google and Microsoft, redirect ALL navigations (they block embedded browsers entirely)
+                    if (domain.StartsWith("accounts.google.com", StringComparison.OrdinalIgnoreCase) ||
+                        domain.StartsWith("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase) ||
+                        domain.StartsWith("login.live.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    // For other domains, only redirect if it looks like an OAuth authorization request
+                    var query = uri.Query;
+                    if (query.Contains("response_type=code", StringComparison.OrdinalIgnoreCase) ||
+                        query.Contains("response_type=token", StringComparison.OrdinalIgnoreCase) ||
+                        query.Contains("scope=", StringComparison.OrdinalIgnoreCase) ||
+                        query.Contains("client_id=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Invalid URL, let it load normally
+        }
+
+        return false;
+    }
+
+    private async Task RedirectToSystemBrowserAsync(string url)
+    {
+        if (_oauthRedirect == null)
+        {
+            return;
+        }
+
+        try
+        {
+            StatusMessage = "Opening in system browser for authentication...";
+            var code = await _oauthRedirect.StartOAuthFlowAsync(url);
+
+            if (code != null)
+            {
+                StatusMessage = "Authentication successful";
+            }
+            else
+            {
+                StatusMessage = "Authentication cancelled or timed out";
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Trace.WriteLine($"[OAuth] Redirect error: {ex.Message}");
+            StatusMessage = "Failed to open system browser for authentication";
+        }
     }
 
     /// <summary>Turns typed text into something Chromium can open.</summary>

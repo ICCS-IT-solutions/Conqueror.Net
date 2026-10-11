@@ -34,6 +34,8 @@
                             Command="{Binding ZoomInCommand}" Content="+" />
                     <Button Classes="xpButton" Padding="5,1"
                             Command="{Binding ShowDeveloperToolsCommand}" Content="DevTools" />
+                    <Button Classes="xpButton" Padding="5,1"
+                            Command="{Binding UserAgentCommand}" Content="UA" />
                 </StackPanel>
             </Grid>
         </Border>
